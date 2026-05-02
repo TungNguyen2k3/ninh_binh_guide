@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import './lib/env.js' // Validate env vars at startup — will throw if invalid
 import Fastify from 'fastify'
 import fastifyCookie from '@fastify/cookie'
