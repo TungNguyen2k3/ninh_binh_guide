@@ -76,7 +76,7 @@ export function buildApp() {
   // API routes
   fastify.register(authRoutes, { prefix: '/api/v1/auth', authService, ticketService })
   fastify.register(adminRoutes, { prefix: '/api/v1/admin', locationService, packageService, ticketService })
-  fastify.register(staffRoutes, { prefix: '/api/v1/staff', ticketService })
+  fastify.register(staffRoutes, { prefix: '/api/v1/staff', ticketService, packageRepo })
 
   // ─── Global Error Handler ─────────────────────────────────────────────────────
 

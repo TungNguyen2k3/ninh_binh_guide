@@ -2,20 +2,29 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { authenticate } from '../middlewares/authenticate.js'
 import { requireRole } from '../middlewares/require-role.js'
 import { TicketService } from '../services/ticket.service.js'
+import { PackageRepo } from '../repositories/package.repo.js'
 import { CreateTicketSchema, TicketQuerySchema } from '../schemas/ticket.schema.js'
 import { ValidationError } from '../lib/errors.js'
 import { ok, paginated } from '../lib/response.js'
 
 interface StaffRouteOptions {
   ticketService: TicketService
+  packageRepo: PackageRepo
 }
 
 export async function staffRoutes(
   fastify: FastifyInstance,
   options: StaffRouteOptions
 ): Promise<void> {
-  const { ticketService } = options
+  const { ticketService, packageRepo } = options
   const preHandler = [authenticate, requireRole('staff', 'admin')]
+
+  // GET /packages — active packages for ticket creation form
+  fastify.get('/packages', { preHandler }, async (_req: FastifyRequest, reply: FastifyReply) => {
+    const packages = await packageRepo.findAll()
+    const active = packages.filter((p) => p.isActive)
+    return reply.send(ok(active))
+  })
 
   // POST /tickets — create a ticket for a guest
   fastify.post('/tickets', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {

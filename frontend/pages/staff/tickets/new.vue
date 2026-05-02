@@ -78,7 +78,7 @@
           </label>
 
           <!-- Package loading skeleton -->
-          <div v-if="packageStore.isLoading" class="h-11 rounded-xl bg-gray-100 animate-pulse" />
+          <div v-if="staffPackages.length === 0" class="h-11 rounded-xl bg-gray-100 animate-pulse" />
 
           <select
             v-else
@@ -135,7 +135,9 @@ const { t } = useI18n()
 useHead({ title: () => t('ticket.create_new') })
 
 const ticketStore = useTicketStore()
-const packageStore = usePackageStore()
+const packageStore = usePackageStore() // used only for type reference
+const staffPackages = ref<Array<{ id: string; name: string; type: string; validityHours: number }>>([])
+const _ = packageStore // suppress unused warning
 const { toast } = useToast()
 
 interface FormData {
@@ -165,7 +167,7 @@ const errors = ref<FormErrors>({
   packageId: ''
 })
 
-const activePackages = computed(() => packageStore.packages.filter((p) => p.isActive))
+const activePackages = staffPackages
 
 function validate(): boolean {
   errors.value.guestName = ''
@@ -220,9 +222,13 @@ function reset(): void {
 }
 
 function goToList(): void {
-  window.location.href = '/staff/tickets'
+  navigateTo('/staff/tickets')
 }
 
-// Load packages on mount
-await packageStore.fetchList()
+onMounted(async () => {
+  const { useApiFetch } = await import('~/utils/api')
+  const { apiFetch } = useApiFetch()
+  const res = await apiFetch<{ success: true; data: typeof staffPackages.value }>('/staff/packages')
+  staffPackages.value = res.data
+})
 </script>
