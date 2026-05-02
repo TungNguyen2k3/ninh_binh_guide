@@ -85,11 +85,27 @@
         </div>
       </header>
 
-      <!-- Page content -->
-      <main class="flex-1 p-4 md:p-6">
+      <!-- Page content — pb-16 on mobile for bottom nav -->
+      <main class="flex-1 p-4 md:p-6 pb-20 md:pb-6">
         <slot />
       </main>
     </div>
+
+    <!-- Bottom navigation — mobile only (md:hidden) -->
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-100 pb-safe">
+      <div class="flex items-stretch h-16">
+        <NuxtLink
+          v-for="item in navItems"
+          :key="item.to"
+          :to="item.to"
+          class="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
+          :class="isActive(item.to) ? 'text-brand-600' : 'text-gray-400'"
+        >
+          <span class="text-xl leading-none" aria-hidden="true">{{ item.icon }}</span>
+          <span class="text-[9px] font-medium leading-none">{{ $t(item.labelKey) }}</span>
+        </NuxtLink>
+      </div>
+    </nav>
   </div>
 </template>
 
