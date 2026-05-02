@@ -59,14 +59,14 @@ export const useAuthStore = defineStore('auth', {
       this.isLoading = true
       try {
         const config = useRuntimeConfig()
-        const response = await $fetch<AuthTokenResponse>('/auth/login', {
+        const response = await $fetch<{ success: true; data: AuthTokenResponse }>('/auth/login', {
           method: 'POST',
           baseURL: config.public.apiUrl as string,
           body: credentials,
           credentials: 'include'
         })
-        this.accessToken = response.accessToken
-        this.user = response.user
+        this.accessToken = response.data.accessToken
+        this.user = response.data.user
       } finally {
         this.isLoading = false
       }
@@ -76,12 +76,14 @@ export const useAuthStore = defineStore('auth', {
       this.isLoading = true
       try {
         const config = useRuntimeConfig()
-        await $fetch('/auth/register', {
+        const response = await $fetch<{ success: true; data: AuthTokenResponse }>('/auth/register', {
           method: 'POST',
           baseURL: config.public.apiUrl as string,
           body: data,
           credentials: 'include'
         })
+        this.accessToken = response.data.accessToken
+        this.user = response.data.user
       } finally {
         this.isLoading = false
       }
@@ -109,7 +111,7 @@ export const useAuthStore = defineStore('auth', {
     async refreshTokens(): Promise<boolean> {
       try {
         const config = useRuntimeConfig()
-        const response = await $fetch<{ accessToken: string }>(
+        const response = await $fetch<{ success: true; data: { accessToken: string } }>(
           '/auth/refresh',
           {
             method: 'POST',
@@ -117,7 +119,7 @@ export const useAuthStore = defineStore('auth', {
             credentials: 'include'
           }
         )
-        this.accessToken = response.accessToken
+        this.accessToken = response.data.accessToken
         return true
       } catch {
         this.clearState()
@@ -128,8 +130,8 @@ export const useAuthStore = defineStore('auth', {
     async fetchMe(): Promise<void> {
       const { useApiFetch } = await import('~/utils/api')
       const { apiFetch } = useApiFetch()
-      const response = await apiFetch<{ user: User }>('/auth/me')
-      this.user = (response as { user: User }).user
+      const response = await apiFetch<{ success: true; data: User }>('/auth/me')
+      this.user = response.data
     },
 
     async initialize(): Promise<void> {

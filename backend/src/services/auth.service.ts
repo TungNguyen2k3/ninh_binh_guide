@@ -96,7 +96,7 @@ export class AuthService {
       : await this.userRepo.findByPhone(phone!)
 
     if (!userWithHash) {
-      throw new NotFoundError('User')
+      throw new UnauthorizedError('Invalid credentials')
     }
 
     const isValid = await comparePassword(password, userWithHash.passwordHash)

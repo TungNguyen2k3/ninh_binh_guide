@@ -147,8 +147,10 @@ async function handleSubmit(): Promise<void> {
     const apiErr = err as { response?: { _data?: { error?: { code?: string } } } }
     const code = apiErr?.response?._data?.error?.code
 
-    if (code === 'INVALID_CREDENTIALS') {
+    if (code === 'UNAUTHORIZED' || code === 'NOT_FOUND') {
       toast.error(t('error.invalid_credentials'))
+    } else if (code === 'RATE_LIMIT_EXCEEDED') {
+      toast.error(t('error.rate_limit'))
     } else {
       toast.error(t('error.login_failed'))
     }

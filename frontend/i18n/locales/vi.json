@@ -36,7 +36,8 @@
     "min_length": "Tối thiểu {min} ký tự",
     "invalid_email": "Email không hợp lệ",
     "login_failed": "Đăng nhập thất bại, vui lòng thử lại",
-    "register_failed": "Đăng ký thất bại, vui lòng thử lại"
+    "register_failed": "Đăng ký thất bại, vui lòng thử lại",
+    "rate_limit": "Quá nhiều lần thử, vui lòng chờ 15 phút"
   },
   "common": {
     "loading": "Đang tải...",

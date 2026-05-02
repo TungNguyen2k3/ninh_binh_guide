@@ -36,7 +36,8 @@
     "min_length": "Minimum {min} characters",
     "invalid_email": "Invalid email address",
     "login_failed": "Login failed, please try again",
-    "register_failed": "Registration failed, please try again"
+    "register_failed": "Registration failed, please try again",
+    "rate_limit": "Too many attempts, please wait 15 minutes"
   },
   "common": {
     "loading": "Loading...",
