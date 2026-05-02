@@ -136,6 +136,6 @@ function isActive(path: string): boolean {
 async function handleLogout(): Promise<void> {
   await authStore.logout()
   toast.success(t('auth.logout_success'))
-  await navigateTo('/auth/login')
+  window.location.href = '/auth/login'
 }
 </script>

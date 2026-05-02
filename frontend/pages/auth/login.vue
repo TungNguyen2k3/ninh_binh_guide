@@ -134,13 +134,8 @@ async function handleSubmit(): Promise<void> {
     await authStore.login(credentials)
     toast.success(t('auth.login_success'))
 
-    if (authStore.isAdmin) {
-      await navigateTo('/admin')
-    } else if (authStore.isStaff) {
-      await navigateTo('/staff')
-    } else {
-      await navigateTo('/explore')
-    }
+    const dest = authStore.isAdmin ? '/admin' : authStore.isStaff ? '/staff' : '/explore'
+    window.location.href = dest
   } catch (err: unknown) {
     const apiErr = err as { response?: { _data?: { error?: { code?: string } } } }
     const code = apiErr?.response?._data?.error?.code

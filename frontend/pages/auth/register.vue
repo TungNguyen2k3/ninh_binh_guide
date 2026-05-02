@@ -194,7 +194,7 @@ async function handleSubmit(): Promise<void> {
 
     await authStore.register(data)
     toast.success(t('auth.login_success'))
-    await navigateTo('/explore')
+    window.location.href = '/explore'
   } catch (err: unknown) {
     const apiErr = err as { response?: { _data?: { error?: { code?: string; message?: string } } } }
     const message = apiErr?.response?._data?.error?.message
