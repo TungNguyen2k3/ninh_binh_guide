@@ -14,7 +14,7 @@
               : 'text-gray-500 hover:text-gray-700'
           "
           :aria-pressed="locale === code"
-          @click="switchLocale(code)"
+          @click="() => switchLocale(code)"
         >
           {{ code.toUpperCase() }}
         </button>
@@ -41,11 +41,5 @@
 </template>
 
 <script setup lang="ts">
-const { locale, availableLocales, setLocale } = useI18n()
-
-// setLocale only accepts known locale codes — type is inferred from nuxt.config i18n.locales
-type LocaleCode = (typeof availableLocales)[number]
-function switchLocale(code: LocaleCode): void {
-  setLocale(code)
-}
+const { locale, availableLocales, switchLocale } = useLocale()
 </script>

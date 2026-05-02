@@ -1,6 +1,14 @@
 export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxtjs/i18n'],
 
+  app: {
+    head: {
+      meta: [
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' }
+      ]
+    }
+  },
+
   i18n: {
     locales: [
       { code: 'vi', name: 'Tiếng Việt', file: 'vi.json' },

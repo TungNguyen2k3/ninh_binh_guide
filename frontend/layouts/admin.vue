@@ -48,7 +48,7 @@
             type="button"
             class="flex-1 py-1 rounded-md text-xs font-medium transition-colors"
             :class="locale === code ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'"
-            @click="setLocale(code)"
+            @click="() => switchLocale(code)"
           >{{ code.toUpperCase() }}</button>
         </div>
         <AppButton
@@ -76,7 +76,7 @@
               type="button"
               class="px-2 py-1 rounded-md text-xs font-medium transition-colors"
               :class="locale === code ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'"
-              @click="setLocale(code)"
+              @click="() => switchLocale(code)"
             >{{ code.toUpperCase() }}</button>
           </div>
           <AppButton variant="secondary" size="sm" @click="handleLogout">
@@ -96,7 +96,8 @@
 <script setup lang="ts">
 const authStore = useAuthStore()
 const { toast } = useToast()
-const { t, locale, availableLocales, setLocale } = useI18n()
+const { t } = useI18n()
+const { locale, availableLocales, switchLocale } = useLocale()
 const route = useRoute()
 
 const navItems = [
