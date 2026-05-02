@@ -63,9 +63,9 @@
     </aside>
 
     <!-- Main area — offset by sidebar width on desktop -->
-    <div class="md:ml-64 min-h-screen flex flex-col">
-      <!-- Top bar (mobile only) -->
-      <header class="md:hidden sticky top-0 z-30 bg-white border-b border-gray-100 shadow-sm px-4 h-14 flex items-center justify-between gap-2">
+    <div class="md:ml-64 flex flex-col min-h-screen">
+      <!-- Top bar (mobile only) — fixed so it always stays at viewport top -->
+      <header class="md:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-100 shadow-sm px-4 h-14 flex items-center justify-between gap-2">
         <span class="font-bold text-brand-700 shrink-0">{{ $t('app.name') }}</span>
         <div class="flex items-center gap-2 min-w-0">
           <!-- Language switcher -->
@@ -85,8 +85,8 @@
         </div>
       </header>
 
-      <!-- Page content — pb-16 on mobile for bottom nav -->
-      <main class="flex-1 p-4 md:p-6 pb-20 md:pb-6">
+      <!-- Page content: pt-14 on mobile (fixed header h-14), pb-20 for bottom nav -->
+      <main class="flex-1 p-4 md:p-6 pt-[72px] md:pt-6 pb-20 md:pb-6">
         <slot />
       </main>
     </div>

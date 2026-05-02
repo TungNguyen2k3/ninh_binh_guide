@@ -9,7 +9,7 @@
     </div>
 
     <!-- Table -->
-    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-2xl border border-gray-200">
       <!-- Loading -->
       <div v-if="packageStore.isLoading" class="flex justify-center items-center py-16">
         <svg class="animate-spin h-6 w-6 text-brand-600" fill="none" viewBox="0 0 24 24">
