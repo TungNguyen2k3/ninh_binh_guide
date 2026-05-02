@@ -1,4 +1,4 @@
-# QA Test Report — Sprint 1 + Sprint 2
+# QA Test Report — Sprint 1 + 2 + 3
 
 **Tested by:** test-agent
 **Date:** 2026-05-02
@@ -10,10 +10,11 @@
 
 | File | Tests | Status |
 |---|---|---|
-| auth.service.test.ts | 18 | ✅ Pass |
-| location.service.test.ts | 11 | ✅ Pass |
-| package.service.test.ts | 9 | ✅ Pass |
-| **Total** | **38** | **✅ 38/38** |
+| auth.service.test.ts | 18 | Pass |
+| location.service.test.ts | 11 | Pass |
+| package.service.test.ts | 9 | Pass |
+| ticket.service.test.ts | 9 | Pass |
+| **Total** | **47** | **47/47** |
 
 **Coverage:**
 | Service | Statements | Branch | Functions | Lines |
@@ -21,109 +22,131 @@
 | auth.service.ts | 96.42% | 91.17% | 100% | 96.42% |
 | location.service.ts | 82.35% | 100% | 75% | 82.35% |
 | package.service.ts | 95% | 100% | 85.71% | 95% |
-| **All files** | **92.61%** | **95.16%** | **86.36%** | **92.61%** |
+| ticket.service.ts | 83.09% | 94.73% | 55.55% | 83.09% |
+| **All files** | **90.14%** | **95.06%** | **77.41%** | **90.14%** |
 
 Uncovered lines:
 - `auth.service.ts`: lines 151-152, 156-157
 - `location.service.ts`: lines 11-13, 57-62
 - `package.service.ts`: lines 14-15
+- `ticket.service.ts`: lines 57-62, 65-68, 94-95
 
 ## TypeScript Check
-- Backend: ✅ 0 errors (`npx tsc --noEmit`)
-- Frontend: ✅ 0 errors (`npx nuxi typecheck`)
+- Backend: 0 errors (`npx tsc --noEmit`)
+- Frontend: 0 errors (`npx nuxi typecheck`)
 
 ---
 
 ## Kịch bản test UI — bạn cần test thủ công
 
 ### Chuẩn bị
-- Backend chạy: `cd backend && npm run dev`
-- Frontend chạy: `cd frontend && npm run dev`
-- Mở: `http://localhost:3000`
+```
+1. Backend: cd backend && npx prisma db push && npm run db:seed && npm run dev
+2. Frontend: cd frontend && npm run dev
+3. Mo: http://localhost:3000
+```
 
-### A. Auth flows
+### A. Auth flows (Sprint 1)
 
-| # | Hành động | Kết quả mong đợi | Ghi chú |
-|---|---|---|---|
-| A1 | Vào `localhost:3000` (chưa login) | Redirect → `/auth/login` | |
-| A2 | Login email sai password | Toast đỏ: "Email/SĐT hoặc mật khẩu không đúng" | |
-| A3 | Login 6 lần liên tiếp sai | Lần 6: Toast "Quá nhiều lần thử, vui lòng chờ 15 phút" | Rate limit |
-| A4 | Login `admin@ninhbinh.vn` / `Admin@123456` | Redirect → `/admin/locations` | |
-| A5 | Login `staff@ninhbinh.vn` / `Staff@123456` | Redirect → `/staff` | |
-| A6 | Đăng ký tourist mới (email mới) | Redirect → `/explore` | Auto-login sau đăng ký |
-| A7 | **F5 refresh** sau khi đăng nhập admin | Vẫn còn đăng nhập, thấy admin dashboard | Cookie session |
-| A8 | Logout | Redirect → `/auth/login` | URL thay đổi ngay |
-| A9 | F5 sau khi logout | Vẫn ở `/auth/login` (không auto-login lại) | |
-| A10 | Dùng URL `/admin` khi đang là tourist | Redirect về `/explore` | Guard |
-| A11 | Đổi ngôn ngữ VI → EN | Toàn bộ UI đổi sang tiếng Anh | |
-| A12 | F5 sau khi đổi ngôn ngữ | Vẫn hiển thị EN (cookie persist) | |
-
-### B. Admin Locations
-
-| # | Hành động | Kết quả mong đợi | Ghi chú |
-|---|---|---|---|
-| L1 | Vào `/admin/locations` | Thấy 5 địa điểm, tên hiển thị đúng (Tràng An, Hang Múa...) | Không thấy raw key |
-| L2 | Tìm kiếm "tràng" | Chỉ còn "Tràng An" | Debounce 400ms |
-| L3 | Xóa text tìm kiếm | Về đủ 5 địa điểm | |
-| L4 | Click badge "Hoạt động" | Toggle ngay thành "Tạm dừng" (không cần reload) | isActive fix |
-| L5 | Click lại badge "Tạm dừng" | Toggle lại thành "Hoạt động" | |
-| L6 | Click **Sửa** địa điểm | Vào form, dữ liệu điền sẵn | |
-| L7 | Sửa tên VI → Lưu | Toast "Cập nhật thành công", list cập nhật | |
-| L8 | Click **Thêm địa điểm** → điền form hợp lệ → Lưu | Địa điểm mới xuất hiện | |
-| L9 | Thêm với slug đã tồn tại (vd: "trang-an") | Toast lỗi "Slug đã tồn tại" | |
-| L10 | Click **Xóa** → confirm | Địa điểm biến khỏi list | |
-| L11 | Click **Xóa** → cancel | Địa điểm vẫn còn | |
-| L12 | Upload audio .mp3 *(cần Cloudinary)* | Spinner quay → xong có audio player | |
-| L13 | Upload ảnh *(cần Cloudinary)* | Spinner quay → xong có thumbnail | |
-
-### C. Admin Packages
-
-| # | Hành động | Kết quả mong đợi | Ghi chú |
-|---|---|---|---|
-| P1 | Vào `/admin/packages` | Thấy "Goi Co Ban" + "Goi Toan Canh" | |
-| P2 | Toggle trạng thái package | Cập nhật ngay | isActive fix |
-| P3 | Thêm gói mới type "Tùy chọn" | Xuất hiện trong list | |
-| P4 | Thêm gói mới type "Tất cả địa điểm" | Xuất hiện trong list | |
-| P5 | Click **Gán địa điểm** (gói Custom) | Trang checkbox, các địa điểm đã assign được pre-check | |
-| P6 | Chọn thêm/bỏ địa điểm → Lưu thay đổi | Toast thành công, số địa điểm cập nhật | |
-| P7 | Click **Gán địa điểm** (gói all_locations) | Banner "Gói này tự động gồm tất cả địa điểm" | Không có checkbox |
-| P8 | Xóa package | Biến khỏi list | |
-
-### D. Mobile/Responsive (test trên DevTools 375px)
-
-| # | Kiểm tra | Kết quả mong đợi |
+| # | Hanh dong | Ket qua mong doi |
 |---|---|---|
-| M1 | Admin Locations trang mobile | Header cố định trên cùng, không lẫn vào table |
-| M2 | Bottom nav admin mobile | 5 icon hiện đúng: 📊📍🎫🎟👥, active icon đổi màu |
-| M3 | Bảng Locations mobile | Scroll ngang được, cột Actions thấy đủ Sửa/Xóa |
-| M4 | Form thêm địa điểm mobile | Fields stack dọc, không bị cắt |
-| M5 | Login page mobile | Form căn giữa, không bị zoom khi focus input |
-| M6 | Packages page mobile | Tương tự Locations |
+| A1 | Vao localhost:3000 chua login | Redirect /auth/login |
+| A2 | Login sai password | Toast do "Email/SDT... khong dung" |
+| A3 | Login admin@ninhbinh.vn / Admin@123456 | Redirect /admin/locations |
+| A4 | Login staff@ninhbinh.vn / Staff@123456 | Redirect /staff/tickets |
+| A5 | Dang ky tourist moi | Redirect /auth/activate (chua co ticket) |
+| A6 | F5 refresh sau login admin | Van con login, dung trang |
+| A7 | Logout | Redirect /auth/login |
+| A8 | Doi ngon ngu VI→EN roi F5 | Giu nguyen EN |
+
+### B. Admin Locations (Sprint 2)
+
+| # | Hanh dong | Ket qua mong doi |
+|---|---|---|
+| L1 | /admin/locations | 5 dia diem seed, ten tieng Viet |
+| L2 | Search "trang" | Chi Trang An |
+| L3 | Toggle badge Hoat dong | Doi thanh Tam dung ngay |
+| L4 | Toggle lai | Ve Hoat dong |
+| L5 | Click Sua | Form dien san du lieu |
+| L6 | Sua ten → Luu | Toast thanh cong, list cap nhat |
+| L7 | Them dia diem slug moi | Xuat hien trong list |
+| L8 | Them slug trung | Toast loi slug da ton tai |
+| L9 | Xoa → confirm | Bien khoi list |
+
+### C. Admin Packages (Sprint 2)
+
+| # | Hanh dong | Ket qua mong doi |
+|---|---|---|
+| P1 | /admin/packages | 2 packages seed |
+| P2 | Toggle trang thai | Cap nhat ngay |
+| P3 | Them goi custom | Xuat hien |
+| P4 | Gan dia diem (custom) | Checkbox, pre-check dung |
+| P5 | Gan dia diem (all_locations) | Banner "tu dong gom tat ca" |
+
+### D. Staff — Tao ve (Sprint 3)
+
+| # | Hanh dong | Ket qua mong doi |
+|---|---|---|
+| S1 | Login staff → /staff/tickets | List tickets (co 2 demo) |
+| S2 | Click "Tao ve moi" | Form: ten khach + SDT + chon goi |
+| S3 | Form: dropdown goi co 2 goi active | Hien dung danh sach |
+| S4 | Dien form → Submit | Man hinh ket qua, code NBG-XXXXXX hien to |
+| S5 | Click "Copy ma ve" | Toast "Da copy ma ve" |
+| S6 | Click "Tao ve khac" | Form reset trong |
+| S7 | Click "Created tickets" → list | Ve moi xuat hien dau list |
+| S8 | Badge ve: Cho kich hoat / Da kich hoat / Het han | Dung trang thai |
+
+### E. Tourist — Kich hoat ve (Sprint 3)
+
+| # | Hanh dong | Ket qua mong doi |
+|---|---|---|
+| T1 | Dang ky tourist moi | Redirect /auth/activate (chua co ve) |
+| T2 | /auth/activate — nhap NBG-DEMO01 | Validate format, nut Kich hoat |
+| T3 | Submit NBG-DEMO01 | Toast thanh cong → redirect /explore |
+| T4 | F5 o /explore | Van vao duoc (ticketId restored) |
+| T5 | Nhap code sai format (ABC) | Loi validation ngay |
+| T6 | Nhap code khong ton tai | Loi "khong tim thay ma ve" |
+| T7 | Kich hoat lai code da dung | Toast "da kich hoat truoc do" |
+
+### F. Admin — Xem tat ca ve (Sprint 3)
+
+| # | Hanh dong | Ket qua mong doi |
+|---|---|---|
+| F1 | Admin → /admin/tickets | Grid tat ca ve |
+| F2 | Search "DEMO" | Chi demo tickets |
+| F3 | Badge trang thai | Dung: pending/activated/expired |
+
+### G. Mobile (375px)
+
+| # | Kiem tra | Ket qua mong doi |
+|---|---|---|
+| M1 | Staff /staff/tickets mobile | List cards, khong vo layout |
+| M2 | Form tao ve mobile | Fields stack doc |
+| M3 | Man hinh ket qua mobile | Code to, copy button ro |
+| M4 | /auth/activate mobile | Input lon, de nhap |
 
 ---
 
-## Bugs đã fix trong Sprint 1+2
+## Bugs da fix Sprint 1–3
 
 | # | Bug | Fix |
 |---|---|---|
-| B1 | Response unwrapping sai (`response.accessToken` undefined) | Đổi thành `response.data.accessToken` |
-| B2 | Login fail do cross-origin cookie | Thêm Nuxt devProxy `/api` → `localhost:4000/api` |
-| B3 | URL không thay đổi sau login | Dùng `window.location.href` thay `navigateTo()` |
-| B4 | i18n keys hiển thị raw | Sprint 2 agent ghi vào `locales/` thay vì `i18n/locales/` |
-| B5 | Admin mobile layout vỡ | Outer div: `flex` → `block`; header: `sticky` → `fixed` |
-| B6 | Table bị cắt bên phải | Bỏ `overflow-hidden` khỏi card container |
-| B7 | Toggle trạng thái không cập nhật | `UpdateLocationSchema` và `UpdatePackageSchema` thiếu `isActive` |
-| B8 | @fastify/multipart crash | Downgrade v9→v8 (v9 yêu cầu Fastify v5) |
-| B9 | Cloudinary error không rõ | Thêm `assertCloudinaryConfigured()` trước upload |
+| B1 | response.accessToken undefined | response.data.accessToken |
+| B2 | Cross-origin cookie | Nuxt devProxy /api |
+| B3 | Login redirect loop (SSR) | import.meta.server return trong middleware |
+| B4 | i18n keys raw string | Locale files sai thu muc |
+| B5 | Admin mobile layout vo | fixed header, block outer |
+| B6 | Table bi cat | Bo overflow-hidden khoi card |
+| B7 | Toggle trang thai khong cap nhat | isActive thieu trong UpdateSchema |
+| B8 | @fastify/multipart crash | Downgrade v8 cho Fastify v4 |
+| B9 | Ticket code khong hien | res.data thay vi res.data.ticket |
+| B10 | Activate khong redirect | ticketId state rieng + initialize() goi /auth/my-ticket |
+| B11 | Staff 403 khi load packages | Them GET /staff/packages endpoint |
+| B12 | Missing template redirect pages | Them <template><div/> + import.meta.client |
+| B13 | TicketCard khong resolve | AdminTicketCard (prefix thu muc) |
+| B14 | API call trong SSR | onMounted thay await top-level |
 
----
-
-## Checklist trước khi release
-
-- [ ] Unit tests: 38/38 pass
-- [ ] TypeScript: 0 errors backend + frontend
-- [ ] Auth flows A1-A12: pass
-- [ ] Location CRUD L1-L11: pass
-- [ ] Package CRUD P1-P8: pass
-- [ ] Mobile M1-M6: pass
-- [ ] Cloudinary credentials: điền vào backend/.env
+## Coverage Summary
+- Unit tests: 47/47 pass
+- Service coverage (statements): auth 96.42% / location 82.35% / package 95% / ticket 83.09% / all files 90.14%
+- TypeScript: 0 errors (backend + frontend)
