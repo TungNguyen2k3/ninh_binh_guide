@@ -41,11 +41,24 @@
   "common": {
     "loading": "Đang tải...",
     "save": "Lưu",
+    "saving": "Đang lưu...",
+    "uploading": "Đang tải lên...",
     "cancel": "Hủy",
     "confirm": "Xác nhận",
+    "confirm_delete": "Xóa",
+    "delete_confirm_message": "Hành động này không thể hoàn tác.",
     "back": "Quay lại",
     "close": "Đóng",
-    "or": "hoặc"
+    "or": "hoặc",
+    "active": "Hoạt động",
+    "inactive": "Tạm dừng",
+    "search_placeholder": "Tìm kiếm...",
+    "add": "Thêm",
+    "edit": "Sửa",
+    "delete": "Xóa",
+    "actions": "Thao tác",
+    "prev": "Trước",
+    "next": "Tiếp"
   },
   "nav": {
     "explore": "Khám phá",
@@ -63,5 +76,56 @@
   "app": {
     "name": "Ninh Bình Guide",
     "tagline": "Tự khám phá di sản"
+  },
+  "admin": {
+    "coming_soon": "Tính năng đang phát triển",
+    "add_location": "Thêm địa điểm",
+    "edit_location": "Sửa địa điểm",
+    "add_package": "Thêm gói",
+    "edit_package": "Sửa gói",
+    "upload_audio": "Tải audio lên",
+    "replace_audio": "Thay audio",
+    "upload_image": "Tải ảnh lên",
+    "assign_locations": "Gán địa điểm",
+    "no_locations": "Chưa có địa điểm nào",
+    "no_packages": "Chưa có gói nào",
+    "audio_vi": "Audio Tiếng Việt",
+    "audio_en": "Audio English",
+    "all_locations_type": "Tất cả địa điểm",
+    "custom_type": "Tùy chọn",
+    "validity_hours": "Hiệu lực (giờ)",
+    "price_vnd": "Giá (VND)",
+    "delete_location_title": "Xóa địa điểm?",
+    "delete_package_title": "Xóa gói?",
+    "num_locations": "Số địa điểm",
+    "package_all_locations_note": "Gói này tự động gồm tất cả địa điểm đang hoạt động",
+    "save_changes": "Lưu thay đổi",
+    "create_success": "Tạo thành công",
+    "update_success": "Cập nhật thành công",
+    "delete_success": "Đã xóa thành công"
+  },
+  "location": {
+    "title": "Địa điểm",
+    "listen": "Nghe thuyết minh",
+    "name_vi": "Tên tiếng Việt",
+    "name_en": "Tên tiếng Anh",
+    "slug": "Slug (URL)",
+    "description_vi": "Mô tả tiếng Việt",
+    "description_en": "Mô tả tiếng Anh",
+    "latitude": "Vĩ độ",
+    "longitude": "Kinh độ",
+    "display_order": "Thứ tự hiển thị",
+    "generate_slug": "Tự tạo slug",
+    "coordinates": "Tọa độ",
+    "status": "Trạng thái"
+  },
+  "package": {
+    "name": "Tên gói",
+    "description": "Mô tả",
+    "type": "Loại gói",
+    "validity_hours": "Hiệu lực (giờ)",
+    "price": "Giá (VND)",
+    "status": "Trạng thái",
+    "locations_count": "Địa điểm"
   }
 }

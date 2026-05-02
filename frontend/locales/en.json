@@ -41,11 +41,24 @@
   "common": {
     "loading": "Loading...",
     "save": "Save",
+    "saving": "Saving...",
+    "uploading": "Uploading...",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "confirm_delete": "Delete",
+    "delete_confirm_message": "This action cannot be undone.",
     "back": "Back",
     "close": "Close",
-    "or": "or"
+    "or": "or",
+    "active": "Active",
+    "inactive": "Inactive",
+    "search_placeholder": "Search...",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "actions": "Actions",
+    "prev": "Prev",
+    "next": "Next"
   },
   "nav": {
     "explore": "Explore",
@@ -63,5 +76,56 @@
   "app": {
     "name": "Ninh Binh Guide",
     "tagline": "Explore the heritage independently"
+  },
+  "admin": {
+    "coming_soon": "Feature under development",
+    "add_location": "Add location",
+    "edit_location": "Edit location",
+    "add_package": "Add package",
+    "edit_package": "Edit package",
+    "upload_audio": "Upload audio",
+    "replace_audio": "Replace audio",
+    "upload_image": "Upload image",
+    "assign_locations": "Assign locations",
+    "no_locations": "No locations yet",
+    "no_packages": "No packages yet",
+    "audio_vi": "Vietnamese Audio",
+    "audio_en": "English Audio",
+    "all_locations_type": "All locations",
+    "custom_type": "Custom",
+    "validity_hours": "Validity (hours)",
+    "price_vnd": "Price (VND)",
+    "delete_location_title": "Delete location?",
+    "delete_package_title": "Delete package?",
+    "num_locations": "Locations",
+    "package_all_locations_note": "This package automatically includes all active locations",
+    "save_changes": "Save changes",
+    "create_success": "Created successfully",
+    "update_success": "Updated successfully",
+    "delete_success": "Deleted successfully"
+  },
+  "location": {
+    "title": "Locations",
+    "listen": "Listen to guide",
+    "name_vi": "Vietnamese name",
+    "name_en": "English name",
+    "slug": "Slug (URL)",
+    "description_vi": "Vietnamese description",
+    "description_en": "English description",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "display_order": "Display order",
+    "generate_slug": "Auto-generate",
+    "coordinates": "Coordinates",
+    "status": "Status"
+  },
+  "package": {
+    "name": "Package name",
+    "description": "Description",
+    "type": "Type",
+    "validity_hours": "Validity (hours)",
+    "price": "Price (VND)",
+    "status": "Status",
+    "locations_count": "Locations"
   }
 }

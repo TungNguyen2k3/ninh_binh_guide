@@ -5,14 +5,20 @@ import fastifyCookie from '@fastify/cookie'
 import fastifyCors from '@fastify/cors'
 import fastifyHelmet from '@fastify/helmet'
 import fastifyRateLimit from '@fastify/rate-limit'
+import multipart from '@fastify/multipart'
 import { ZodError } from 'zod'
 import { PrismaClient } from '@prisma/client'
 import { env } from './lib/env.js'
 import { AppError } from './lib/errors.js'
 import { UserRepo } from './repositories/user.repo.js'
 import { RefreshTokenRepo } from './repositories/refresh-token.repo.js'
+import { LocationRepo } from './repositories/location.repo.js'
+import { PackageRepo } from './repositories/package.repo.js'
 import { AuthService } from './services/auth.service.js'
+import { LocationService } from './services/location.service.js'
+import { PackageService } from './services/package.service.js'
 import { authRoutes } from './routes/auth.route.js'
+import { adminRoutes } from './routes/admin.route.js'
 
 export function buildApp() {
   const fastify = Fastify({
@@ -38,6 +44,8 @@ export function buildApp() {
     timeWindow: 60 * 1000, // 1 minute fallback
   })
 
+  fastify.register(multipart, { limits: { fileSize: 50 * 1024 * 1024 } }) // 50 MB
+
   // ─── Infrastructure ──────────────────────────────────────────────────────────
 
   const prisma = new PrismaClient()
@@ -45,9 +53,13 @@ export function buildApp() {
   // Repositories
   const userRepo = new UserRepo(prisma)
   const refreshTokenRepo = new RefreshTokenRepo(prisma)
+  const locationRepo = new LocationRepo(prisma)
+  const packageRepo = new PackageRepo(prisma)
 
   // Services
   const authService = new AuthService(userRepo, refreshTokenRepo)
+  const locationService = new LocationService(locationRepo)
+  const packageService = new PackageService(packageRepo, locationRepo)
 
   // ─── Routes ──────────────────────────────────────────────────────────────────
 
@@ -58,6 +70,7 @@ export function buildApp() {
 
   // API routes
   fastify.register(authRoutes, { prefix: '/api/v1/auth', authService })
+  fastify.register(adminRoutes, { prefix: '/api/v1/admin', locationService, packageService })
 
   // ─── Global Error Handler ─────────────────────────────────────────────────────
 

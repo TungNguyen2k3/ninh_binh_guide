@@ -39,3 +39,57 @@ model RefreshToken {
 
   @@map("refresh_tokens")
 }
+
+enum PackageType {
+  all_locations
+  custom
+}
+
+model Location {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  nameVi        String
+  nameEn        String
+  descriptionVi String?  @db.Text
+  descriptionEn String?  @db.Text
+  audioViUrl    String?
+  audioEnUrl    String?
+  imageUrl      String?
+  latitude      Float
+  longitude     Float
+  displayOrder  Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  packages PackageLocation[]
+
+  @@map("locations")
+}
+
+model Package {
+  id            String      @id @default(cuid())
+  name          String
+  description   String?
+  type          PackageType @default(custom)
+  validityHours Int         @default(24)
+  price         Int         @default(0)
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  locations PackageLocation[]
+
+  @@map("packages")
+}
+
+model PackageLocation {
+  packageId  String
+  locationId String
+
+  package  Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@id([packageId, locationId])
+  @@map("package_locations")
+}
