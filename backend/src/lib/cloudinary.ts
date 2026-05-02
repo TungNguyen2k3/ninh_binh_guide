@@ -7,7 +7,16 @@ cloudinary.config({
   api_secret: env.CLOUDINARY_API_SECRET,
 })
 
+function assertCloudinaryConfigured() {
+  if (!env.CLOUDINARY_CLOUD_NAME || !env.CLOUDINARY_API_KEY || !env.CLOUDINARY_API_SECRET) {
+    throw new Error(
+      'Cloudinary chưa được cấu hình. Vui lòng điền CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET vào file .env'
+    )
+  }
+}
+
 export async function uploadAudio(buffer: Buffer, filename: string): Promise<string> {
+  assertCloudinaryConfigured()
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
@@ -27,6 +36,7 @@ export async function uploadAudio(buffer: Buffer, filename: string): Promise<str
 }
 
 export async function uploadImage(buffer: Buffer, filename: string): Promise<string> {
+  assertCloudinaryConfigured()
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {

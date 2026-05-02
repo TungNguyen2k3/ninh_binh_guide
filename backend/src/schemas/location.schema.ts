@@ -14,7 +14,9 @@ export const CreateLocationSchema = z.object({
   displayOrder: z.number().int().min(0).optional(),
 })
 
-export const UpdateLocationSchema = CreateLocationSchema.partial()
+export const UpdateLocationSchema = CreateLocationSchema.partial().extend({
+  isActive: z.boolean().optional(),
+})
 
 export const LocationQuerySchema = z.object({
   search: z.string().optional(),
