@@ -1,6 +1,10 @@
 import { useAuthStore } from '~/stores/auth.store'
 
 export default defineNuxtRouteMiddleware((to) => {
+  // Auth state is restored client-side only (auth.client.ts plugin).
+  // Skipping on server prevents redirect loops caused by empty store during SSR.
+  if (import.meta.server) return
+
   const authStore = useAuthStore()
 
   const publicRoutes = ['/auth/login', '/auth/register']
