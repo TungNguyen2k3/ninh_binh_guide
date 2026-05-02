@@ -27,9 +27,21 @@ export default defineNuxtConfig({
     }
   },
 
+  // Dev proxy: /api → localhost:4000/api (same-origin → cookie works without SameSite=None)
+  nitro: {
+    devProxy: {
+      '/api': {
+        target: 'http://localhost:4000/api',
+        changeOrigin: true,
+      }
+    }
+  },
+
   runtimeConfig: {
     public: {
-      apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'
+      // Dev: relative /api/v1 → goes through Nuxt proxy (same-origin, cookie OK)
+      // Prod: set NUXT_PUBLIC_API_URL=https://your-backend.railway.app/api/v1
+      apiUrl: process.env.NUXT_PUBLIC_API_URL || '/api/v1'
     }
   },
 

@@ -1,5 +1,4 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { ZodError } from 'zod'
 import { RegisterSchema, LoginSchema } from '../schemas/auth.schema.js'
 import { AuthService } from '../services/auth.service.js'
 import { authenticate } from '../middlewares/authenticate.js'
@@ -11,10 +10,13 @@ const COOKIE_NAME = 'refreshToken'
 const COOKIE_MAX_AGE = 7 * 24 * 3600 // 7 days in seconds
 
 function getCookieOptions() {
+  const isProd = env.NODE_ENV === 'production'
   return {
     httpOnly: true,
-    secure: env.NODE_ENV === 'production',
-    sameSite: 'lax' as const,
+    secure: isProd,
+    // Production (HTTPS, cross-domain Railway↔Vercel): SameSite=None requires Secure=true
+    // Development (HTTP, same-origin via Nuxt proxy): SameSite=Lax is sufficient
+    sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
     path: '/',
     maxAge: COOKIE_MAX_AGE,
   }
