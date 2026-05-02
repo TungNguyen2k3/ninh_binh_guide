@@ -80,7 +80,6 @@ definePageMeta({ layout: 'auth' })
 const authStore = useAuthStore()
 const { toast } = useToast()
 const { t } = useI18n()
-const router = useRouter()
 
 useHead({ title: () => t('auth.login') })
 
@@ -135,13 +134,12 @@ async function handleSubmit(): Promise<void> {
     await authStore.login(credentials)
     toast.success(t('auth.login_success'))
 
-    // Redirect based on role
     if (authStore.isAdmin) {
-      await router.push('/admin')
+      await navigateTo('/admin')
     } else if (authStore.isStaff) {
-      await router.push('/staff')
+      await navigateTo('/staff')
     } else {
-      await router.push('/explore')
+      await navigateTo('/explore')
     }
   } catch (err: unknown) {
     const apiErr = err as { response?: { _data?: { error?: { code?: string } } } }

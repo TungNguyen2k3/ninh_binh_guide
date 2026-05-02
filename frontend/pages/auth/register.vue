@@ -104,7 +104,6 @@ const { toast } = useToast()
 const { t } = useI18n()
 
 useHead({ title: () => t('auth.register') })
-const router = useRouter()
 
 const form = reactive({
   name: '',
@@ -194,8 +193,8 @@ async function handleSubmit(): Promise<void> {
       : { phone: form.identifier, password: form.password, name: form.name.trim() }
 
     await authStore.register(data)
-    toast.success(t('auth.register_success'))
-    await router.push('/auth/login')
+    toast.success(t('auth.login_success'))
+    await navigateTo('/explore')
   } catch (err: unknown) {
     const apiErr = err as { response?: { _data?: { error?: { code?: string; message?: string } } } }
     const message = apiErr?.response?._data?.error?.message

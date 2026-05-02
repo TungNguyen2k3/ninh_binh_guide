@@ -99,6 +99,6 @@ function isActive(path: string): boolean {
 async function handleLogout(): Promise<void> {
   await authStore.logout()
   toast.success(t('auth.logout_success'))
-  await router.push('/auth/login')
+  await navigateTo('/auth/login')
 }
 </script>
