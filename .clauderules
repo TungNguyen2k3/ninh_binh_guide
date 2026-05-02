@@ -1,0 +1,87 @@
+# Claude Rules — Ninh Bình Audio Guide
+
+## Nguyên tắc chung
+- Luôn đọc CLAUDE.md trước khi bắt đầu bất kỳ task nào
+- Kiến trúc 3 layer: `routes → services → repositories` — không thêm layer mới
+- Không viết business logic trong route handler — logic thuộc về service
+- Không viết Prisma query trong service — query thuộc về repository
+- Mỗi function làm đúng 1 việc, tên function nói rõ việc đó
+
+## Code style
+- TypeScript strict mode, không dùng `any`
+- Mọi async function trong service throw `AppError` khi lỗi — không return null để báo lỗi
+- Route handler không cần try/catch — đã có global error handler trong `app.ts`
+- Validate input bằng Zod ở route, trước khi gọi service
+- Không dùng `console.log` — dùng `fastify.log` (backend) hoặc bỏ hẳn (frontend)
+
+## Naming conventions
+```
+# Backend
+src/routes/auth.route.ts              # kebab-case, suffix .route
+src/services/auth.service.ts          # kebab-case, suffix .service
+src/repositories/user.repo.ts         # kebab-case, suffix .repo
+src/middlewares/authenticate.ts       # kebab-case
+src/lib/jwt.ts                        # kebab-case, tên ngắn
+src/schemas/auth.schema.ts            # kebab-case, suffix .schema
+
+# Frontend
+components/LocationCard.vue           # PascalCase component
+composables/useAuth.ts                # use-prefix composable
+stores/auth.store.ts                  # kebab + .store suffix
+pages/explore/[slug].vue              # dynamic route
+```
+
+## API conventions
+- Prefix: `/api/v1/`
+- Luôn trả về đúng format — dùng helper từ `lib/response.ts`:
+  - Success: `ok(data)` hoặc `paginated(data, total, page, limit)`
+  - Error: throw `AppError` subclass, global handler tự format
+- HTTP status: 200 OK, 201 Created, 401 Unauthorized, 403 Forbidden, 404 Not Found, 422 Validation, 500 Server Error
+- Không expose stack trace ở production
+- Pagination: `?page=1&limit=20`
+
+## Auth / Security
+- Access token TTL: 1h, lưu memory ở frontend (không localStorage)
+- Refresh token TTL: 7 ngày, lưu DB, gửi qua httpOnly cookie, rotate on use
+- `authenticate` middleware verify token và attach `req.user`
+- `requireRole` middleware dùng sau `authenticate`, không dùng độc lập
+- Tourist chỉ được xem location thuộc ticket đang active — check trong `location.service.ts`
+
+## Database (Prisma)
+- Không raw SQL trừ aggregation phức tạp (stats)
+- Tên migration mô tả rõ: `add_ticket_users_table`, `add_location_display_order`
+- Không hardcode `DATABASE_URL` — luôn từ `env.ts`
+- Dùng `select` để loại bỏ `passwordHash` khi query user cho response
+
+## Cache (node-cache)
+- Dùng `lib/cache.ts` — không gọi node-cache trực tiếp trong service
+- Key format: `{entity}:{qualifier}:{id}` — VD: `locations:ticket:abc123`
+- Invalidate cache sau mỗi write operation ở admin (update/delete location, package)
+- TTL mặc định: 5 phút — không set TTL quá cao vì RAM giới hạn free tier
+
+## Frontend (Nuxt / Vue)
+- Mobile-first: base styles cho 375px, responsive lên với `sm:` `md:`
+- Không gọi `$fetch` trực tiếp từ component — luôn qua store hoặc composable
+- i18n: không hardcode string hiển thị cho user, luôn dùng `$t('key')`
+- Lazy load image và audio — không preload toàn bộ khi vào trang
+- Pinia store: `state` / `getters` / `actions` — không để logic trong component
+
+## Testing
+- Ưu tiên test service layer — đây là nơi chứa business logic
+- Mock repository trong unit test service, không mock Prisma trực tiếp
+- Test file đặt cạnh source: `auth.service.test.ts`
+- Coverage mục tiêu: 70% services — không yêu cầu 100%
+- Tên test case đọc hiểu ngay: `'throws ForbiddenError when ticket is expired'`
+
+## Git
+- Branch: `feature/s1-auth-login`, `fix/audio-url-expired` (xem git-agent để biết thêm)
+- Commit: Conventional Commits — `feat(auth): add refresh token rotation`
+- Không commit: `.env`, `node_modules/`, `dist/`, `prisma/generated/`
+
+## Những điều KHÔNG được làm
+- ❌ Không thêm layer mới (không tạo `domain/`, `use-cases/`, `infrastructure/`)
+- ❌ Không trả về `passwordHash` trong bất kỳ response nào
+- ❌ Không gọi repository trực tiếp từ route handler — phải qua service
+- ❌ Không gọi service này từ service khác — nếu cần share logic, đưa vào `lib/`
+- ❌ Không hardcode text tiếng Việt/Anh trong Vue template
+- ❌ Không viết migration bằng tay — luôn dùng `prisma migrate dev`

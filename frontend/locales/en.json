@@ -1,0 +1,67 @@
+{
+  "auth": {
+    "login": "Log in",
+    "register": "Sign up",
+    "logout": "Log out",
+    "email": "Email",
+    "phone": "Phone number",
+    "password": "Password",
+    "confirm_password": "Confirm password",
+    "name": "Full name",
+    "login_title": "Welcome back",
+    "login_subtitle": "Log in to continue exploring Ninh Binh",
+    "register_title": "Create an account",
+    "register_subtitle": "Start your Ninh Binh exploration journey",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "email_or_phone": "Email or phone number",
+    "email_placeholder": "example{'@'}email.com",
+    "phone_placeholder": "+84 912 345 678",
+    "password_placeholder": "Minimum 8 characters",
+    "name_placeholder": "John Doe",
+    "login_success": "Logged in successfully",
+    "register_success": "Account created, please log in",
+    "logout_success": "Logged out successfully",
+    "show_password": "Show password",
+    "hide_password": "Hide password"
+  },
+  "error": {
+    "unauthorized": "Please log in to continue",
+    "forbidden": "You do not have access",
+    "not_found": "Not found",
+    "server_error": "Server error, please try again",
+    "invalid_credentials": "Incorrect email/phone or password",
+    "password_mismatch": "Passwords do not match",
+    "required": "This field is required",
+    "min_length": "Minimum {min} characters",
+    "invalid_email": "Invalid email address",
+    "login_failed": "Login failed, please try again",
+    "register_failed": "Registration failed, please try again"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "close": "Close",
+    "or": "or"
+  },
+  "nav": {
+    "explore": "Explore",
+    "map": "Map",
+    "dashboard": "Dashboard",
+    "locations": "Locations",
+    "packages": "Packages",
+    "tickets": "Tickets",
+    "users": "Users"
+  },
+  "explore": {
+    "title": "Explore Ninh Binh",
+    "coming_soon": "Map and audio guide coming in Sprint 4"
+  },
+  "app": {
+    "name": "Ninh Binh Guide",
+    "tagline": "Explore the heritage independently"
+  }
+}

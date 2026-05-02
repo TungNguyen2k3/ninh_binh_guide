@@ -45,3 +45,6 @@ prisma/migrations/*.sql.bak
 # Misc
 coverage/
 .cache/
+
+# Claude Code
+.claude/

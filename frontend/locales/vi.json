@@ -1,0 +1,67 @@
+{
+  "auth": {
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "logout": "Đăng xuất",
+    "email": "Email",
+    "phone": "Số điện thoại",
+    "password": "Mật khẩu",
+    "confirm_password": "Xác nhận mật khẩu",
+    "name": "Họ tên",
+    "login_title": "Chào mừng trở lại",
+    "login_subtitle": "Đăng nhập để tiếp tục khám phá Ninh Bình",
+    "register_title": "Tạo tài khoản",
+    "register_subtitle": "Bắt đầu hành trình khám phá Ninh Bình",
+    "no_account": "Chưa có tài khoản?",
+    "have_account": "Đã có tài khoản?",
+    "email_or_phone": "Email hoặc số điện thoại",
+    "email_placeholder": "example{'@'}email.com",
+    "phone_placeholder": "0912 345 678",
+    "password_placeholder": "Tối thiểu 8 ký tự",
+    "name_placeholder": "Nguyễn Văn A",
+    "login_success": "Đăng nhập thành công",
+    "register_success": "Đăng ký thành công, vui lòng đăng nhập",
+    "logout_success": "Đã đăng xuất",
+    "show_password": "Hiện mật khẩu",
+    "hide_password": "Ẩn mật khẩu"
+  },
+  "error": {
+    "unauthorized": "Vui lòng đăng nhập",
+    "forbidden": "Không có quyền truy cập",
+    "not_found": "Không tìm thấy",
+    "server_error": "Lỗi máy chủ, vui lòng thử lại",
+    "invalid_credentials": "Email/số điện thoại hoặc mật khẩu không đúng",
+    "password_mismatch": "Mật khẩu không khớp",
+    "required": "Trường này là bắt buộc",
+    "min_length": "Tối thiểu {min} ký tự",
+    "invalid_email": "Email không hợp lệ",
+    "login_failed": "Đăng nhập thất bại, vui lòng thử lại",
+    "register_failed": "Đăng ký thất bại, vui lòng thử lại"
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "back": "Quay lại",
+    "close": "Đóng",
+    "or": "hoặc"
+  },
+  "nav": {
+    "explore": "Khám phá",
+    "map": "Bản đồ",
+    "dashboard": "Tổng quan",
+    "locations": "Địa điểm",
+    "packages": "Gói tham quan",
+    "tickets": "Vé",
+    "users": "Người dùng"
+  },
+  "explore": {
+    "title": "Khám phá Ninh Bình",
+    "coming_soon": "Bản đồ và thuyết minh audio sẽ ra mắt ở Sprint 4"
+  },
+  "app": {
+    "name": "Ninh Bình Guide",
+    "tagline": "Tự khám phá di sản"
+  }
+}
