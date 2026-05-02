@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen flex bg-gray-50">
-    <!-- Sidebar — hidden on mobile, visible md+ -->
+  <div class="min-h-screen bg-gray-50">
+    <!-- Sidebar — fixed, desktop only -->
     <aside
       class="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 fixed inset-y-0 z-20"
     >
@@ -62,9 +62,9 @@
       </div>
     </aside>
 
-    <!-- Main area -->
-    <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
-      <!-- Top bar (mobile) -->
+    <!-- Main area — offset by sidebar width on desktop -->
+    <div class="md:ml-64 min-h-screen flex flex-col">
+      <!-- Top bar (mobile only) -->
       <header class="md:hidden sticky top-0 z-30 bg-white border-b border-gray-100 shadow-sm px-4 h-14 flex items-center justify-between gap-2">
         <span class="font-bold text-brand-700 shrink-0">{{ $t('app.name') }}</span>
         <div class="flex items-center gap-2 min-w-0">
