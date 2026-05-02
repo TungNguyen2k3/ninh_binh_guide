@@ -109,8 +109,8 @@
   "location": {
     "title": "Địa điểm",
     "listen": "Nghe thuyết minh",
-    "name_vi": "Tên tiếng Việt",
-    "name_en": "Tên tiếng Anh",
+    "name_vi": "Tên",
+    "name_en": "Tên",
     "slug": "Slug (URL)",
     "description_vi": "Mô tả tiếng Việt",
     "description_en": "Mô tả tiếng Anh",
