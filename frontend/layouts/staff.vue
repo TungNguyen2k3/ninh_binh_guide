@@ -9,14 +9,20 @@
           <span class="font-bold text-brand-700 text-lg">{{ $t('app.name') }}</span>
         </div>
 
-        <!-- User info + logout -->
-        <div class="flex items-center gap-3">
+        <!-- Lang + user + logout -->
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-0.5 bg-gray-100 rounded-lg p-0.5">
+            <button
+              v-for="code in availableLocales"
+              :key="code"
+              type="button"
+              class="px-2 py-1 rounded-md text-xs font-medium transition-colors"
+              :class="locale === code ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'"
+              @click="setLocale(code)"
+            >{{ code.toUpperCase() }}</button>
+          </div>
           <span class="text-sm text-gray-600 hidden sm:inline">{{ authStore.user?.name }}</span>
-          <AppButton
-            variant="secondary"
-            size="sm"
-            @click="handleLogout"
-          >
+          <AppButton variant="secondary" size="sm" @click="handleLogout">
             {{ $t('auth.logout') }}
           </AppButton>
         </div>
@@ -36,7 +42,7 @@
 <script setup lang="ts">
 const authStore = useAuthStore()
 const { toast } = useToast()
-const { t } = useI18n()
+const { t, locale, availableLocales, setLocale } = useI18n()
 
 async function handleLogout(): Promise<void> {
   await authStore.logout()

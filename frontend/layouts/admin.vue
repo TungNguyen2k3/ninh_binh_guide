@@ -40,6 +40,17 @@
             <p class="text-xs text-gray-500 capitalize">{{ authStore.user?.role }}</p>
           </div>
         </div>
+        <!-- Language switcher -->
+        <div class="flex items-center gap-0.5 bg-gray-100 rounded-lg p-0.5 mt-2">
+          <button
+            v-for="code in availableLocales"
+            :key="code"
+            type="button"
+            class="flex-1 py-1 rounded-md text-xs font-medium transition-colors"
+            :class="locale === code ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'"
+            @click="setLocale(code)"
+          >{{ code.toUpperCase() }}</button>
+        </div>
         <AppButton
           variant="secondary"
           size="sm"
@@ -54,10 +65,20 @@
     <!-- Main area -->
     <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
       <!-- Top bar (mobile) -->
-      <header class="md:hidden sticky top-0 z-30 bg-white border-b border-gray-100 shadow-sm px-4 h-14 flex items-center justify-between">
-        <span class="font-bold text-brand-700">{{ $t('app.name') }}</span>
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-gray-500">{{ authStore.user?.name }}</span>
+      <header class="md:hidden sticky top-0 z-30 bg-white border-b border-gray-100 shadow-sm px-4 h-14 flex items-center justify-between gap-2">
+        <span class="font-bold text-brand-700 shrink-0">{{ $t('app.name') }}</span>
+        <div class="flex items-center gap-2 min-w-0">
+          <!-- Language switcher -->
+          <div class="flex items-center gap-0.5 bg-gray-100 rounded-lg p-0.5">
+            <button
+              v-for="code in availableLocales"
+              :key="code"
+              type="button"
+              class="px-2 py-1 rounded-md text-xs font-medium transition-colors"
+              :class="locale === code ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'"
+              @click="setLocale(code)"
+            >{{ code.toUpperCase() }}</button>
+          </div>
           <AppButton variant="secondary" size="sm" @click="handleLogout">
             {{ $t('auth.logout') }}
           </AppButton>
@@ -75,9 +96,8 @@
 <script setup lang="ts">
 const authStore = useAuthStore()
 const { toast } = useToast()
-const { t } = useI18n()
+const { t, locale, availableLocales, setLocale } = useI18n()
 const route = useRoute()
-const router = useRouter()
 
 const navItems = [
   { to: '/admin', icon: '📊', labelKey: 'nav.dashboard' },
