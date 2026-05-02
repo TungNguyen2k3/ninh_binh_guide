@@ -30,7 +30,7 @@
 
     <!-- Ticket list -->
     <div v-else class="space-y-3">
-      <TicketCard
+      <AdminTicketCard
         v-for="ticket in ticketStore.tickets"
         :key="ticket.id"
         :ticket="ticket"
@@ -76,7 +76,7 @@ const limit = 20
 const totalPages = computed(() => Math.max(1, Math.ceil(ticketStore.total / limit)))
 
 function goToNew(): void {
-  window.location.href = '/staff/tickets/new'
+  navigateTo('/staff/tickets/new')
 }
 
 async function load(): Promise<void> {
@@ -88,5 +88,6 @@ async function changePage(next: number): Promise<void> {
   await load()
 }
 
-await load()
+// Load only client-side — SSR has no auth token, API call would fail
+onMounted(load)
 </script>

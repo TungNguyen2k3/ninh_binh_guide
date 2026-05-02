@@ -41,7 +41,7 @@
 
     <!-- Ticket grid -->
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <TicketCard
+      <AdminTicketCard
         v-for="ticket in ticketStore.tickets"
         :key="ticket.id"
         :ticket="ticket"
@@ -109,5 +109,5 @@ async function changePage(next: number): Promise<void> {
   await load()
 }
 
-await load()
+onMounted(load)
 </script>
