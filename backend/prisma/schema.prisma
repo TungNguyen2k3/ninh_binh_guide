@@ -24,6 +24,8 @@ model User {
   updatedAt    DateTime @updatedAt
 
   refreshTokens RefreshToken[]
+  staffTickets  Ticket[]       @relation("StaffTickets")
+  ticketUsers   TicketUser[]
 
   @@map("users")
 }
@@ -79,6 +81,7 @@ model Package {
   updatedAt     DateTime    @updatedAt
 
   locations PackageLocation[]
+  tickets   Ticket[]
 
   @@map("packages")
 }
@@ -92,4 +95,35 @@ model PackageLocation {
 
   @@id([packageId, locationId])
   @@map("package_locations")
+}
+
+model Ticket {
+  id          String     @id @default(cuid())
+  code        String     @unique // NBG-XXXXXX
+  packageId   String
+  guestName   String
+  guestPhone  String?
+  note        String?
+  expiresAt   DateTime
+  createdById String // staff userId
+  createdAt   DateTime   @default(now())
+
+  package     Package      @relation(fields: [packageId], references: [id])
+  createdBy   User         @relation("StaffTickets", fields: [createdById], references: [id])
+  ticketUsers TicketUser[]
+
+  @@map("tickets")
+}
+
+model TicketUser {
+  id          String   @id @default(cuid())
+  ticketId    String
+  userId      String
+  activatedAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([ticketId, userId])
+  @@map("ticket_users")
 }

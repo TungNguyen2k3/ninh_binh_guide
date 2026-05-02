@@ -8,6 +8,8 @@ export default defineNuxtRouteMiddleware((to) => {
 
   // Not authenticated — redirect to login unless on a public route
   if (!authStore.isAuthenticated && !isPublicRoute) {
+    // Allow tourists to reach the activate page without a ticket
+    if (to.path === '/auth/activate') return
     return navigateTo('/auth/login')
   }
 
@@ -26,5 +28,10 @@ export default defineNuxtRouteMiddleware((to) => {
   // Staff guard
   if (to.path.startsWith('/staff') && !authStore.isStaff && !authStore.isAdmin) {
     return navigateTo('/')
+  }
+
+  // Tourist without active ticket — redirect to activate before entering /explore
+  if (to.path.startsWith('/explore') && authStore.isTourist && !authStore.hasActiveTicket) {
+    return navigateTo('/auth/activate')
   }
 })

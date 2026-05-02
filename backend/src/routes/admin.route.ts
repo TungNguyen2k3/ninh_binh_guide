@@ -3,6 +3,7 @@ import { authenticate } from '../middlewares/authenticate.js'
 import { requireRole } from '../middlewares/require-role.js'
 import { LocationService } from '../services/location.service.js'
 import { PackageService } from '../services/package.service.js'
+import { TicketService } from '../services/ticket.service.js'
 import {
   CreateLocationSchema,
   UpdateLocationSchema,
@@ -13,19 +14,21 @@ import {
   UpdatePackageSchema,
   AssignLocationsSchema,
 } from '../schemas/package.schema.js'
+import { TicketQuerySchema } from '../schemas/ticket.schema.js'
 import { ValidationError } from '../lib/errors.js'
 import { ok, paginated } from '../lib/response.js'
 
 interface AdminRouteOptions {
   locationService: LocationService
   packageService: PackageService
+  ticketService: TicketService
 }
 
 export async function adminRoutes(
   fastify: FastifyInstance,
   options: AdminRouteOptions
 ): Promise<void> {
-  const { locationService, packageService } = options
+  const { locationService, packageService, ticketService } = options
   const preHandler = [authenticate, requireRole('admin')]
 
   // ─── Location Routes ─────────────────────────────────────────────────────────
@@ -148,5 +151,23 @@ export async function adminRoutes(
 
     const pkg = await packageService.assignLocations(id, parsed.data.locationIds)
     return reply.send(ok(pkg))
+  })
+
+  // ─── Ticket Routes (admin view) ───────────────────────────────────────────────
+
+  // GET /stats/tickets — overview stats
+  fastify.get('/stats/tickets', { preHandler }, async (_req: FastifyRequest, reply: FastifyReply) => {
+    const stats = await ticketService.getStats()
+    return reply.send(ok(stats))
+  })
+
+  // GET /tickets — list all tickets with optional search + pagination
+  fastify.get('/tickets', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = TicketQuerySchema.safeParse(req.query)
+    if (!parsed.success) throw new ValidationError('Invalid query parameters', parsed.error.flatten())
+
+    const { page, limit, search } = parsed.data
+    const { tickets, total } = await ticketService.listAll({ page, limit, search })
+    return reply.send(paginated(tickets, total, page, limit))
   })
 }

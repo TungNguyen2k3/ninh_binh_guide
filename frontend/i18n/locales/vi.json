@@ -103,8 +103,37 @@
     "update_success": "Cập nhật thành công",
     "delete_success": "Đã xóa thành công"
   },
+  "ticket": {
+    "activate_title": "Kích hoạt vé tham quan",
+    "activate_subtitle": "Nhập mã vé bạn nhận từ quầy để bắt đầu khám phá",
+    "code_label": "Mã vé",
+    "code_placeholder": "NBG-XXXXXX",
+    "activate": "Kích hoạt",
+    "activated": "Đã kích hoạt",
+    "pending": "Chờ kích hoạt",
+    "expired": "Hết hạn",
+    "create_new": "Tạo vé mới",
+    "my_tickets": "Vé của tôi",
+    "guest_name": "Tên khách",
+    "guest_phone": "Số điện thoại",
+    "select_package": "Chọn gói tham quan",
+    "note": "Ghi chú",
+    "expires_at": "Hết hạn lúc",
+    "created_by": "Tạo bởi",
+    "copy_code": "Copy mã vé",
+    "create_success": "Tạo vé thành công",
+    "activate_success": "Kích hoạt thành công! Chào mừng đến Ninh Bình",
+    "already_owned": "Bạn đã kích hoạt vé này trước đó",
+    "invalid_code": "Mã vé không hợp lệ",
+    "not_found": "Không tìm thấy mã vé",
+    "expired_error": "Vé đã hết hạn",
+    "all_tickets": "Tất cả vé",
+    "search_placeholder": "Tìm theo mã vé, tên, SĐT...",
+    "no_tickets": "Chưa có vé nào"
+  },
   "staff": {
-    "coming_soon": "Quản lý vé sẽ ra mắt ở Sprint 3"
+    "coming_soon": "Quản lý vé sẽ ra mắt ở Sprint 3",
+    "tickets_title": "Vé đã tạo"
   },
   "location": {
     "title": "Địa điểm",

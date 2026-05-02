@@ -103,12 +103,42 @@
     "update_success": "Updated successfully",
     "delete_success": "Deleted successfully"
   },
+  "ticket": {
+    "activate_title": "Activate your ticket",
+    "activate_subtitle": "Enter the ticket code you received at the counter to start exploring",
+    "code_label": "Ticket code",
+    "code_placeholder": "NBG-XXXXXX",
+    "activate": "Activate",
+    "activated": "Activated",
+    "pending": "Pending",
+    "expired": "Expired",
+    "create_new": "Create ticket",
+    "my_tickets": "My tickets",
+    "guest_name": "Guest name",
+    "guest_phone": "Phone number",
+    "select_package": "Select package",
+    "note": "Notes",
+    "expires_at": "Expires at",
+    "created_by": "Created by",
+    "copy_code": "Copy code",
+    "create_success": "Ticket created",
+    "activate_success": "Activated! Welcome to Ninh Binh",
+    "already_owned": "You have already activated this ticket",
+    "invalid_code": "Invalid ticket code",
+    "not_found": "Ticket code not found",
+    "expired_error": "This ticket has expired",
+    "all_tickets": "All tickets",
+    "search_placeholder": "Search by code, name, phone...",
+    "no_tickets": "No tickets yet"
+  },
   "staff": {
-    "coming_soon": "Ticket management coming in Sprint 3"
+    "coming_soon": "Ticket management coming in Sprint 3",
+    "tickets_title": "Created tickets"
   },
   "location": {
     "title": "Locations",
     "listen": "Listen to guide",
+
     "name_vi": "Name",
     "name_en": "English name",
     "slug": "Slug (URL)",

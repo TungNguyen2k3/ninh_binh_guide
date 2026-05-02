@@ -1,25 +1,11 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <!-- Page header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <h1 class="text-2xl font-bold text-gray-900">{{ $t('ticket.all_tickets') }}</h1>
-    </div>
-
-    <!-- Search bar -->
-    <div class="relative">
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1016.65 16.65z" />
-        </svg>
-      </div>
-      <input
-        v-model="searchInput"
-        type="search"
-        :placeholder="$t('ticket.search_placeholder')"
-        class="block w-full rounded-xl border border-gray-300 bg-white pl-9 pr-3 py-2.5 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-colors"
-        @input="debouncedSearch"
-      />
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold text-gray-900">{{ $t('staff.tickets_title') }}</h1>
+      <AppButton size="sm" @click="goToNew">
+        {{ $t('ticket.create_new') }}
+      </AppButton>
     </div>
 
     <!-- Loading -->
@@ -37,10 +23,13 @@
     >
       <div class="text-5xl mb-3">🎫</div>
       <p class="text-sm text-gray-500">{{ $t('ticket.no_tickets') }}</p>
+      <AppButton class="mt-4" @click="goToNew">
+        {{ $t('ticket.create_new') }}
+      </AppButton>
     </div>
 
-    <!-- Ticket grid -->
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <!-- Ticket list -->
+    <div v-else class="space-y-3">
       <TicketCard
         v-for="ticket in ticketStore.tickets"
         :key="ticket.id"
@@ -75,33 +64,23 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'staff' })
 const { t } = useI18n()
-useHead({ title: () => t('ticket.all_tickets') })
+useHead({ title: () => t('staff.tickets_title') })
 
 const ticketStore = useTicketStore()
 
 const page = ref(1)
 const limit = 20
-const searchInput = ref('')
-let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 const totalPages = computed(() => Math.max(1, Math.ceil(ticketStore.total / limit)))
 
-async function load(): Promise<void> {
-  await ticketStore.fetchAllTickets({
-    page: page.value,
-    limit,
-    search: searchInput.value.trim() || undefined
-  })
+function goToNew(): void {
+  window.location.href = '/staff/tickets/new'
 }
 
-function debouncedSearch(): void {
-  if (debounceTimer) clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(async () => {
-    page.value = 1
-    await load()
-  }, 400)
+async function load(): Promise<void> {
+  await ticketStore.fetchMyTickets({ page: page.value, limit })
 }
 
 async function changePage(next: number): Promise<void> {

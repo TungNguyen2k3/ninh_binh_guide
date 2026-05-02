@@ -14,11 +14,14 @@ import { UserRepo } from './repositories/user.repo.js'
 import { RefreshTokenRepo } from './repositories/refresh-token.repo.js'
 import { LocationRepo } from './repositories/location.repo.js'
 import { PackageRepo } from './repositories/package.repo.js'
+import { TicketRepo } from './repositories/ticket.repo.js'
 import { AuthService } from './services/auth.service.js'
 import { LocationService } from './services/location.service.js'
 import { PackageService } from './services/package.service.js'
+import { TicketService } from './services/ticket.service.js'
 import { authRoutes } from './routes/auth.route.js'
 import { adminRoutes } from './routes/admin.route.js'
+import { staffRoutes } from './routes/staff.route.js'
 
 export function buildApp() {
   const fastify = Fastify({
@@ -55,11 +58,13 @@ export function buildApp() {
   const refreshTokenRepo = new RefreshTokenRepo(prisma)
   const locationRepo = new LocationRepo(prisma)
   const packageRepo = new PackageRepo(prisma)
+  const ticketRepo = new TicketRepo(prisma)
 
   // Services
   const authService = new AuthService(userRepo, refreshTokenRepo)
   const locationService = new LocationService(locationRepo)
   const packageService = new PackageService(packageRepo, locationRepo)
+  const ticketService = new TicketService(ticketRepo, packageRepo)
 
   // ─── Routes ──────────────────────────────────────────────────────────────────
 
@@ -69,8 +74,9 @@ export function buildApp() {
   })
 
   // API routes
-  fastify.register(authRoutes, { prefix: '/api/v1/auth', authService })
-  fastify.register(adminRoutes, { prefix: '/api/v1/admin', locationService, packageService })
+  fastify.register(authRoutes, { prefix: '/api/v1/auth', authService, ticketService })
+  fastify.register(adminRoutes, { prefix: '/api/v1/admin', locationService, packageService, ticketService })
+  fastify.register(staffRoutes, { prefix: '/api/v1/staff', ticketService })
 
   // ─── Global Error Handler ─────────────────────────────────────────────────────
 
