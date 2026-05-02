@@ -73,7 +73,13 @@
   },
   "explore": {
     "title": "Khám phá Ninh Bình",
-    "coming_soon": "Bản đồ và thuyết minh audio sẽ ra mắt ở Sprint 4"
+    "coming_soon": "Bản đồ và thuyết minh audio sẽ ra mắt ở Sprint 4",
+    "no_locations": "Chưa có địa điểm nào trong gói của bạn",
+    "no_audio": "Chưa có audio thuyết minh cho địa điểm này",
+    "not_found": "Không tìm thấy địa điểm",
+    "view_detail": "Xem chi tiết",
+    "play": "Phát",
+    "pause": "Dừng"
   },
   "admin": {
     "coming_soon": "Tính năng đang phát triển",

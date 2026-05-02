@@ -19,9 +19,11 @@ import { AuthService } from './services/auth.service.js'
 import { LocationService } from './services/location.service.js'
 import { PackageService } from './services/package.service.js'
 import { TicketService } from './services/ticket.service.js'
+import { TouristService } from './services/tourist.service.js'
 import { authRoutes } from './routes/auth.route.js'
 import { adminRoutes } from './routes/admin.route.js'
 import { staffRoutes } from './routes/staff.route.js'
+import { touristRoutes } from './routes/tourist.route.js'
 
 export function buildApp() {
   const fastify = Fastify({
@@ -65,6 +67,7 @@ export function buildApp() {
   const locationService = new LocationService(locationRepo)
   const packageService = new PackageService(packageRepo, locationRepo)
   const ticketService = new TicketService(ticketRepo, packageRepo)
+  const touristService = new TouristService(locationRepo, ticketRepo)
 
   // ─── Routes ──────────────────────────────────────────────────────────────────
 
@@ -77,6 +80,7 @@ export function buildApp() {
   fastify.register(authRoutes, { prefix: '/api/v1/auth', authService, ticketService })
   fastify.register(adminRoutes, { prefix: '/api/v1/admin', locationService, packageService, ticketService })
   fastify.register(staffRoutes, { prefix: '/api/v1/staff', ticketService, packageRepo })
+  fastify.register(touristRoutes, { prefix: '/api/v1', touristService })
 
   // ─── Global Error Handler ─────────────────────────────────────────────────────
 

@@ -82,4 +82,11 @@ export class LocationRepo {
       orderBy: { displayOrder: 'asc' },
     })
   }
+
+  findByIds(ids: string[]) {
+    return this.prisma.location.findMany({
+      where: { id: { in: ids }, isActive: true },
+      orderBy: { displayOrder: 'asc' },
+    })
+  }
 }

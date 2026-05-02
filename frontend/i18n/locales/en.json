@@ -73,7 +73,13 @@
   },
   "explore": {
     "title": "Explore Ninh Binh",
-    "coming_soon": "Map and audio guide coming in Sprint 4"
+    "coming_soon": "Map and audio guide coming in Sprint 4",
+    "no_locations": "No locations available in your package yet",
+    "no_audio": "No audio guide available for this location",
+    "not_found": "Location not found",
+    "view_detail": "View details",
+    "play": "Play",
+    "pause": "Pause"
   },
   "admin": {
     "coming_soon": "Feature under development",
