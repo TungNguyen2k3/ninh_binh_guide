@@ -84,6 +84,7 @@
     "upload_audio": "Upload audio",
     "replace_audio": "Replace audio",
     "upload_image": "Upload image",
+    "replace_image": "Replace image",
     "assign_locations": "Assign locations",
     "no_locations": "No locations yet",
     "no_packages": "No packages yet",

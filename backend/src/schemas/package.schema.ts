@@ -8,7 +8,9 @@ export const CreatePackageSchema = z.object({
   price: z.number().int().min(0).default(0),
 })
 
-export const UpdatePackageSchema = CreatePackageSchema.partial()
+export const UpdatePackageSchema = CreatePackageSchema.partial().extend({
+  isActive: z.boolean().optional(),
+})
 
 export const AssignLocationsSchema = z.object({
   locationIds: z.array(z.string()).min(0),
