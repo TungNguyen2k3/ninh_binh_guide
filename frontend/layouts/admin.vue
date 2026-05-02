@@ -56,7 +56,12 @@
       <!-- Top bar (mobile) -->
       <header class="md:hidden sticky top-0 z-30 bg-white border-b border-gray-100 shadow-sm px-4 h-14 flex items-center justify-between">
         <span class="font-bold text-brand-700">{{ $t('app.name') }}</span>
-        <span class="text-sm text-gray-500">{{ authStore.user?.name }}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-gray-500">{{ authStore.user?.name }}</span>
+          <AppButton variant="secondary" size="sm" @click="handleLogout">
+            {{ $t('auth.logout') }}
+          </AppButton>
+        </div>
       </header>
 
       <!-- Page content -->

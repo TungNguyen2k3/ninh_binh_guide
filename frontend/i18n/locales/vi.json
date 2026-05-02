@@ -61,6 +61,12 @@
     "title": "Khám phá Ninh Bình",
     "coming_soon": "Bản đồ và thuyết minh audio sẽ ra mắt ở Sprint 4"
   },
+  "admin": {
+    "coming_soon": "Quản trị nội dung sẽ ra mắt ở Sprint 2"
+  },
+  "staff": {
+    "coming_soon": "Quản lý vé sẽ ra mắt ở Sprint 3"
+  },
   "app": {
     "name": "Ninh Bình Guide",
     "tagline": "Tự khám phá di sản"

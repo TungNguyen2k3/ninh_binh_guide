@@ -61,6 +61,12 @@
     "title": "Explore Ninh Binh",
     "coming_soon": "Map and audio guide coming in Sprint 4"
   },
+  "admin": {
+    "coming_soon": "Content management coming in Sprint 2"
+  },
+  "staff": {
+    "coming_soon": "Ticket management coming in Sprint 3"
+  },
   "app": {
     "name": "Ninh Binh Guide",
     "tagline": "Explore the heritage independently"

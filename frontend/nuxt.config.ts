@@ -2,14 +2,18 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxtjs/i18n'],
 
   i18n: {
-    // @nuxtjs/i18n v9 defaults: locale files live in <srcDir>/i18n/locales/
     locales: [
       { code: 'vi', name: 'Tiếng Việt', file: 'vi.json' },
       { code: 'en', name: 'English', file: 'en.json' }
     ],
     defaultLocale: 'vi',
     strategy: 'no_prefix',
-    // Silence the optimizeTranslationDirective deprecation warning
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_locale',
+      redirectOn: 'root',
+      alwaysRedirect: false
+    },
     bundle: {
       optimizeTranslationDirective: false
     }
