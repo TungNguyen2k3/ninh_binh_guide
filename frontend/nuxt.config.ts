@@ -1,6 +1,10 @@
 export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxtjs/i18n'],
 
+  // SPA mode — app requires login (no SEO needed), SSR causes empty auth
+  // store on server which breaks middleware redirect loop
+  ssr: false,
+
   app: {
     head: {
       meta: [
