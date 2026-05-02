@@ -9,18 +9,11 @@
 </template>
 
 <script setup lang="ts">
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 
-// Set <html lang> attribute reactively
 useHead({
-  htmlAttrs: {
-    lang: locale
-  },
-  titleTemplate: (titleChunk) => {
-    const { t } = useI18n()
-    return titleChunk
-      ? `${titleChunk} — ${t('app.name')}`
-      : t('app.name')
-  }
+  htmlAttrs: { lang: locale },
+  titleTemplate: (titleChunk) =>
+    titleChunk ? `${titleChunk} — ${t('app.name')}` : t('app.name')
 })
 </script>
