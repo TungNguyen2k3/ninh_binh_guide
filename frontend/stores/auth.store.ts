@@ -13,6 +13,7 @@ interface AuthState {
   user: User | null
   accessToken: string | null // in-memory only — never persisted to localStorage
   isLoading: boolean
+  ticketId: string | null    // active ticket for tourist (restored from /auth/my-ticket)
 }
 
 interface LoginCredentials {
@@ -37,7 +38,8 @@ export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
     accessToken: null,
-    isLoading: false
+    isLoading: false,
+    ticketId: null
   }),
 
   getters: {
@@ -45,7 +47,7 @@ export const useAuthStore = defineStore('auth', {
     isAdmin: (state): boolean => state.user?.role === 'admin',
     isStaff: (state): boolean => state.user?.role === 'staff',
     isTourist: (state): boolean => state.user?.role === 'tourist',
-    hasActiveTicket: (state): boolean => !!state.user?.ticketId
+    hasActiveTicket: (state): boolean => !!state.ticketId
   },
 
   actions: {
@@ -53,6 +55,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       this.accessToken = null
       this.isLoading = false
+      this.ticketId = null
     },
 
     async login(credentials: LoginCredentials): Promise<void> {
@@ -139,6 +142,18 @@ export const useAuthStore = defineStore('auth', {
       if (refreshed) {
         try {
           await this.fetchMe()
+          // Restore active ticket for tourist on page reload
+          if (this.user?.role === 'tourist') {
+            const { useApiFetch } = await import('~/utils/api')
+            const { apiFetch } = useApiFetch()
+            try {
+              // /auth/my-ticket returns ticketUser object: { ticket: { id, ... } } or null
+              const res = await apiFetch<{ success: true; data: { ticket: { id: string } } | null }>('/auth/my-ticket')
+              this.ticketId = res.data?.ticket?.id ?? null
+            } catch {
+              this.ticketId = null
+            }
+          }
         } catch {
           this.clearState()
         }

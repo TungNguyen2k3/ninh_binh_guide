@@ -89,22 +89,23 @@ export const useTicketStore = defineStore('ticket', {
     async createTicket(data: TicketFormData): Promise<Ticket> {
       const { useApiFetch } = await import('~/utils/api')
       const { apiFetch } = useApiFetch()
-      const res = await apiFetch<{ success: true; data: { ticket: Ticket } }>('/staff/tickets', {
+      // Backend returns ok(ticket) → { success: true, data: ticket } (not data.ticket)
+      const res = await apiFetch<{ success: true; data: Ticket }>('/staff/tickets', {
         method: 'POST',
         body: data
       })
-      const ticket = res.data.ticket
-      this.lastCreated = ticket
-      return ticket
+      this.lastCreated = res.data
+      return res.data
     },
 
-    async activateTicket(code: string): Promise<void> {
+    async activateTicket(code: string): Promise<{ ticketId: string }> {
       const { useApiFetch } = await import('~/utils/api')
       const { apiFetch } = useApiFetch()
-      await apiFetch('/auth/activate-ticket', {
-        method: 'POST',
-        body: { code }
-      })
+      const res = await apiFetch<{ success: true; data: { ticket: { id: string } } }>(
+        '/auth/activate-ticket',
+        { method: 'POST', body: { code } }
+      )
+      return { ticketId: res.data.ticket.id }
     },
 
     async fetchMyActiveTicket(): Promise<void> {

@@ -98,11 +98,11 @@ async function handleActivate(): Promise<void> {
 
   loading.value = true
   try {
-    await ticketStore.activateTicket(cleaned)
-    // Refresh user object so hasActiveTicket getter updates
-    await authStore.fetchMe()
+    const result = await ticketStore.activateTicket(cleaned)
+    // Store ticketId so hasActiveTicket becomes true before redirect
+    authStore.ticketId = result.ticketId
     toast.success(t('ticket.activate_success'))
-    window.location.href = '/explore'
+    await navigateTo('/explore')
   } catch (err: unknown) {
     const apiErr = err as { data?: { error?: { code?: string; message?: string } } }
     const errCode = apiErr?.data?.error?.code ?? ''
