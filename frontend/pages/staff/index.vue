@@ -7,6 +7,6 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'staff' })
-useHead({ title: () => t('nav.tickets') })
 const { t } = useI18n()
+useHead({ title: () => t('nav.tickets') })
 </script>

@@ -7,6 +7,6 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'admin' })
-useHead({ title: () => t('nav.dashboard') })
 const { t } = useI18n()
+useHead({ title: () => t('nav.dashboard') })
 </script>

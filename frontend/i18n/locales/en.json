@@ -51,6 +51,7 @@
   "nav": {
     "explore": "Explore",
     "map": "Map",
+    "list": "List",
     "dashboard": "Dashboard",
     "locations": "Locations",
     "packages": "Packages",

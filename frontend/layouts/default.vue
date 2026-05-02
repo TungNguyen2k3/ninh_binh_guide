@@ -34,16 +34,36 @@
       </div>
     </header>
 
-    <!-- Main content -->
-    <main class="flex-1">
+    <!-- Main content — padding bottom for bottom nav on mobile -->
+    <main class="flex-1 pb-16 sm:pb-0">
       <slot />
     </main>
 
-    <!-- Bottom safe area spacer for mobile -->
-    <div class="pb-safe" aria-hidden="true" />
+    <!-- Bottom navigation — mobile only -->
+    <nav class="sm:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-100 pb-safe">
+      <div class="flex items-stretch h-16">
+        <NuxtLink
+          v-for="item in navItems"
+          :key="item.to"
+          :to="item.to"
+          class="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
+          :class="route.path === item.to ? 'text-brand-600' : 'text-gray-400'"
+          :aria-label="$t(item.labelKey)"
+        >
+          <span class="text-2xl leading-none" aria-hidden="true">{{ item.icon }}</span>
+          <span class="text-[10px] font-medium leading-none">{{ $t(item.labelKey) }}</span>
+        </NuxtLink>
+      </div>
+    </nav>
   </div>
 </template>
 
 <script setup lang="ts">
 const { locale, availableLocales, switchLocale } = useLocale()
+const route = useRoute()
+
+const navItems = [
+  { to: '/explore', icon: '🗺️', labelKey: 'nav.map' },
+  { to: '/explore/list', icon: '📋', labelKey: 'nav.list' },
+]
 </script>

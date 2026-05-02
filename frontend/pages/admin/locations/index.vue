@@ -10,3 +10,4 @@ definePageMeta({ layout: 'admin' })
 const { t } = useI18n()
 useHead({ title: () => t('nav.locations') })
 </script>
+
