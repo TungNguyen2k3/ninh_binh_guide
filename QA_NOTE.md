@@ -1,4 +1,4 @@
-# QA Test Report — Sprint 1 + 2 + 3
+# QA Test Report — Sprint 1–4
 
 **Tested by:** test-agent
 **Date:** 2026-05-02
@@ -14,7 +14,8 @@
 | location.service.test.ts | 11 | Pass |
 | package.service.test.ts | 9 | Pass |
 | ticket.service.test.ts | 9 | Pass |
-| **Total** | **47** | **47/47** |
+| tourist.service.test.ts | 10 | Pass |
+| **Total** | **57** | **57/57** |
 
 **Coverage:**
 | Service | Statements | Branch | Functions | Lines |
@@ -23,13 +24,15 @@
 | location.service.ts | 82.35% | 100% | 75% | 82.35% |
 | package.service.ts | 95% | 100% | 85.71% | 95% |
 | ticket.service.ts | 83.09% | 94.73% | 55.55% | 83.09% |
-| **All files** | **90.14%** | **95.06%** | **77.41%** | **90.14%** |
+| tourist.service.ts | 100% | 78.04% | 100% | 100% |
+| **All files** | **92.21%** | **89.34%** | **80%** | **92.21%** |
 
 Uncovered lines:
 - `auth.service.ts`: lines 151-152, 156-157
 - `location.service.ts`: lines 11-13, 57-62
 - `package.service.ts`: lines 14-15
 - `ticket.service.ts`: lines 57-62, 65-68, 94-95
+- `tourist.service.ts`: branch lines 74, 80-83, 96, 98 (cache hit paths)
 
 ## TypeScript Check
 - Backend: 0 errors (`npx tsc --noEmit`)
@@ -125,6 +128,26 @@ Uncovered lines:
 | M3 | Man hinh ket qua mobile | Code to, copy button ro |
 | M4 | /auth/activate mobile | Input lon, de nhap |
 
+### H. Tourist — Kham pha ban do (Sprint 4)
+
+| # | Hanh dong | Ket qua mong doi |
+|---|---|---|
+| H1 | Tourist co ticket → vao /explore | Ban do Ninh Binh hien voi markers |
+| H2 | Markers hien dung vi tri | 5 dia diem (hoac theo goi) |
+| H3 | Click marker | Panel slide-up hien ten + mo ta ngan |
+| H4 | Click "Xem chi tiet" trong panel | Chuyen sang trang /explore/slug |
+| H5 | Tab "Danh sach" | List cards cac dia diem |
+| H6 | Click card | Trang chi tiet |
+| H7 | Trang chi tiet | Anh + mo ta day du + audio player |
+| H8 | Nhan Play audio (can co file audio) | Phat am thanh |
+| H9 | Click thanh seek | Tua den vi tri do |
+| H10 | Chon toc do 1.5x | Audio phat nhanh hon |
+| H11 | Doi ngon ngu VI→EN | Ten dia diem, mo ta doi sang EN |
+| H12 | Doi ngon ngu EN→VI | Ve lai tieng Viet |
+| H13 | Tourist chua co ticket vao /explore | Redirect /auth/activate |
+| H14 | F5 o /explore voi ticket active | Van vao duoc (ticketId restored) |
+| H15 | Dia diem khong co audio | Hien thong bao "Chua co audio" |
+
 ---
 
 ## Bugs da fix Sprint 1–3
@@ -147,6 +170,6 @@ Uncovered lines:
 | B14 | API call trong SSR | onMounted thay await top-level |
 
 ## Coverage Summary
-- Unit tests: 47/47 pass
-- Service coverage (statements): auth 96.42% / location 82.35% / package 95% / ticket 83.09% / all files 90.14%
+- Unit tests: 57/57 pass
+- Service coverage (statements): auth 96.42% / location 82.35% / package 95% / ticket 83.09% / tourist 100% / all files 92.21%
 - TypeScript: 0 errors (backend + frontend)
