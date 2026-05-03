@@ -14,16 +14,7 @@
         </NuxtLink>
 
         <div class="flex items-center gap-2">
-          <!-- Ticket expiry badge — tourist only -->
-          <span
-            v-if="authStore.isTourist && timeLeft"
-            class="text-xs font-medium px-2 py-0.5 rounded-full"
-            :class="expirySoon ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'"
-          >
-            ⏱ {{ timeLeft }}
-          </span>
-
-          <!-- Language switcher -->
+          <!-- Language switcher (always rendered — safe for SSR) -->
           <button
             v-for="code in availableLocales"
             :key="code"
@@ -36,19 +27,31 @@
             {{ code.toUpperCase() }}
           </button>
 
-          <!-- Logout button -->
-          <button
-            v-if="authStore.isAuthenticated"
-            type="button"
-            class="touch-target flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            :aria-label="$t('auth.logout')"
-            @click="handleLogout"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-          </button>
+          <!-- Auth-dependent UI: client-only to avoid SSR hydration mismatch -->
+          <ClientOnly>
+            <!-- Ticket expiry badge — tourist only -->
+            <span
+              v-if="authStore.isTourist && timeLeft"
+              class="text-xs font-medium px-2 py-0.5 rounded-full"
+              :class="expirySoon ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'"
+            >
+              ⏱ {{ timeLeft }}
+            </span>
+
+            <!-- Logout button -->
+            <button
+              v-if="authStore.isAuthenticated"
+              type="button"
+              class="touch-target flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              :aria-label="$t('auth.logout')"
+              @click="handleLogout"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+          </ClientOnly>
         </div>
       </div>
     </header>

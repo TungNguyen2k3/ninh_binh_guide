@@ -25,10 +25,11 @@ export class LocationService {
   async getByIdFull(id: string) {
     const loc = await this.locationRepo.findById(id)
     if (!loc) throw new NotFoundError('Location')
-    // For admin: re-fetch with full relations via slug
     const full = await this.locationRepo.findBySlugFull(loc.slug)
     if (!full) throw new NotFoundError('Location')
-    return full
+    // Rename locationImages → images so frontend interface matches
+    const { locationImages, ...rest } = full
+    return { ...rest, images: locationImages ?? [] }
   }
 
   async create(data: CreateLocationDto) {

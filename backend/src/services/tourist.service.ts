@@ -104,7 +104,9 @@ export class TouristService {
       address: location.address ?? null,
       bestTime: location.bestTime ?? null,
       imageUrl: location.imageUrl ?? null,
-      audioUrl: lang === 'vi' ? (location.audioViUrl ?? null) : (location.audioEnUrl ?? null),
+      audioUrl: lang === 'vi'
+        ? (location.audioViUrl ?? location.audioEnUrl ?? null)
+        : (location.audioEnUrl ?? location.audioViUrl ?? null),
       images: (location.locationImages ?? []).map((img: { id: string; url: string; caption: string | null }) => ({
         id: img.id,
         url: img.url,
@@ -123,7 +125,9 @@ export class TouristService {
         id: spot.id,
         name: lang === 'vi' ? spot.nameVi : spot.nameEn,
         description: lang === 'vi' ? (spot.descriptionVi ?? null) : (spot.descriptionEn ?? null),
-        audioUrl: lang === 'vi' ? (spot.audioViUrl ?? null) : (spot.audioEnUrl ?? null),
+        audioUrl: lang === 'vi'
+          ? (spot.audioViUrl ?? spot.audioEnUrl ?? null)
+          : (spot.audioEnUrl ?? spot.audioViUrl ?? null),
         images: spot.images.map((img: { id: string; url: string }) => ({ id: img.id, url: img.url })),
       })),
       latitude: location.latitude,
