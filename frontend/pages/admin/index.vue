@@ -155,8 +155,7 @@ definePageMeta({ layout: 'admin' })
 const { t } = useI18n()
 useHead({ title: () => t('nav.dashboard') })
 
-const config = useRuntimeConfig()
-const authStore = useAuthStore()
+const { apiFetch } = useApiFetch()
 
 interface RecentTicket {
   id: string
@@ -205,10 +204,7 @@ function formatDate(iso: string): string {
 
 async function load(): Promise<void> {
   try {
-    const res = await $fetch<{ success: true; data: Stats }>(
-      `${config.public.apiUrl}/admin/stats`,
-      { headers: authStore.accessToken ? { Authorization: `Bearer ${authStore.accessToken}` } : {} }
-    )
+    const res = await apiFetch<{ success: true; data: Stats }>('/admin/stats')
     stats.value = res.data
   } catch {
     // show zeros

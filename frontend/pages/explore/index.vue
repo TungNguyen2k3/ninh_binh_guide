@@ -87,11 +87,11 @@ function handleSelectLocation(loc: TouristLocation) {
   selectedLocation.value = loc
 }
 
-watch(locale, () => {
+watch(locale, (lang) => {
   selectedLocation.value = null
-  touristStore.fetchLocations()
+  touristStore.fetchLocations(lang)
 })
-onMounted(() => touristStore.fetchLocations())
+onMounted(() => touristStore.fetchLocations(locale.value))
 </script>
 
 <style>

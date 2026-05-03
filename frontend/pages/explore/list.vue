@@ -34,6 +34,6 @@ useHead({ title: () => t('nav.list') })
 const touristStore = useTouristStore()
 const { locale } = useI18n()
 
-watch(locale, () => touristStore.fetchLocations())
-onMounted(() => touristStore.fetchLocations())
+watch(locale, (lang) => touristStore.fetchLocations(lang))
+onMounted(() => touristStore.fetchLocations(locale.value))
 </script>

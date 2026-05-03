@@ -78,13 +78,8 @@ definePageMeta({ layout: 'admin' })
 const { t } = useI18n()
 useHead({ title: () => t('ticket.create_new') })
 
-const config = useRuntimeConfig()
-const authStore = useAuthStore()
 const { toast } = useToast()
-
-function authHeaders() {
-  return authStore.accessToken ? { Authorization: `Bearer ${authStore.accessToken}` } : {}
-}
+const { apiFetch } = useApiFetch()
 
 interface PackageItem { id: string; name: string; type: string; validityHours: number; isActive: boolean }
 interface CreatedTicket { code: string; guestName: string; package: { name: string } | null }
@@ -110,11 +105,10 @@ async function handleSubmit(): Promise<void> {
   if (!validate()) return
   isSubmitting.value = true
   try {
-    const res = await $fetch<{ success: true; data: CreatedTicket }>(
-      `${config.public.apiUrl}/staff/tickets`,
+    const res = await apiFetch<{ success: true; data: CreatedTicket }>(
+      '/staff/tickets',
       {
         method: 'POST',
-        headers: authHeaders(),
         body: {
           packageId: form.value.packageId,
           guestName: form.value.guestName.trim(),
@@ -151,10 +145,7 @@ function reset(): void {
 }
 
 onMounted(async () => {
-  const res = await $fetch<{ success: true; data: PackageItem[] }>(
-    `${config.public.apiUrl}/admin/packages`,
-    { headers: authHeaders() }
-  )
+  const res = await apiFetch<{ success: true; data: PackageItem[] }>('/admin/packages')
   packages.value = (res.data ?? []).filter((p) => p.isActive)
 })
 </script>

@@ -139,6 +139,7 @@ const packageStore = usePackageStore() // used only for type reference
 const staffPackages = ref<Array<{ id: string; name: string; type: string; validityHours: number }>>([])
 const _ = packageStore // suppress unused warning
 const { toast } = useToast()
+const { apiFetch } = useApiFetch()
 
 interface FormData {
   guestName: string
@@ -226,8 +227,6 @@ function goToList(): void {
 }
 
 onMounted(async () => {
-  const { useApiFetch } = await import('~/utils/api')
-  const { apiFetch } = useApiFetch()
   const res = await apiFetch<{ success: true; data: typeof staffPackages.value }>('/staff/packages')
   staffPackages.value = res.data
 })

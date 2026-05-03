@@ -241,8 +241,8 @@ definePageMeta({ layout: 'admin' })
 const { t } = useI18n()
 useHead({ title: () => t('nav.users') })
 
-const config = useRuntimeConfig()
 const authStore = useAuthStore()
+const { apiFetch } = useApiFetch()
 
 type UserRole = 'admin' | 'staff' | 'tourist'
 
@@ -259,14 +259,6 @@ interface UsersResponse {
   success: true
   data: UserItem[]
   meta: { total: number; page: number; limit: number }
-}
-
-function headers(): Record<string, string> {
-  return authStore.accessToken ? { Authorization: `Bearer ${authStore.accessToken}` } : {}
-}
-
-function api(path: string): string {
-  return `${config.public.apiUrl}${path}`
 }
 
 // State
@@ -345,9 +337,8 @@ async function load(): Promise<void> {
     if (searchInput.value.trim()) params.set('search', searchInput.value.trim())
     if (roleFilter.value) params.set('role', roleFilter.value)
 
-    const res = await $fetch<UsersResponse>(
-      api(`/admin/users?${params.toString()}`),
-      { headers: headers() }
+    const res = await apiFetch<UsersResponse>(
+      `/admin/users?${params.toString()}`
     )
     users.value = res.data
     total.value = res.meta.total
@@ -382,9 +373,8 @@ async function changePage(next: number): Promise<void> {
 async function onRoleChange(user: UserItem, newRole: UserRole): Promise<void> {
   if (newRole === user.role) return
   try {
-    await $fetch(api(`/admin/users/${user.id}/role`), {
+    await apiFetch(`/admin/users/${user.id}/role`, {
       method: 'PUT',
-      headers: headers(),
       body: { role: newRole }
     })
     user.role = newRole
@@ -403,10 +393,7 @@ function confirmDelete(user: UserItem): void {
 async function doDelete(): Promise<void> {
   deleteDialog.isLoading = true
   try {
-    await $fetch(api(`/admin/users/${deleteDialog.targetId}`), {
-      method: 'DELETE',
-      headers: headers()
-    })
+    await apiFetch(`/admin/users/${deleteDialog.targetId}`, { method: 'DELETE' })
     deleteDialog.open = false
     await load()
   } catch {
@@ -466,11 +453,7 @@ async function doCreate(): Promise<void> {
     } else {
       body.phone = createForm.emailOrPhone.trim()
     }
-    await $fetch(api('/admin/users'), {
-      method: 'POST',
-      headers: headers(),
-      body
-    })
+    await apiFetch('/admin/users', { method: 'POST', body })
     createModal.open = false
     page.value = 1
     await load()
