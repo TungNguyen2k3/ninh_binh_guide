@@ -20,9 +20,11 @@ export class LocationRepo {
         orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
         skip: (page - 1) * limit,
         take: limit,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore -- _count.spots is valid; Prisma client type lags schema
-        include: { _count: { select: { spots: true } } },
+        include: {
+          // @ts-ignore -- Prisma client type lags schema
+          _count: { select: { spots: true } },
+          locationImages: { orderBy: { order: 'asc' as const }, take: 1 },
+        },
       }),
       this.prisma.location.count({ where }),
     ])
@@ -107,8 +109,11 @@ export class LocationRepo {
     return this.prisma.location.findMany({
       where: { id: { in: ids }, isActive: true },
       orderBy: { displayOrder: 'asc' },
-      // @ts-ignore -- _count.spots is valid; Prisma client type lags schema
-      include: { _count: { select: { spots: true } } },
+      include: {
+        // @ts-ignore -- Prisma client type lags schema
+        _count: { select: { spots: true } },
+        locationImages: { orderBy: { order: 'asc' as const }, take: 1 },
+      },
     })
   }
 
