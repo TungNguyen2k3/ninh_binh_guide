@@ -28,7 +28,8 @@ export class LocationService {
     const full = await this.locationRepo.findBySlugFull(loc.slug)
     if (!full) throw new NotFoundError('Location')
     // Rename locationImages → images so frontend interface matches
-    const { locationImages, ...rest } = full
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { locationImages, ...rest } = full as any
     return { ...rest, images: locationImages ?? [] }
   }
 
@@ -46,7 +47,7 @@ export class LocationService {
       const existing = await this.locationRepo.findBySlug(data.slug)
       if (existing && existing.id !== id) throw new ConflictError(`Slug '${data.slug}' already exists`)
     }
-    const updated = await this.locationRepo.update(id, data)
+    const updated = await this.locationRepo.update(id, data as Parameters<typeof this.locationRepo.update>[1])
     cache.del('locations:all')
     cache.del(`location:slug:${updated.slug}`)
     cache.del(`location:detail:${updated.slug}:vi`)
@@ -88,6 +89,10 @@ export class LocationService {
     const location = await this.getById(locationId)
     const url = await uploadImage(buffer, `loc-${locationId}-img-${Date.now()}`)
     const image = await this.locationRepo.addImage(locationId, { url })
+    // Auto-set as cover image if none exists yet
+    if (!location.imageUrl) {
+      await this.locationRepo.update(locationId, { imageUrl: url })
+    }
     cache.del('locations:all')
     cache.del(`location:detail:${location.slug}:vi`)
     cache.del(`location:detail:${location.slug}:en`)

@@ -76,8 +76,8 @@ export class LocationRepo {
       highlightsEn: string
       openTime: string
       closeTime: string
-      admissionFee: number
-      estimatedDuration: number
+      admissionFee: number | null
+      estimatedDuration: number | null
       address: string
       bestTime: string
       latitude: number
@@ -147,8 +147,8 @@ export class LocationRepo {
       nameEn: string
       descriptionVi?: string
       descriptionEn?: string
-      latitude?: number
-      longitude?: number
+      latitude?: number | null
+      longitude?: number | null
       order?: number
     }
   ) {
@@ -164,8 +164,8 @@ export class LocationRepo {
       descriptionEn: string
       audioViUrl: string
       audioEnUrl: string
-      latitude: number
-      longitude: number
+      latitude: number | null
+      longitude: number | null
       order: number
     }>
   ) {
