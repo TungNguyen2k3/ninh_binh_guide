@@ -14,6 +14,7 @@ interface AuthState {
   accessToken: string | null // in-memory only — never persisted to localStorage
   isLoading: boolean
   ticketId: string | null    // active ticket for tourist (restored from /auth/my-ticket)
+  ticketExpiresAt: string | null
 }
 
 interface LoginCredentials {
@@ -39,7 +40,8 @@ export const useAuthStore = defineStore('auth', {
     user: null,
     accessToken: null,
     isLoading: false,
-    ticketId: null
+    ticketId: null,
+    ticketExpiresAt: null
   }),
 
   getters: {
@@ -56,6 +58,7 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = null
       this.isLoading = false
       this.ticketId = null
+      this.ticketExpiresAt = null
     },
 
     async login(credentials: LoginCredentials): Promise<void> {
@@ -147,9 +150,10 @@ export const useAuthStore = defineStore('auth', {
             const { useApiFetch } = await import('~/utils/api')
             const { apiFetch } = useApiFetch()
             try {
-              // /auth/my-ticket returns ticketUser object: { ticket: { id, ... } } or null
-              const res = await apiFetch<{ success: true; data: { ticket: { id: string } } | null }>('/auth/my-ticket')
+              // /auth/my-ticket returns ticketUser object: { ticket: { id, ... }, expiresAt } or null
+              const res = await apiFetch<{ success: true; data: { ticket: { id: string }; expiresAt: string | null } | null }>('/auth/my-ticket')
               this.ticketId = res.data?.ticket?.id ?? null
+              this.ticketExpiresAt = res.data?.expiresAt ?? null
             } catch {
               this.ticketId = null
             }

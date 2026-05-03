@@ -19,6 +19,7 @@ function mapLocation(
     latitude: number
     longitude: number
     displayOrder: number
+    _count?: { spots: number }
   },
   lang: 'vi' | 'en'
 ) {
@@ -33,6 +34,7 @@ function mapLocation(
     latitude: loc.latitude,
     longitude: loc.longitude,
     displayOrder: loc.displayOrder,
+    spotsCount: loc._count?.spots ?? 0,
   }
 }
 

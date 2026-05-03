@@ -20,6 +20,9 @@ export class LocationRepo {
         orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
         skip: (page - 1) * limit,
         take: limit,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore -- _count.spots is valid; Prisma client type lags schema
+        include: { _count: { select: { spots: true } } },
       }),
       this.prisma.location.count({ where }),
     ])
@@ -104,6 +107,8 @@ export class LocationRepo {
     return this.prisma.location.findMany({
       where: { id: { in: ids }, isActive: true },
       orderBy: { displayOrder: 'asc' },
+      // @ts-ignore -- _count.spots is valid; Prisma client type lags schema
+      include: { _count: { select: { spots: true } } },
     })
   }
 

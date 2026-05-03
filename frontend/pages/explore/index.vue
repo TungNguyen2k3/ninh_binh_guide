@@ -1,23 +1,5 @@
 <template>
   <div class="h-[calc(100vh-8rem)] flex flex-col">
-    <!-- Tab switcher -->
-    <div class="flex border-b border-gray-200 bg-white">
-      <NuxtLink
-        to="/explore"
-        class="flex-1 py-3 text-sm font-medium text-center transition-colors"
-        :class="$route.path === '/explore' ? 'text-brand-600 border-b-2 border-brand-600' : 'text-gray-500'"
-      >
-        🗺️ {{ $t('nav.map') }}
-      </NuxtLink>
-      <NuxtLink
-        to="/explore/list"
-        class="flex-1 py-3 text-sm font-medium text-center transition-colors"
-        :class="$route.path === '/explore/list' ? 'text-brand-600 border-b-2 border-brand-600' : 'text-gray-500'"
-      >
-        📋 {{ $t('nav.list') }}
-      </NuxtLink>
-    </div>
-
     <!-- Loading skeleton -->
     <div v-if="touristStore.isLoading" class="flex-1 bg-gray-200 animate-pulse" />
 
@@ -32,33 +14,53 @@
         <Transition name="slide-up">
           <div
             v-if="selectedLocation"
-            class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl p-4 z-[1000]"
+            class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl z-[1000]"
           >
-            <div class="flex items-start gap-3">
-              <img
-                v-if="selectedLocation.imageUrl"
-                :src="selectedLocation.imageUrl"
-                class="w-20 h-20 rounded-xl object-cover flex-shrink-0"
-                loading="lazy"
-              />
-              <div
-                v-else
-                class="w-20 h-20 rounded-xl bg-gray-100 flex-shrink-0 flex items-center justify-center text-3xl"
-              >🏛️</div>
-              <div class="flex-1 min-w-0">
-                <h3 class="font-bold text-gray-900 text-base leading-tight">{{ selectedLocation.name }}</h3>
-                <p class="text-sm text-gray-500 mt-0.5 line-clamp-2">{{ selectedLocation.description }}</p>
-              </div>
-              <button @click="selectedLocation = null" class="text-gray-400 p-1 flex-shrink-0">✕</button>
+            <!-- Thumbnail strip -->
+            <div v-if="selectedLocation.imageUrl" class="relative h-32 overflow-hidden rounded-t-2xl">
+              <img :src="selectedLocation.imageUrl" :alt="selectedLocation.name" class="w-full h-full object-cover" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              <button
+                class="absolute top-2 right-2 w-7 h-7 bg-black/30 backdrop-blur rounded-full flex items-center justify-center text-white text-sm"
+                @click="selectedLocation = null"
+              >✕</button>
             </div>
-            <AppButton
-              variant="primary"
-              size="sm"
-              class="w-full mt-3"
-              @click="navigateTo(`/explore/${selectedLocation.slug}`)"
-            >
-              {{ $t('explore.view_detail') }}
-            </AppButton>
+
+            <div class="p-4">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-bold text-gray-900 text-base leading-tight">{{ selectedLocation.name }}</h3>
+                  <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">{{ selectedLocation.description }}</p>
+                </div>
+                <!-- if no image, put close button here -->
+                <button
+                  v-if="!selectedLocation.imageUrl"
+                  class="text-gray-400 p-1 flex-shrink-0"
+                  @click="selectedLocation = null"
+                >✕</button>
+              </div>
+
+              <!-- Badges -->
+              <div class="flex gap-2 mt-2">
+                <span
+                  v-if="selectedLocation.hasAudioVi || selectedLocation.hasAudioEn"
+                  class="text-[11px] font-medium text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full"
+                >🎧 Audio</span>
+                <span
+                  v-if="(selectedLocation.spotsCount ?? 0) > 0"
+                  class="text-[11px] font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full"
+                >📍 {{ selectedLocation.spotsCount }} điểm</span>
+              </div>
+
+              <AppButton
+                variant="primary"
+                size="sm"
+                class="w-full mt-3"
+                @click="navigateTo(`/explore/${selectedLocation.slug}`)"
+              >
+                {{ $t('explore.view_detail') }} →
+              </AppButton>
+            </div>
           </div>
         </Transition>
         <template #fallback>

@@ -1,24 +1,8 @@
 <template>
   <div>
-    <!-- Tab switcher -->
-    <div class="flex border-b border-gray-200 bg-white sticky top-14 z-10">
-      <NuxtLink
-        to="/explore"
-        class="flex-1 py-3 text-sm font-medium text-center text-gray-500"
-      >
-        🗺️ {{ $t('nav.map') }}
-      </NuxtLink>
-      <NuxtLink
-        to="/explore/list"
-        class="flex-1 py-3 text-sm font-medium text-center text-brand-600 border-b-2 border-brand-600"
-      >
-        📋 {{ $t('nav.list') }}
-      </NuxtLink>
-    </div>
-
     <!-- Loading skeletons -->
-    <div v-if="touristStore.isLoading" class="p-4 space-y-3">
-      <div v-for="i in 3" :key="i" class="bg-gray-100 rounded-2xl h-24 animate-pulse" />
+    <div v-if="touristStore.isLoading" class="p-4 grid grid-cols-2 gap-3">
+      <div v-for="i in 4" :key="i" class="bg-gray-100 rounded-2xl h-48 animate-pulse" />
     </div>
 
     <!-- Empty state -->
@@ -31,7 +15,7 @@
     </div>
 
     <!-- List -->
-    <div v-else class="p-4 space-y-3 pb-24">
+    <div v-else class="p-4 grid grid-cols-2 gap-3 pb-24">
       <ExploreLocationCard
         v-for="loc in touristStore.locations"
         :key="loc.id"

@@ -11,6 +11,7 @@ export interface TouristLocation {
   latitude: number
   longitude: number
   displayOrder: number
+  spotsCount?: number
 }
 
 export interface TouristSpotImage {

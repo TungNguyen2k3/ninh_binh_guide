@@ -1,8 +1,8 @@
 <template>
-  <div class="pb-24">
+  <div class="pb-52">
     <!-- Loading skeleton -->
     <div v-if="touristStore.isLoadingDetail" class="animate-pulse">
-      <div class="w-full h-56 bg-gray-200" />
+      <div class="w-full h-60 bg-gray-200" />
       <div class="p-4 space-y-3">
         <div class="h-6 bg-gray-200 rounded w-3/4" />
         <div class="h-4 bg-gray-100 rounded" />
@@ -10,115 +10,116 @@
       </div>
     </div>
 
-    <!-- Content -->
-    <template v-else-if="touristStore.currentLocation">
+    <template v-else-if="loc">
       <!-- Image carousel -->
       <div class="relative overflow-hidden">
         <div
-          v-if="touristStore.currentLocation.images?.length"
+          v-if="loc.images?.length"
           class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth"
           style="-webkit-overflow-scrolling: touch; scrollbar-width: none;"
         >
           <div
-            v-for="(img, idx) in touristStore.currentLocation.images"
+            v-for="(img, idx) in loc.images"
             :key="idx"
             class="w-full flex-shrink-0 snap-center"
           >
-            <img
-              :src="img.url"
-              :alt="img.caption ?? touristStore.currentLocation.name"
-              class="w-full h-56 object-cover"
-            />
+            <img :src="img.url" :alt="img.caption ?? loc.name" class="w-full h-60 object-cover" />
           </div>
         </div>
-        <!-- Fallback: single imageUrl or placeholder -->
         <template v-else>
           <img
-            v-if="touristStore.currentLocation.imageUrl"
-            :src="touristStore.currentLocation.imageUrl"
-            :alt="touristStore.currentLocation.name"
-            class="w-full h-56 object-cover"
+            v-if="loc.imageUrl"
+            :src="loc.imageUrl"
+            :alt="loc.name"
+            class="w-full h-60 object-cover"
           />
           <div
             v-else
-            class="w-full h-56 bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center text-6xl"
-          >
-            🏛️
-          </div>
+            class="w-full h-60 bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center text-7xl"
+          >🏛️</div>
         </template>
 
         <!-- Back button -->
         <button
-          class="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-md text-gray-700 text-xl"
+          class="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-md text-gray-700"
           @click="navigateTo('/explore/list')"
         >
-          ‹
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
 
         <!-- Dot indicators -->
         <div
-          v-if="(touristStore.currentLocation.images?.length ?? 0) > 1"
-          class="absolute bottom-2 left-0 right-0 flex justify-center gap-1"
+          v-if="(loc.images?.length ?? 0) > 1"
+          class="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5"
         >
-          <div
-            v-for="(_, i) in touristStore.currentLocation.images"
-            :key="i"
-            class="w-1.5 h-1.5 rounded-full bg-white/70"
-          />
+          <div v-for="(_, i) in loc.images" :key="i" class="w-1.5 h-1.5 rounded-full bg-white/80" />
         </div>
       </div>
 
-      <!-- Info -->
-      <div class="p-4">
-        <h1 class="text-2xl font-bold text-gray-900">{{ touristStore.currentLocation.name }}</h1>
+      <!-- Title + short description -->
+      <div class="px-4 pt-4 pb-2">
+        <h1 class="text-2xl font-bold text-gray-900">{{ loc.name }}</h1>
+        <p v-if="loc.description" class="text-sm text-gray-500 mt-1 leading-relaxed">{{ loc.description }}</p>
+      </div>
 
-        <!-- Short description (legacy field) -->
-        <p
-          v-if="touristStore.currentLocation.description && !touristStore.currentLocation.overview"
-          class="text-sm text-gray-600 mt-3 leading-relaxed"
+      <!-- Visiting info chips (compact row) -->
+      <div v-if="hasVisitingInfo" class="px-4 py-2 flex items-center gap-2 overflow-x-auto" style="scrollbar-width: none;">
+        <span v-if="loc.openTime" class="flex-shrink-0 flex items-center gap-1 text-xs bg-gray-100 rounded-full px-2.5 py-1 text-gray-700">
+          🕐 {{ loc.openTime }}
+        </span>
+        <span
+          v-if="loc.admissionFee !== null && loc.admissionFee !== undefined"
+          class="flex-shrink-0 flex items-center gap-1 text-xs bg-gray-100 rounded-full px-2.5 py-1 text-gray-700"
         >
-          {{ touristStore.currentLocation.description }}
-        </p>
+          🎫 {{ loc.admissionFee === 0 ? $t('location.free_entry') : formatVnd(loc.admissionFee) }}
+        </span>
+        <span v-if="loc.estimatedDuration" class="flex-shrink-0 flex items-center gap-1 text-xs bg-gray-100 rounded-full px-2.5 py-1 text-gray-700">
+          ⏱ {{ loc.estimatedDuration }}{{ $t('location.minutes') }}
+        </span>
+        <span v-if="loc.bestTime" class="flex-shrink-0 flex items-center gap-1 text-xs bg-amber-50 rounded-full px-2.5 py-1 text-amber-700">
+          🌤 {{ loc.bestTime }}
+        </span>
+        <span v-if="loc.address" class="flex-shrink-0 flex items-center gap-1 text-xs bg-gray-100 rounded-full px-2.5 py-1 text-gray-700">
+          📍 {{ loc.address }}
+        </span>
+      </div>
 
+      <div class="px-4 space-y-6 pt-2">
         <!-- Overview -->
-        <section v-if="touristStore.currentLocation.overview" class="mt-4">
-          <p class="text-sm text-gray-600 leading-relaxed">{{ touristStore.currentLocation.overview }}</p>
+        <section v-if="loc.overview">
+          <p class="text-sm text-gray-600 leading-relaxed">{{ loc.overview }}</p>
         </section>
 
         <!-- History -->
-        <section v-if="touristStore.currentLocation.history" class="mt-6">
-          <h2 class="text-base font-bold text-gray-900 mb-2">📜 {{ $t('explore.history') }}</h2>
-          <p class="text-sm text-gray-600 leading-relaxed">{{ touristStore.currentLocation.history }}</p>
+        <section v-if="loc.history">
+          <h2 class="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+            <span class="text-lg">📜</span> {{ $t('explore.history') }}
+          </h2>
+          <p class="text-sm text-gray-600 leading-relaxed">{{ loc.history }}</p>
         </section>
 
         <!-- Highlights -->
-        <section v-if="touristStore.currentLocation.highlights" class="mt-6">
-          <h2 class="text-base font-bold text-gray-900 mb-2">⭐ {{ $t('explore.highlights') }}</h2>
-          <p class="text-sm text-gray-600 leading-relaxed">{{ touristStore.currentLocation.highlights }}</p>
+        <section v-if="loc.highlights">
+          <h2 class="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+            <span class="text-lg">⭐</span> {{ $t('explore.highlights') }}
+          </h2>
+          <p class="text-sm text-gray-600 leading-relaxed">{{ loc.highlights }}</p>
         </section>
 
-        <!-- Main audio (full location) -->
-        <section v-if="touristStore.currentLocation.audioUrl" class="mt-6">
-          <h2 class="text-base font-bold text-gray-900 mb-3">🎧 {{ $t('location.listen') }}</h2>
-          <ExploreAudioPlayer :src="touristStore.currentLocation.audioUrl" />
-        </section>
-        <div
-          v-else-if="!touristStore.currentLocation.spots?.length"
-          class="mt-6 p-4 bg-gray-50 rounded-xl text-sm text-gray-500 text-center"
-        >
-          {{ $t('explore.no_audio') }}
-        </div>
-
-        <!-- Spots -->
-        <section v-if="touristStore.currentLocation.spots?.length" class="mt-6">
-          <h2 class="text-base font-bold text-gray-900 mb-4">📍 {{ $t('explore.spots') }}</h2>
-          <div class="space-y-4">
+        <!-- Spots content (images + desc only, audio is in bar) -->
+        <section v-if="loc.spots?.length">
+          <h2 class="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <span class="text-lg">📍</span> {{ $t('explore.spots') }}
+          </h2>
+          <div class="space-y-3">
             <div
-              v-for="spot in touristStore.currentLocation.spots"
+              v-for="spot in loc.spots"
               :key="spot.id"
               class="bg-gray-50 rounded-2xl overflow-hidden"
             >
-              <!-- Spot images (horizontal scroll) -->
+              <!-- Spot images -->
               <div
                 v-if="spot.images?.length"
                 class="flex gap-2 overflow-x-auto p-3 pb-0"
@@ -132,63 +133,19 @@
                   loading="lazy"
                 />
               </div>
-              <div class="p-4">
-                <h3 class="font-semibold text-gray-900 text-sm">{{ spot.name }}</h3>
-                <p
-                  v-if="spot.description"
-                  class="text-xs text-gray-500 mt-1 leading-relaxed"
-                >
-                  {{ spot.description }}
-                </p>
-                <div v-if="spot.audioUrl" class="mt-3">
-                  <ExploreAudioPlayer :src="spot.audioUrl" />
+              <div class="p-3">
+                <div class="flex items-center gap-2">
+                  <h3 class="font-semibold text-gray-900 text-sm">{{ spot.name }}</h3>
+                  <span
+                    v-if="spot.audioUrl"
+                    class="text-[10px] text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded-full font-medium"
+                  >🎧</span>
                 </div>
+                <p v-if="spot.description" class="text-xs text-gray-500 mt-1 leading-relaxed">{{ spot.description }}</p>
               </div>
             </div>
           </div>
         </section>
-
-        <!-- Visiting info: structured fields -->
-        <div v-if="hasVisitingInfo" class="mb-6">
-          <h2 class="text-lg font-bold text-gray-900 mb-3">{{ $t('explore.visiting_guide') }}</h2>
-          <div class="bg-gray-50 rounded-2xl p-4 space-y-3">
-            <div v-if="touristStore.currentLocation.openTime" class="flex items-start gap-3">
-              <span class="text-lg flex-shrink-0">🕐</span>
-              <div>
-                <p class="text-xs text-gray-500">{{ $t('location.open_time') }}</p>
-                <p class="text-sm text-gray-800">{{ touristStore.currentLocation.openTime }}</p>
-              </div>
-            </div>
-            <div v-if="touristStore.currentLocation.admissionFee !== null && touristStore.currentLocation.admissionFee !== undefined" class="flex items-start gap-3">
-              <span class="text-lg flex-shrink-0">🎫</span>
-              <div>
-                <p class="text-xs text-gray-500">{{ $t('location.admission_fee') }}</p>
-                <p class="text-sm text-gray-800">{{ touristStore.currentLocation.admissionFee === 0 ? $t('location.free_entry') : formatVnd(touristStore.currentLocation.admissionFee) }}</p>
-              </div>
-            </div>
-            <div v-if="touristStore.currentLocation.estimatedDuration" class="flex items-start gap-3">
-              <span class="text-lg flex-shrink-0">⏱</span>
-              <div>
-                <p class="text-xs text-gray-500">{{ $t('location.estimated_duration') }}</p>
-                <p class="text-sm text-gray-800">{{ touristStore.currentLocation.estimatedDuration }} {{ $t('location.minutes') }}</p>
-              </div>
-            </div>
-            <div v-if="touristStore.currentLocation.address" class="flex items-start gap-3">
-              <span class="text-lg flex-shrink-0">📍</span>
-              <div>
-                <p class="text-xs text-gray-500">{{ $t('location.address') }}</p>
-                <p class="text-sm text-gray-800">{{ touristStore.currentLocation.address }}</p>
-              </div>
-            </div>
-            <div v-if="touristStore.currentLocation.bestTime" class="flex items-start gap-3">
-              <span class="text-lg flex-shrink-0">🌤</span>
-              <div>
-                <p class="text-xs text-gray-500">{{ $t('location.best_time') }}</p>
-                <p class="text-sm text-gray-800">{{ touristStore.currentLocation.bestTime }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </template>
 
@@ -198,20 +155,40 @@
       <p class="text-gray-500">{{ $t('explore.not_found') }}</p>
       <AppButton class="mt-4" @click="navigateTo('/explore/list')">{{ $t('common.back') }}</AppButton>
     </div>
+
+    <!-- Sticky audio bar (only when content is loaded) -->
+    <ExploreAudioBar v-if="loc && audioTracks.length" :tracks="audioTracks" />
   </div>
 </template>
 
 <script setup lang="ts">
+import type { AudioTrack } from '~/components/explore/AudioBar.vue'
+
 definePageMeta({ layout: 'default' })
 const { t, locale } = useI18n()
 const route = useRoute()
 const touristStore = useTouristStore()
 
-useHead({ title: () => touristStore.currentLocation?.name ?? t('explore.title') })
+const loc = computed(() => touristStore.currentLocation)
+
+useHead({ title: () => loc.value?.name ?? t('explore.title') })
 
 const hasVisitingInfo = computed(() => {
-  const loc = touristStore.currentLocation
-  return loc && (loc.openTime || loc.admissionFee !== undefined || loc.estimatedDuration || loc.address || loc.bestTime)
+  const l = loc.value
+  return l && (l.openTime || l.admissionFee !== undefined || l.estimatedDuration || l.address || l.bestTime)
+})
+
+// Build tracks: main audio first, then spots with audio
+const audioTracks = computed<AudioTrack[]>(() => {
+  const l = loc.value
+  if (!l) return []
+  const tracks: AudioTrack[] = [
+    { id: 'main', name: t('explore.overview_audio'), audioUrl: l.audioUrl ?? null }
+  ]
+  for (const spot of l.spots ?? []) {
+    tracks.push({ id: spot.id, name: spot.name, audioUrl: spot.audioUrl ?? null })
+  }
+  return tracks
 })
 
 function formatVnd(amount: number): string {
@@ -222,8 +199,6 @@ function load() {
   touristStore.fetchLocationDetail(route.params.slug as string, locale.value)
 }
 
-// Refetch when language switches so content updates immediately
 watch(locale, load)
-
 onMounted(load)
 </script>
