@@ -4,6 +4,7 @@ import { requireRole } from '../middlewares/require-role.js'
 import { LocationService } from '../services/location.service.js'
 import { PackageService } from '../services/package.service.js'
 import { TicketService } from '../services/ticket.service.js'
+import { UserService } from '../services/user.service.js'
 import {
   CreateLocationSchema,
   UpdateLocationSchema,
@@ -17,6 +18,7 @@ import {
   AssignLocationsSchema,
 } from '../schemas/package.schema.js'
 import { TicketQuerySchema } from '../schemas/ticket.schema.js'
+import { CreateUserSchema, UpdateRoleSchema, UserQuerySchema } from '../schemas/user.schema.js'
 import { ValidationError } from '../lib/errors.js'
 import { ok, paginated } from '../lib/response.js'
 
@@ -24,13 +26,14 @@ interface AdminRouteOptions {
   locationService: LocationService
   packageService: PackageService
   ticketService: TicketService
+  userService: UserService
 }
 
 export async function adminRoutes(
   fastify: FastifyInstance,
   options: AdminRouteOptions
 ): Promise<void> {
-  const { locationService, packageService, ticketService } = options
+  const { locationService, packageService, ticketService, userService } = options
   const preHandler = [authenticate, requireRole('admin')]
 
   // ─── Location Routes ─────────────────────────────────────────────────────────
@@ -257,5 +260,63 @@ export async function adminRoutes(
     const { page, limit, search } = parsed.data
     const { tickets, total } = await ticketService.listAll({ page, limit, search })
     return reply.send(paginated(tickets, total, page, limit))
+  })
+
+  // ─── Stats Route ──────────────────────────────────────────────────────────────
+
+  // GET /stats — aggregated stats across locations, packages, tickets, users
+  fastify.get('/stats', { preHandler }, async (_req: FastifyRequest, reply: FastifyReply) => {
+    const [locationTotal, locationActive, packageTotal, ticketStats, userStats] = await Promise.all([
+      locationService.count(),
+      locationService.count({ isActive: true }),
+      packageService.count(),
+      ticketService.getStats(),
+      userService.countByRole(),
+    ])
+    return reply.send(
+      ok({
+        locations: { total: locationTotal, active: locationActive },
+        packages: { total: packageTotal },
+        tickets: ticketStats,
+        users: userStats,
+      })
+    )
+  })
+
+  // ─── User Management Routes ───────────────────────────────────────────────────
+
+  // GET /users — list users with pagination + search + role filter
+  fastify.get('/users', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = UserQuerySchema.safeParse(req.query)
+    if (!parsed.success) throw new ValidationError('Invalid query parameters', parsed.error.flatten())
+
+    const { users, total } = await userService.listUsers(parsed.data)
+    return reply.send(paginated(users, total, parsed.data.page, parsed.data.limit))
+  })
+
+  // POST /users — create admin or staff account
+  fastify.post('/users', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = CreateUserSchema.safeParse(req.body)
+    if (!parsed.success) throw new ValidationError('Validation failed', parsed.error.flatten())
+
+    const user = await userService.createStaff(parsed.data)
+    return reply.status(201).send(ok(user))
+  })
+
+  // PUT /users/:id/role — change a user's role
+  fastify.put('/users/:id/role', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as { id: string }
+    const parsed = UpdateRoleSchema.safeParse(req.body)
+    if (!parsed.success) throw new ValidationError('Validation failed', parsed.error.flatten())
+
+    const user = await userService.changeRole(id, parsed.data.role, req.user.userId)
+    return reply.send(ok(user))
+  })
+
+  // DELETE /users/:id — delete a user account
+  fastify.delete('/users/:id', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as { id: string }
+    await userService.deleteUser(id, req.user.userId)
+    return reply.status(204).send()
   })
 }

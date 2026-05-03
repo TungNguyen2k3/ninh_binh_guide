@@ -3,9 +3,14 @@
     <!-- Page header -->
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-gray-900">{{ $t('staff.tickets_title') }}</h1>
-      <AppButton size="sm" @click="goToNew">
-        {{ $t('ticket.create_new') }}
-      </AppButton>
+      <div class="flex items-center gap-2">
+        <AppButton v-if="authStore.isAdmin" variant="secondary" size="sm" @click="navigateTo('/admin/tickets')">
+          {{ $t('ticket.all_tickets') }}
+        </AppButton>
+        <AppButton size="sm" @click="goToNew">
+          {{ $t('ticket.create_new') }}
+        </AppButton>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -68,6 +73,7 @@ definePageMeta({ layout: 'staff' })
 const { t } = useI18n()
 useHead({ title: () => t('staff.tickets_title') })
 
+const authStore = useAuthStore()
 const ticketStore = useTicketStore()
 
 const page = ref(1)

@@ -20,6 +20,7 @@ import { LocationService } from './services/location.service.js'
 import { PackageService } from './services/package.service.js'
 import { TicketService } from './services/ticket.service.js'
 import { TouristService } from './services/tourist.service.js'
+import { UserService } from './services/user.service.js'
 import { authRoutes } from './routes/auth.route.js'
 import { adminRoutes } from './routes/admin.route.js'
 import { staffRoutes } from './routes/staff.route.js'
@@ -68,6 +69,7 @@ export function buildApp() {
   const packageService = new PackageService(packageRepo, locationRepo)
   const ticketService = new TicketService(ticketRepo, packageRepo)
   const touristService = new TouristService(locationRepo, ticketRepo)
+  const userService = new UserService(userRepo)
 
   // ─── Routes ──────────────────────────────────────────────────────────────────
 
@@ -78,7 +80,7 @@ export function buildApp() {
 
   // API routes
   fastify.register(authRoutes, { prefix: '/api/v1/auth', authService, ticketService })
-  fastify.register(adminRoutes, { prefix: '/api/v1/admin', locationService, packageService, ticketService })
+  fastify.register(adminRoutes, { prefix: '/api/v1/admin', locationService, packageService, ticketService, userService })
   fastify.register(staffRoutes, { prefix: '/api/v1/staff', ticketService, packageRepo })
   fastify.register(touristRoutes, { prefix: '/api/v1', touristService })
 

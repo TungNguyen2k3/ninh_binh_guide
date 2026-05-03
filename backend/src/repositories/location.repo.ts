@@ -25,6 +25,11 @@ export class LocationRepo {
     ])
   }
 
+  count(opts?: { isActive?: boolean }) {
+    const where = opts?.isActive !== undefined ? { isActive: opts.isActive } : {}
+    return this.prisma.location.count({ where })
+  }
+
   findById(id: string) {
     return this.prisma.location.findUnique({ where: { id } })
   }

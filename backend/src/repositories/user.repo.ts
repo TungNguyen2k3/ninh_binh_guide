@@ -62,4 +62,55 @@ export class UserRepo {
       select: publicUserSelect,
     })
   }
+
+  async countByRole() {
+    const [admin, staff, tourist] = await Promise.all([
+      this.prisma.user.count({ where: { role: 'admin' } }),
+      this.prisma.user.count({ where: { role: 'staff' } }),
+      this.prisma.user.count({ where: { role: 'tourist' } }),
+    ])
+    return { admin, staff, tourist, total: admin + staff + tourist }
+  }
+
+  async findAll(opts?: {
+    search?: string
+    role?: Role
+    page?: number
+    limit?: number
+  }) {
+    const { search = '', role, page = 1, limit = 20 } = opts ?? {}
+    const where = {
+      ...(role && { role }),
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' as const } },
+          { email: { contains: search, mode: 'insensitive' as const } },
+          { phone: { contains: search, mode: 'insensitive' as const } },
+        ],
+      }),
+    }
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        select: publicUserSelect,
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.user.count({ where }),
+    ])
+    return { users, total }
+  }
+
+  updateRole(id: string, role: Role): Promise<PublicUser> {
+    return this.prisma.user.update({
+      where: { id },
+      data: { role },
+      select: publicUserSelect,
+    })
+  }
+
+  deleteById(id: string) {
+    return this.prisma.user.delete({ where: { id } })
+  }
 }

@@ -18,6 +18,10 @@ export class PackageRepo {
     })
   }
 
+  count() {
+    return this.prisma.package.count()
+  }
+
   findById(id: string) {
     return this.prisma.package.findUnique({
       where: { id },

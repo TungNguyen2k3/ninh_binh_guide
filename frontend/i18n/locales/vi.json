@@ -202,6 +202,26 @@
     "status": "Trạng thái",
     "locations_count": "Địa điểm"
   },
+  "dashboard": {
+    "manage_users": "Quản lý người dùng",
+    "quick_actions": "Thao tác nhanh",
+    "stats_title": "Tổng quan hệ thống"
+  },
+  "user": {
+    "create": "Tạo tài khoản",
+    "create_title": "Tạo tài khoản mới",
+    "name": "Họ tên",
+    "role": "Vai trò",
+    "change_role": "Đổi vai trò",
+    "delete_confirm": "Xóa tài khoản này?",
+    "created_at": "Ngày tạo",
+    "role_admin": "Admin",
+    "role_staff": "Staff",
+    "role_tourist": "Tourist",
+    "no_users": "Chưa có người dùng",
+    "filter_role": "Lọc theo vai trò",
+    "all_roles": "Tất cả vai trò"
+  },
   "app": {
     "name": "Ninh Bình Guide",
     "tagline": "Tự khám phá di sản"

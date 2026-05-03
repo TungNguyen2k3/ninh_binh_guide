@@ -203,6 +203,26 @@
     "status": "Status",
     "locations_count": "Locations"
   },
+  "dashboard": {
+    "manage_users": "Manage users",
+    "quick_actions": "Quick actions",
+    "stats_title": "System overview"
+  },
+  "user": {
+    "create": "Create account",
+    "create_title": "Create new account",
+    "name": "Full name",
+    "role": "Role",
+    "change_role": "Change role",
+    "delete_confirm": "Delete this account?",
+    "created_at": "Created at",
+    "role_admin": "Admin",
+    "role_staff": "Staff",
+    "role_tourist": "Tourist",
+    "no_users": "No users yet",
+    "filter_role": "Filter by role",
+    "all_roles": "All roles"
+  },
   "app": {
     "name": "Ninh Binh Guide",
     "tagline": "Explore the heritage independently"

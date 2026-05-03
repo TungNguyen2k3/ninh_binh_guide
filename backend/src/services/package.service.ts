@@ -14,6 +14,10 @@ export class PackageService {
     return this.packageRepo.findAll()
   }
 
+  count() {
+    return this.packageRepo.count()
+  }
+
   async getById(id: string) {
     const pkg = await this.packageRepo.findById(id)
     if (!pkg) throw new NotFoundError('Package')

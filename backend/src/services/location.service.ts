@@ -12,6 +12,10 @@ export class LocationService {
     return { locations, total }
   }
 
+  count(opts?: { isActive?: boolean }) {
+    return this.locationRepo.count(opts)
+  }
+
   async getById(id: string) {
     const loc = await this.locationRepo.findById(id)
     if (!loc) throw new NotFoundError('Location')
