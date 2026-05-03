@@ -123,6 +123,13 @@ export async function adminRoutes(
     return reply.status(204).send()
   })
 
+  // GET /locations/:id/spots/:spotId — get single spot with images
+  fastify.get('/locations/:id/spots/:spotId', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { spotId } = req.params as { id: string; spotId: string }
+    const spot = await locationService.getSpotById(spotId)
+    return reply.send(ok(spot))
+  })
+
   // POST /locations/:id/spots — create a spot
   fastify.post('/locations/:id/spots', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
     const { id } = req.params as { id: string }

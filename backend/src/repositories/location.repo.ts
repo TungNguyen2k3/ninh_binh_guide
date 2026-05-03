@@ -111,6 +111,13 @@ export class LocationRepo {
     return this.prisma.locationImage.delete({ where: { id: imageId } })
   }
 
+  findSpotById(spotId: string) {
+    return this.prisma.locationSpot.findUnique({
+      where: { id: spotId },
+      include: { images: { orderBy: { order: 'asc' } } },
+    })
+  }
+
   createSpot(
     locationId: string,
     data: {

@@ -167,11 +167,18 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const touristStore = useTouristStore()
 
 useHead({ title: () => touristStore.currentLocation?.name ?? t('explore.title') })
 
-onMounted(() => touristStore.fetchLocationDetail(route.params.slug as string))
+function load() {
+  touristStore.fetchLocationDetail(route.params.slug as string, locale.value)
+}
+
+// Refetch when language switches so content updates immediately
+watch(locale, load)
+
+onMounted(load)
 </script>

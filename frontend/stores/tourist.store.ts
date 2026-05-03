@@ -64,20 +64,26 @@ export const useTouristStore = defineStore('tourist', {
       try {
         const { useApiFetch } = await import('~/utils/api')
         const { apiFetch } = useApiFetch()
-        const res = await apiFetch<{ success: true; data: TouristLocation[] }>('/locations')
+        const { locale } = useI18n()
+        const res = await apiFetch<{ success: true; data: TouristLocation[] }>('/locations', {
+          headers: { 'Accept-Language': locale.value }
+        })
         this.locations = res.data
       } finally {
         this.isLoading = false
       }
     },
 
-    async fetchLocationDetail(slug: string): Promise<void> {
+    async fetchLocationDetail(slug: string, lang?: string): Promise<void> {
       this.isLoadingDetail = true
       this.currentLocation = null
       try {
         const { useApiFetch } = await import('~/utils/api')
         const { apiFetch } = useApiFetch()
-        const res = await apiFetch<{ success: true; data: TouristLocationDetail }>(`/locations/${slug}`)
+        const { locale } = useI18n()
+        const res = await apiFetch<{ success: true; data: TouristLocationDetail }>(`/locations/${slug}`, {
+          headers: { 'Accept-Language': lang ?? locale.value }
+        })
         this.currentLocation = res.data
       } finally {
         this.isLoadingDetail = false

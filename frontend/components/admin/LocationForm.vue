@@ -148,8 +148,8 @@
       </div>
     </div>
 
-    <!-- Submit button -->
-    <div class="flex justify-end pt-2">
+    <!-- Submit button (hidden when parent controls it) -->
+    <div v-if="!hideButton" class="flex justify-end pt-2">
       <AppButton type="submit" :loading="isLoading" class="min-w-32">
         {{ isLoading ? $t('common.saving') : $t('common.save') }}
       </AppButton>
@@ -163,10 +163,12 @@ import type { LocationFormData } from '~/stores/location.store'
 interface Props {
   modelValue: LocationFormData
   isLoading?: boolean
+  hideButton?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  isLoading: false
+  isLoading: false,
+  hideButton: false,
 })
 
 const emit = defineEmits<{

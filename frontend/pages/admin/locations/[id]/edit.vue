@@ -1,178 +1,123 @@
 <template>
-  <div class="max-w-3xl space-y-6">
-    <!-- Page header -->
+  <div class="max-w-3xl space-y-5">
+    <!-- Header -->
     <div class="flex items-center gap-3">
-      <button
-        type="button"
-        class="text-gray-400 hover:text-gray-600 transition-colors"
-        @click="navigateTo('/admin/locations')"
-      >
+      <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors"
+        @click="navigateTo('/admin/locations')">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
-      <h1 class="text-2xl font-bold text-gray-900">{{ $t('admin.edit_location') }}</h1>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">{{ $t('admin.edit_location') }}</h1>
+        <p v-if="locationStore.current" class="text-sm text-gray-500 mt-0.5">
+          {{ locationStore.current.nameVi }}
+        </p>
+      </div>
     </div>
 
-    <!-- Loading skeleton -->
-    <div v-if="locationStore.isLoading && !locationStore.current" class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-      <div v-for="i in 6" :key="i" class="h-10 bg-gray-100 rounded-xl animate-pulse" />
+    <!-- Loading -->
+    <div v-if="locationStore.isLoading && !locationStore.current"
+      class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+      <div v-for="i in 5" :key="i" class="h-10 bg-gray-100 rounded-xl animate-pulse" />
     </div>
 
     <template v-else-if="locationStore.current">
-      <!-- Main form -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6">
-        <AdminLocationForm
-          v-model="formData"
-          :is-loading="isSubmitting"
-          @submit="handleSubmit"
-        />
+      <!-- 3-Tab navigation -->
+      <div class="flex gap-1 bg-gray-100 rounded-2xl p-1">
+        <button v-for="tab in tabs" :key="tab.id" type="button"
+          class="flex-1 py-2.5 text-sm font-medium rounded-xl transition-all"
+          :class="activeTab === tab.id
+            ? 'bg-white text-gray-900 shadow-sm'
+            : 'text-gray-500 hover:text-gray-700'"
+          @click="activeTab = tab.id">
+          <span class="block text-base leading-none mb-0.5">{{ tab.icon }}</span>
+          <span class="text-xs">{{ tab.label }}</span>
+        </button>
       </div>
 
-      <!-- Audio upload -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-        <h2 class="text-base font-semibold text-gray-900">Audio</h2>
-        <AdminAudioUpload
-          :location-id="locationStore.current.id"
-          :audio-vi-url="locationStore.current.audioViUrl"
-          :audio-en-url="locationStore.current.audioEnUrl"
-          @uploaded="reloadCurrent"
-        />
-      </div>
-
-      <!-- Image upload (single cover) -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-        <h2 class="text-base font-semibold text-gray-900">{{ $t('admin.upload_image') }}</h2>
-        <AdminImageUpload
-          :location-id="locationStore.current.id"
-          :image-url="locationStore.current.imageUrl"
-          @uploaded="reloadCurrent"
-        />
-      </div>
-
-      <!-- Detailed content sections -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-5">
-        <div class="flex items-center justify-between">
-          <h2 class="text-base font-semibold text-gray-900">{{ $t('admin.content_sections') }}</h2>
-          <!-- Language tabs -->
-          <div class="flex gap-2">
-            <button
-              v-for="lang in (['vi', 'en'] as const)"
-              :key="lang"
-              type="button"
-              class="px-3 py-1 text-sm rounded-lg transition-colors"
-              :class="contentLang === lang
-                ? 'bg-brand-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-              @click="contentLang = lang"
-            >
-              {{ lang === 'vi' ? 'Tiếng Việt' : 'English' }}
-            </button>
-          </div>
+      <!-- Tab 1: Cơ bản — form + ảnh + audio cùng 1 chỗ -->
+      <div v-show="activeTab === 'basic'" class="space-y-5">
+        <div class="bg-white rounded-2xl border border-gray-200 p-5">
+          <!-- hide-button: save button shown once at bottom of tab -->
+          <AdminLocationForm v-model="formData" :is-loading="isSubmitting" hide-button @submit="handleSubmit" />
         </div>
 
-        <!-- Vietnamese content fields -->
-        <template v-if="contentLang === 'vi'">
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-gray-700">{{ $t('admin.overview') }} (VI)</label>
-            <textarea
-              v-model="formData.overviewVi"
-              rows="4"
-              :placeholder="$t('admin.overview')"
-              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
-            />
+        <!-- Hình ảnh ngay dưới form -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+          <div>
+            <h3 class="text-sm font-semibold text-gray-900">🖼 {{ $t('admin.images_section') }}</h3>
+            <p class="text-xs text-gray-400 mt-0.5">{{ $t('admin.images_hint') }}</p>
           </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-gray-700">{{ $t('admin.history') }} (VI)</label>
-            <textarea
-              v-model="formData.historyVi"
-              rows="4"
-              :placeholder="$t('admin.history')"
-              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
-            />
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-gray-700">{{ $t('admin.highlights') }} (VI)</label>
-            <textarea
-              v-model="formData.highlightsVi"
-              rows="4"
-              :placeholder="$t('admin.highlights')"
-              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
-            />
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-gray-700">{{ $t('admin.visiting_guide') }} (VI)</label>
-            <textarea
-              v-model="formData.visitingGuideVi"
-              rows="4"
-              :placeholder="$t('admin.visiting_guide')"
-              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
-            />
-          </div>
-        </template>
+          <AdminMultiImageUpload
+            :location-id="locationStore.current.id"
+            :images="locationStore.current.images ?? []"
+            @uploaded="reloadCurrent"
+            @deleted="reloadCurrent"
+          />
+        </div>
 
-        <!-- English content fields -->
-        <template v-if="contentLang === 'en'">
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-gray-700">{{ $t('admin.overview') }} (EN)</label>
-            <textarea
-              v-model="formData.overviewEn"
-              rows="4"
-              :placeholder="$t('admin.overview')"
-              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
-            />
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-gray-700">{{ $t('admin.history') }} (EN)</label>
-            <textarea
-              v-model="formData.historyEn"
-              rows="4"
-              :placeholder="$t('admin.history')"
-              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
-            />
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-gray-700">{{ $t('admin.highlights') }} (EN)</label>
-            <textarea
-              v-model="formData.highlightsEn"
-              rows="4"
-              :placeholder="$t('admin.highlights')"
-              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
-            />
-          </div>
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-gray-700">{{ $t('admin.visiting_guide') }} (EN)</label>
-            <textarea
-              v-model="formData.visitingGuideEn"
-              rows="4"
-              :placeholder="$t('admin.visiting_guide')"
-              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
-            />
-          </div>
-        </template>
+        <!-- Audio chính ngay dưới ảnh -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+          <h3 class="text-sm font-semibold text-gray-900">🎧 {{ $t('admin.audio_main') }}</h3>
+          <AdminAudioUpload
+            :location-id="locationStore.current.id"
+            :audio-vi-url="locationStore.current.audioViUrl"
+            :audio-en-url="locationStore.current.audioEnUrl"
+            @uploaded="reloadCurrent"
+          />
+        </div>
 
-        <!-- Save content button -->
-        <div class="flex justify-end pt-2">
-          <AppButton type="button" :loading="isSubmitting" class="min-w-32" @click="handleSubmit">
-            {{ isSubmitting ? $t('common.saving') : $t('admin.save_changes') }}
+        <!-- Single save button at the very bottom of tab -->
+        <div class="flex justify-end">
+          <AppButton :loading="isSubmitting" size="lg" @click="handleSubmit">
+            {{ isSubmitting ? $t('common.saving') : $t('admin.save_basic') }}
           </AppButton>
         </div>
       </div>
 
-      <!-- Multi-image upload -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-        <h2 class="text-base font-semibold text-gray-900">{{ $t('admin.images_section') }}</h2>
-        <AdminMultiImageUpload
-          :location-id="locationStore.current.id"
-          :images="locationStore.current.images ?? []"
-          @uploaded="reloadCurrent"
-          @deleted="reloadCurrent"
-        />
+      <!-- Tab 2: Nội dung chi tiết -->
+      <div v-show="activeTab === 'content'" class="bg-white rounded-2xl border border-gray-200 p-5 space-y-5">
+        <!-- VI/EN toggle -->
+        <div class="flex items-center justify-between">
+          <p class="text-xs text-gray-500">{{ $t('admin.content_hint') }}</p>
+          <div class="flex gap-1 bg-gray-100 rounded-lg p-0.5">
+            <button v-for="lang in (['vi', 'en'] as const)" :key="lang" type="button"
+              class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
+              :class="contentLang === lang ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'"
+              @click="contentLang = lang">
+              {{ lang === 'vi' ? '🇻🇳 Tiếng Việt' : '🇬🇧 English' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 content sections -->
+        <div v-for="section in contentSections" :key="section.keyBase" class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-gray-700">
+            {{ section.icon }} {{ section.label }}
+          </label>
+          <p class="text-xs text-gray-400">{{ section.hint }}</p>
+          <textarea
+            v-model="(formData as any)[section.keyBase + (contentLang === 'vi' ? 'Vi' : 'En')]"
+            :rows="section.rows"
+            :placeholder="section.placeholder"
+            class="mt-1 block w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none transition-colors"
+          />
+        </div>
+
+        <div class="flex justify-end pt-1">
+          <AppButton :loading="isSubmitting" @click="handleSubmit">
+            {{ $t('admin.save_changes') }}
+          </AppButton>
+        </div>
       </div>
 
-      <!-- Spot manager -->
-      <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-        <h2 class="text-base font-semibold text-gray-900">{{ $t('admin.spots_section') }}</h2>
+      <!-- Tab 3: Khu vực -->
+      <div v-show="activeTab === 'spots'" class="bg-white rounded-2xl border border-gray-200 p-5">
+        <div class="mb-4">
+          <h3 class="text-sm font-semibold text-gray-900">📍 {{ $t('admin.spots_section') }}</h3>
+          <p class="text-xs text-gray-400 mt-0.5">{{ $t('admin.spots_hint') }}</p>
+        </div>
         <AdminSpotManager
           :location-id="locationStore.current.id"
           :spots="locationStore.current.spots ?? []"
@@ -181,7 +126,6 @@
       </div>
     </template>
 
-    <!-- Not found -->
     <div v-else class="bg-white rounded-2xl border border-gray-200 p-6 text-center text-gray-500">
       {{ $t('error.not_found') }}
     </div>
@@ -199,51 +143,62 @@ const route = useRoute()
 const locationStore = useLocationStore()
 const { toast } = useToast()
 const isSubmitting = ref(false)
+const activeTab = ref<'basic' | 'content' | 'spots'>('basic')
 const contentLang = ref<'vi' | 'en'>('vi')
 
+const tabs = computed(() => [
+  { id: 'basic' as const, icon: '📋', label: t('admin.tab_basic') },
+  { id: 'content' as const, icon: '📝', label: t('admin.tab_content') },
+  { id: 'spots' as const, icon: '📍', label: t('admin.tab_spots') },
+])
+
+const contentSections = computed(() => [
+  {
+    keyBase: 'overview', icon: '📄',
+    label: t('admin.overview'), hint: t('admin.overview_hint'),
+    placeholder: t('admin.overview_placeholder'), rows: 4,
+  },
+  {
+    keyBase: 'history', icon: '📜',
+    label: t('admin.history'), hint: t('admin.history_hint'),
+    placeholder: t('admin.history_placeholder'), rows: 5,
+  },
+  {
+    keyBase: 'highlights', icon: '⭐',
+    label: t('admin.highlights'), hint: t('admin.highlights_hint'),
+    placeholder: t('admin.highlights_placeholder'), rows: 4,
+  },
+  {
+    keyBase: 'visitingGuide', icon: '🗺️',
+    label: t('admin.visiting_guide'), hint: t('admin.visiting_guide_hint'),
+    placeholder: t('admin.visiting_guide_placeholder'), rows: 4,
+  },
+])
+
 const formData = ref<LocationFormData>({
-  nameVi: '',
-  nameEn: '',
-  slug: '',
-  descriptionVi: '',
-  descriptionEn: '',
-  overviewVi: '',
-  overviewEn: '',
-  historyVi: '',
-  historyEn: '',
-  highlightsVi: '',
-  highlightsEn: '',
-  visitingGuideVi: '',
-  visitingGuideEn: '',
-  latitude: null,
-  longitude: null,
-  displayOrder: 0,
-  isActive: true
+  nameVi: '', nameEn: '', slug: '',
+  descriptionVi: '', descriptionEn: '',
+  overviewVi: '', overviewEn: '',
+  historyVi: '', historyEn: '',
+  highlightsVi: '', highlightsEn: '',
+  visitingGuideVi: '', visitingGuideEn: '',
+  latitude: null, longitude: null,
+  displayOrder: 0, isActive: true,
 })
 
 async function loadLocation(): Promise<void> {
-  const id = route.params.id as string
-  await locationStore.fetchOne(id)
+  await locationStore.fetchOne(route.params.id as string)
   if (locationStore.current) {
     const loc = locationStore.current
     formData.value = {
-      nameVi: loc.nameVi,
-      nameEn: loc.nameEn,
-      slug: loc.slug,
-      descriptionVi: loc.descriptionVi ?? '',
-      descriptionEn: loc.descriptionEn ?? '',
-      overviewVi: loc.overviewVi ?? '',
-      overviewEn: loc.overviewEn ?? '',
-      historyVi: loc.historyVi ?? '',
-      historyEn: loc.historyEn ?? '',
-      highlightsVi: loc.highlightsVi ?? '',
-      highlightsEn: loc.highlightsEn ?? '',
-      visitingGuideVi: loc.visitingGuideVi ?? '',
-      visitingGuideEn: loc.visitingGuideEn ?? '',
-      latitude: loc.latitude,
-      longitude: loc.longitude,
-      displayOrder: loc.displayOrder,
-      isActive: loc.isActive
+      nameVi: loc.nameVi, nameEn: loc.nameEn, slug: loc.slug,
+      descriptionVi: loc.descriptionVi ?? '', descriptionEn: loc.descriptionEn ?? '',
+      overviewVi: loc.overviewVi ?? '', overviewEn: loc.overviewEn ?? '',
+      historyVi: loc.historyVi ?? '', historyEn: loc.historyEn ?? '',
+      highlightsVi: loc.highlightsVi ?? '', highlightsEn: loc.highlightsEn ?? '',
+      visitingGuideVi: loc.visitingGuideVi ?? '', visitingGuideEn: loc.visitingGuideEn ?? '',
+      latitude: loc.latitude, longitude: loc.longitude,
+      displayOrder: loc.displayOrder, isActive: loc.isActive,
     }
   }
 }
@@ -254,14 +209,8 @@ async function reloadCurrent(): Promise<void> {
 
 async function handleSubmit(): Promise<void> {
   if (!formData.value.nameVi || !formData.value.nameEn || !formData.value.slug) {
-    toast.error(t('error.required'))
-    return
+    toast.error(t('error.required')); return
   }
-  if (formData.value.latitude === null || formData.value.longitude === null) {
-    toast.error(t('location.latitude') + ' / ' + t('location.longitude') + ': ' + t('error.required'))
-    return
-  }
-
   isSubmitting.value = true
   try {
     await locationStore.update(route.params.id as string, formData.value)

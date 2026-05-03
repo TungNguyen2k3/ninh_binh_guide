@@ -96,6 +96,12 @@ export class LocationService {
     cache.del(`location:detail:${location.slug}:en`)
   }
 
+  async getSpotById(spotId: string) {
+    const spot = await this.locationRepo.findSpotById(spotId)
+    if (!spot) throw new NotFoundError('Spot')
+    return spot
+  }
+
   async createSpot(locationId: string, data: CreateSpotDto) {
     await this.getById(locationId)
     return this.locationRepo.createSpot(locationId, data)

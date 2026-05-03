@@ -75,7 +75,7 @@
 import type { TouristLocation } from '~/stores/tourist.store'
 
 definePageMeta({ layout: 'default' })
-const { t } = useI18n()
+const { t, locale } = useI18n()
 useHead({ title: () => t('explore.title') })
 
 const touristStore = useTouristStore()
@@ -85,6 +85,10 @@ function handleSelectLocation(loc: TouristLocation) {
   selectedLocation.value = loc
 }
 
+watch(locale, () => {
+  selectedLocation.value = null
+  touristStore.fetchLocations()
+})
 onMounted(() => touristStore.fetchLocations())
 </script>
 
