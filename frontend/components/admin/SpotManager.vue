@@ -256,8 +256,16 @@ const emit = defineEmits<{ updated: [] }>()
 
 const { toast } = useToast()
 const { t } = useI18n()
-const { useApiFetch } = await import('~/utils/api')
-const { apiFetch } = useApiFetch()
+const config = useRuntimeConfig()
+const authStore = useAuthStore()
+
+function authHeaders(): Record<string, string> {
+  return authStore.accessToken ? { Authorization: `Bearer ${authStore.accessToken}` } : {}
+}
+
+function apiUrl(path: string): string {
+  return `${config.public.apiUrl}${path}`
+}
 
 let pendingKey = 0
 const pendingSpots = ref<PendingSpot[]>([])
@@ -316,7 +324,9 @@ async function handleSaveSpot(spotId: string): Promise<void> {
   if (!form) return
   savingSpotId.value = spotId
   try {
-    await apiFetch(`/admin/locations/${props.locationId}/spots/${spotId}`, { method: 'PUT', body: form })
+    await $fetch(apiUrl(`/admin/locations/${props.locationId}/spots/${spotId}`), {
+      method: 'PUT', headers: authHeaders(), body: form
+    })
     toast.success(t('admin.update_success'))
     emit('updated')
   } catch { toast.error(t('error.server_error')) }
@@ -326,7 +336,9 @@ async function handleSaveSpot(spotId: string): Promise<void> {
 async function handleDeleteSpot(spotId: string): Promise<void> {
   deletingSpotId.value = spotId
   try {
-    await apiFetch(`/admin/locations/${props.locationId}/spots/${spotId}`, { method: 'DELETE' })
+    await $fetch(apiUrl(`/admin/locations/${props.locationId}/spots/${spotId}`), {
+      method: 'DELETE', headers: authHeaders()
+    })
     emit('updated')
   } catch { toast.error(t('error.server_error')) }
   finally { deletingSpotId.value = null }
@@ -339,41 +351,46 @@ async function handleCreateSpot(idx: number): Promise<void> {
   }
   pending.saving = true
   try {
-    // API returns the created spot with its id
-    const res = await apiFetch<{ success: true; data: Spot }>(`/admin/locations/${props.locationId}/spots`, {
-      method: 'POST',
-      body: {
-        nameVi: pending.nameVi.trim(), nameEn: pending.nameEn.trim(),
-        descriptionVi: pending.descriptionVi.trim() || undefined,
-        descriptionEn: pending.descriptionEn.trim() || undefined,
-      },
-    })
-    // Show just-created card immediately (for audio/image upload without waiting for reload)
+    const res = await $fetch<{ success: true; data: Spot }>(
+      apiUrl(`/admin/locations/${props.locationId}/spots`),
+      {
+        method: 'POST',
+        headers: authHeaders(),
+        body: {
+          nameVi: pending.nameVi.trim(), nameEn: pending.nameEn.trim(),
+          descriptionVi: pending.descriptionVi.trim() || undefined,
+          descriptionEn: pending.descriptionEn.trim() || undefined,
+        },
+      }
+    )
+    // Show just-created card immediately so user can upload audio/images without waiting for reload
     justCreatedSpots.value.push({
       id: res.data.id,
       nameVi: res.data.nameVi, nameEn: res.data.nameEn,
       audioViUrl: null, audioEnUrl: null, images: [],
     })
     pendingSpots.value.splice(idx, 1)
-    emit('updated') // reload parent in background
+    emit('updated')
     toast.success(t('admin.create_success'))
   } catch { toast.error(t('error.server_error')) }
   finally { if (pendingSpots.value[idx]) pendingSpots.value[idx].saving = false }
 }
 
 async function refreshJustCreated(spotId: string): Promise<void> {
-  // After uploading to a just-created spot, reload the spot data to show badges
   try {
-    const res = await apiFetch<{ success: true; data: Spot }>(`/admin/locations/${props.locationId}/spots/${spotId}`)
+    const res = await $fetch<{ success: true; data: Spot }>(
+      apiUrl(`/admin/locations/${props.locationId}/spots/${spotId}`),
+      { headers: authHeaders() }
+    )
     const idx = justCreatedSpots.value.findIndex(jc => jc.id === spotId)
     if (idx !== -1) {
       justCreatedSpots.value[idx] = {
         id: res.data.id, nameVi: res.data.nameVi, nameEn: res.data.nameEn,
         audioViUrl: res.data.audioViUrl, audioEnUrl: res.data.audioEnUrl,
-        images: res.data.images,
+        images: res.data.images ?? [],
       }
     }
-  } catch { /* ignore */ }
+  } catch { /* ignore, badges will update on parent reload */ }
 }
 
 function doneJustCreated(spotId: string): void {
