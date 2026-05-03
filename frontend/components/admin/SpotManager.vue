@@ -139,28 +139,18 @@
           </div>
         </div>
         <div class="flex items-center gap-1.5 flex-shrink-0">
-          <!-- Order badge -->
-          <span class="w-5 h-5 rounded-full bg-gray-200 text-gray-600 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-            {{ sortedSpots.indexOf(spot) + 1 }}
-          </span>
-          <!-- Move up -->
-          <button type="button"
-            class="w-6 h-6 flex items-center justify-center rounded text-gray-300 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-30"
-            :disabled="sortedSpots.indexOf(spot) === 0 || reorderingId === spot.id"
-            @click.stop="reorderSpot(spot.id, 'up')">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
-            </svg>
-          </button>
-          <!-- Move down -->
-          <button type="button"
-            class="w-6 h-6 flex items-center justify-center rounded text-gray-300 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-30"
-            :disabled="sortedSpots.indexOf(spot) === sortedSpots.length - 1 || reorderingId === spot.id"
-            @click.stop="reorderSpot(spot.id, 'down')">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+          <!-- Order number input -->
+          <input
+            type="number"
+            min="1"
+            :max="sortedSpots.length"
+            :value="sortedSpots.indexOf(spot) + 1"
+            :disabled="reorderingId === spot.id"
+            class="w-10 h-7 text-center text-xs font-semibold rounded-lg border border-gray-200 bg-white text-gray-700 outline-none focus:border-brand-400 focus:ring-1 focus:ring-brand-200 disabled:opacity-50 transition-colors"
+            @click.stop
+            @keydown.enter.stop="($event.target as HTMLInputElement).blur()"
+            @blur.stop="setOrder(spot.id, +($event.target as HTMLInputElement).value)"
+          />
           <!-- Delete -->
           <button type="button"
             class="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
@@ -453,24 +443,28 @@ async function handleSaveSpot(spotId: string): Promise<void> {
   finally { savingSpotId.value = null }
 }
 
-async function reorderSpot(spotId: string, dir: 'up' | 'down'): Promise<void> {
+// Set order by position number (1-based). Clamps to valid range.
+// Shifts other spots so there are no gaps.
+async function setOrder(spotId: string, newPos: number): Promise<void> {
   const list = sortedSpots.value
-  const idx = list.findIndex(s => s.id === spotId)
-  if (idx === -1) return
-  const swapIdx = dir === 'up' ? idx - 1 : idx + 1
-  if (swapIdx < 0 || swapIdx >= list.length) return
-  const a = list[idx]
-  const b = list[swapIdx]
+  const clampedPos = Math.max(1, Math.min(newPos, list.length))
+  const currentIdx = list.findIndex(s => s.id === spotId)
+  if (currentIdx === -1 || currentIdx + 1 === clampedPos) return
+
   reorderingId.value = spotId
   try {
-    await Promise.all([
-      $fetch(apiUrl(`/admin/locations/${props.locationId}/spots/${a.id}`), {
-        method: 'PUT', headers: authHeaders(), body: { order: b.order === a.order ? (dir === 'up' ? a.order - 1 : a.order + 1) : b.order }
-      }),
-      $fetch(apiUrl(`/admin/locations/${props.locationId}/spots/${b.id}`), {
-        method: 'PUT', headers: authHeaders(), body: { order: a.order === b.order ? (dir === 'up' ? b.order + 1 : b.order - 1) : a.order }
-      }),
-    ])
+    // Re-assign every spot a clean sequential order after the move
+    const reordered = [...list]
+    const [moved] = reordered.splice(currentIdx, 1)
+    reordered.splice(clampedPos - 1, 0, moved)
+
+    await Promise.all(
+      reordered.map((s, i) =>
+        $fetch(apiUrl(`/admin/locations/${props.locationId}/spots/${s.id}`), {
+          method: 'PUT', headers: authHeaders(), body: { order: i }
+        })
+      )
+    )
     emit('updated')
   } catch { toast.error(t('error.server_error')) }
   finally { reorderingId.value = null }
