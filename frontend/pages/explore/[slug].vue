@@ -148,11 +148,47 @@
           </div>
         </section>
 
-        <!-- Visiting guide -->
-        <section v-if="touristStore.currentLocation.visitingGuide" class="mt-6 bg-amber-50 rounded-2xl p-4">
-          <h2 class="text-base font-bold text-gray-900 mb-2">🗺️ {{ $t('explore.visiting_guide') }}</h2>
-          <p class="text-sm text-gray-600 leading-relaxed">{{ touristStore.currentLocation.visitingGuide }}</p>
-        </section>
+        <!-- Visiting info: structured fields -->
+        <div v-if="hasVisitingInfo" class="mb-6">
+          <h2 class="text-lg font-bold text-gray-900 mb-3">{{ $t('explore.visiting_guide') }}</h2>
+          <div class="bg-gray-50 rounded-2xl p-4 space-y-3">
+            <div v-if="touristStore.currentLocation.openTime" class="flex items-start gap-3">
+              <span class="text-lg flex-shrink-0">🕐</span>
+              <div>
+                <p class="text-xs text-gray-500">{{ $t('location.open_time') }}</p>
+                <p class="text-sm text-gray-800">{{ touristStore.currentLocation.openTime }}</p>
+              </div>
+            </div>
+            <div v-if="touristStore.currentLocation.admissionFee !== null && touristStore.currentLocation.admissionFee !== undefined" class="flex items-start gap-3">
+              <span class="text-lg flex-shrink-0">🎫</span>
+              <div>
+                <p class="text-xs text-gray-500">{{ $t('location.admission_fee') }}</p>
+                <p class="text-sm text-gray-800">{{ touristStore.currentLocation.admissionFee === 0 ? $t('location.free_entry') : formatVnd(touristStore.currentLocation.admissionFee) }}</p>
+              </div>
+            </div>
+            <div v-if="touristStore.currentLocation.estimatedDuration" class="flex items-start gap-3">
+              <span class="text-lg flex-shrink-0">⏱</span>
+              <div>
+                <p class="text-xs text-gray-500">{{ $t('location.estimated_duration') }}</p>
+                <p class="text-sm text-gray-800">{{ touristStore.currentLocation.estimatedDuration }} {{ $t('location.minutes') }}</p>
+              </div>
+            </div>
+            <div v-if="touristStore.currentLocation.address" class="flex items-start gap-3">
+              <span class="text-lg flex-shrink-0">📍</span>
+              <div>
+                <p class="text-xs text-gray-500">{{ $t('location.address') }}</p>
+                <p class="text-sm text-gray-800">{{ touristStore.currentLocation.address }}</p>
+              </div>
+            </div>
+            <div v-if="touristStore.currentLocation.bestTime" class="flex items-start gap-3">
+              <span class="text-lg flex-shrink-0">🌤</span>
+              <div>
+                <p class="text-xs text-gray-500">{{ $t('location.best_time') }}</p>
+                <p class="text-sm text-gray-800">{{ touristStore.currentLocation.bestTime }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </template>
 
@@ -172,6 +208,15 @@ const route = useRoute()
 const touristStore = useTouristStore()
 
 useHead({ title: () => touristStore.currentLocation?.name ?? t('explore.title') })
+
+const hasVisitingInfo = computed(() => {
+  const loc = touristStore.currentLocation
+  return loc && (loc.openTime || loc.admissionFee !== undefined || loc.estimatedDuration || loc.address || loc.bestTime)
+})
+
+function formatVnd(amount: number): string {
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
+}
 
 function load() {
   touristStore.fetchLocationDetail(route.params.slug as string, locale.value)

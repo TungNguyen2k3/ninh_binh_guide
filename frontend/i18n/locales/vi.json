@@ -144,7 +144,13 @@
     "overview": "Mô tả tổng quan",
     "history": "Lịch sử hình thành",
     "highlights": "Điểm nổi bật",
-    "visiting_guide": "Hướng dẫn tham quan"
+    "visiting_guide": "Hướng dẫn tham quan",
+    "visiting_info": "Thông tin tham quan",
+    "open_time_placeholder": "7:00 - 17:30",
+    "admission_fee_placeholder": "250000",
+    "duration_placeholder": "120",
+    "address_placeholder": "Tràng An, Trường Yên, Hoa Lư, Ninh Bình",
+    "best_time_placeholder": "Sáng sớm, tháng 3-4"
   },
   "ticket": {
     "activate_title": "Kích hoạt vé tham quan",
@@ -191,7 +197,14 @@
     "display_order": "Thứ tự hiển thị",
     "generate_slug": "Tự tạo slug",
     "coordinates": "Tọa độ",
-    "status": "Trạng thái"
+    "status": "Trạng thái",
+    "open_time": "Giờ mở cửa",
+    "admission_fee": "Giá vé",
+    "estimated_duration": "Thời gian tham quan",
+    "address": "Địa chỉ",
+    "best_time": "Thời điểm lý tưởng",
+    "free_entry": "Miễn phí",
+    "minutes": "phút"
   },
   "package": {
     "name": "Tên gói",
@@ -205,7 +218,11 @@
   "dashboard": {
     "manage_users": "Quản lý người dùng",
     "quick_actions": "Thao tác nhanh",
-    "stats_title": "Tổng quan hệ thống"
+    "stats_title": "Tổng quan hệ thống",
+    "activity_chart": "Hoạt động",
+    "recent_tickets": "Vé gần đây",
+    "period_7d": "7 ngày",
+    "period_30d": "30 ngày"
   },
   "user": {
     "create": "Tạo tài khoản",

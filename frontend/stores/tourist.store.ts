@@ -37,7 +37,12 @@ export interface TouristLocationDetail extends TouristLocation {
   overview: string | null
   history: string | null
   highlights: string | null
-  visitingGuide: string | null
+  openTime: string | null
+  closeTime: string | null
+  admissionFee: number | null
+  estimatedDuration: number | null
+  address: string | null
+  bestTime: string | null
   images: TouristLocationImage[]
   spots: TouristSpot[]
 }

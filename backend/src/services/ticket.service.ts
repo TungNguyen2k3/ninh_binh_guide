@@ -28,8 +28,8 @@ export class TicketService {
     if (!pkg) throw new NotFoundError('Package')
     if (!pkg.isActive) throw new ValidationError('Package không còn hoạt động')
 
-    // Calculate expiry from package validityHours
-    const expiresAt = new Date(Date.now() + pkg.validityHours * 3600 * 1000)
+    // Activation deadline: 30 days from creation
+    const expiresAt = new Date(Date.now() + 30 * 24 * 3600 * 1000)
 
     // Generate unique code with retry
     let code: string = ''
@@ -70,8 +70,9 @@ export class TicketService {
   async activateTicket(code: string, userId: string) {
     const ticket = await this.ticketRepo.findByCode(code)
     if (!ticket) throw new NotFoundError('Ticket')
+    if (ticket.isCancelled) throw new ForbiddenError('Ticket đã bị hủy')
 
-    // Check expiry
+    // Check activation deadline
     if (ticket.expiresAt < new Date()) throw new ForbiddenError('Ticket đã hết hạn')
 
     // Check already activated by a different user
@@ -86,7 +87,9 @@ export class TicketService {
       return { ticket, alreadyOwned: true }
     }
 
-    await this.ticketRepo.activateTicket(ticket.id, userId)
+    // Compute tour access expiry from now + package validity
+    const expiresAt = new Date(Date.now() + ticket.package.validityHours * 3600 * 1000)
+    await this.ticketRepo.activateTicket(ticket.id, userId, expiresAt)
     return { ticket, alreadyOwned: false }
   }
 

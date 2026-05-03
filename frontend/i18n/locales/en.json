@@ -144,7 +144,13 @@
     "overview": "Overview",
     "history": "History",
     "highlights": "Highlights",
-    "visiting_guide": "Visiting guide"
+    "visiting_guide": "Visiting guide",
+    "visiting_info": "Visiting information",
+    "open_time_placeholder": "7:00 - 17:30",
+    "admission_fee_placeholder": "250000",
+    "duration_placeholder": "120",
+    "address_placeholder": "Tràng An, Trường Yên, Hoa Lư, Ninh Bình",
+    "best_time_placeholder": "Early morning, March-April"
   },
   "ticket": {
     "activate_title": "Activate your ticket",
@@ -192,7 +198,14 @@
     "display_order": "Display order",
     "generate_slug": "Auto-generate",
     "coordinates": "Coordinates",
-    "status": "Status"
+    "status": "Status",
+    "open_time": "Opening hours",
+    "admission_fee": "Admission fee",
+    "estimated_duration": "Estimated duration",
+    "address": "Address",
+    "best_time": "Best time to visit",
+    "free_entry": "Free",
+    "minutes": "min"
   },
   "package": {
     "name": "Package name",
@@ -206,7 +219,11 @@
   "dashboard": {
     "manage_users": "Manage users",
     "quick_actions": "Quick actions",
-    "stats_title": "System overview"
+    "stats_title": "System overview",
+    "activity_chart": "Activity",
+    "recent_tickets": "Recent tickets",
+    "period_7d": "7 days",
+    "period_30d": "30 days"
   },
   "user": {
     "create": "Create account",

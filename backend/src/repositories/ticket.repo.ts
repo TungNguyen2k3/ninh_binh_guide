@@ -94,7 +94,7 @@ export class TicketRepo {
     return this.prisma.ticketUser.findFirst({
       where: {
         userId,
-        ticket: { expiresAt: { gt: new Date() } },
+        expiresAt: { gt: new Date() },
       },
       include: {
         ticket: {
@@ -107,20 +107,75 @@ export class TicketRepo {
     })
   }
 
-  async activateTicket(ticketId: string, userId: string) {
+  async activateTicket(ticketId: string, userId: string, expiresAt: Date) {
     return this.prisma.ticketUser.create({
-      data: { ticketId, userId },
+      data: { ticketId, userId, expiresAt },
     })
   }
 
   async stats() {
     const now = new Date()
-    const [total, active, expired, activatedCount] = await Promise.all([
+    const [total, activatedCount] = await Promise.all([
       this.prisma.ticket.count(),
-      this.prisma.ticket.count({ where: { expiresAt: { gt: now } } }),
-      this.prisma.ticket.count({ where: { expiresAt: { lte: now } } }),
       this.prisma.ticketUser.count(),
     ])
-    return { total, active, expired, activatedCount }
+
+    // Recent tickets (last 5)
+    const recentTickets = await this.prisma.ticket.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      include: {
+        package: { select: { name: true } },
+        createdBy: { select: { name: true } },
+        ticketUsers: { select: { userId: true } },
+      },
+    })
+
+    // Chart data: last 30 days, group by day
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 3600 * 1000)
+    const [ticketsLast30, usersLast30] = await Promise.all([
+      this.prisma.ticket.findMany({
+        where: { createdAt: { gte: thirtyDaysAgo } },
+        select: { createdAt: true },
+      }),
+      this.prisma.user.findMany({
+        where: { createdAt: { gte: thirtyDaysAgo } },
+        select: { createdAt: true },
+      }),
+    ])
+
+    function buildChartData(days: number) {
+      const buckets: Record<string, { tickets: number; users: number }> = {}
+      const cutoff = new Date(now.getTime() - days * 24 * 3600 * 1000)
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(now)
+        d.setDate(d.getDate() - i)
+        const key = d.toISOString().slice(0, 10)
+        buckets[key] = { tickets: 0, users: 0 }
+      }
+      for (const t of ticketsLast30) {
+        if (t.createdAt >= cutoff) {
+          const key = t.createdAt.toISOString().slice(0, 10)
+          if (buckets[key]) buckets[key].tickets++
+        }
+      }
+      for (const u of usersLast30) {
+        if (u.createdAt >= cutoff) {
+          const key = u.createdAt.toISOString().slice(0, 10)
+          if (buckets[key]) buckets[key].users++
+        }
+      }
+      return Object.entries(buckets).map(([date, v]) => ({ date, ...v }))
+    }
+
+    return {
+      total,
+      activatedCount,
+      recentTickets,
+      chart: {
+        '7d': buildChartData(7),
+        '30d': buildChartData(30),
+      },
+    }
   }
 }

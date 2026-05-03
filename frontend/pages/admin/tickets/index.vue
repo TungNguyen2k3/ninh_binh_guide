@@ -3,7 +3,7 @@
     <!-- Page header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <h1 class="text-2xl font-bold text-gray-900">{{ $t('ticket.all_tickets') }}</h1>
-      <AppButton @click="navigateTo('/staff/tickets/new')">
+      <AppButton @click="navigateTo('/admin/tickets/new')">
         {{ $t('ticket.create_new') }}
       </AppButton>
     </div>

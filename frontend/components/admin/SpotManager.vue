@@ -67,6 +67,20 @@
             class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" />
         </div>
 
+        <!-- Optional coordinates -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('location.latitude') }}</label>
+            <input v-model.number="draft.latitude" type="number" step="0.000001" placeholder="20.254"
+              class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('location.longitude') }}</label>
+            <input v-model.number="draft.longitude" type="number" step="0.000001" placeholder="105.976"
+              class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
+          </div>
+        </div>
+
         <!-- Images -->
         <div>
           <h5 class="text-xs font-semibold text-gray-600 mb-2">🖼 {{ $t('admin.images_section') }}</h5>
@@ -171,6 +185,20 @@
             class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" />
         </div>
 
+        <!-- Optional coordinates -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('location.latitude') }}</label>
+            <input v-model.number="editForms[spot.id].latitude" type="number" step="0.000001" placeholder="20.254"
+              class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('location.longitude') }}</label>
+            <input v-model.number="editForms[spot.id].longitude" type="number" step="0.000001" placeholder="105.976"
+              class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
+          </div>
+        </div>
+
         <!-- Images -->
         <div>
           <h5 class="text-xs font-semibold text-gray-600 mb-2">🖼 Hình ảnh khu vực</h5>
@@ -224,6 +252,7 @@ export interface Spot {
   descriptionVi: string | null; descriptionEn: string | null
   audioViUrl: string | null; audioEnUrl: string | null
   images: SpotImage[]; order: number
+  latitude: number | null; longitude: number | null
 }
 
 interface DraftSpot {
@@ -234,6 +263,7 @@ interface DraftSpot {
   audioViUrl: string | null; audioEnUrl: string | null
   images: SpotImage[]
   saving: boolean
+  latitude: number | null; longitude: number | null
 }
 
 interface Props { locationId: string; spots: Spot[] }
@@ -259,7 +289,7 @@ const creatingNew = ref(false)
 // Saved spots edit state
 const expanded = ref<Record<string, boolean>>({})
 const spotLang = ref<Record<string, 'vi' | 'en'>>({})
-const editForms = ref<Record<string, { nameVi: string; nameEn: string; descriptionVi: string; descriptionEn: string }>>({})
+const editForms = ref<Record<string, { nameVi: string; nameEn: string; descriptionVi: string; descriptionEn: string; latitude: number | null; longitude: number | null }>>({})
 const savingSpotId = ref<string | null>(null)
 const deletingSpotId = ref<string | null>(null)
 
@@ -270,6 +300,8 @@ watch(() => props.spots, (newSpots) => {
         nameVi: spot.nameVi, nameEn: spot.nameEn,
         descriptionVi: spot.descriptionVi ?? '',
         descriptionEn: spot.descriptionEn ?? '',
+        latitude: spot.latitude ?? null,
+        longitude: spot.longitude ?? null,
       }
     }
     if (!(spot.id in spotLang.value)) spotLang.value[spot.id] = 'vi'
@@ -296,6 +328,7 @@ async function addDraftSpot(): Promise<void> {
       audioViUrl: null, audioEnUrl: null,
       images: [],
       saving: false,
+      latitude: null, longitude: null,
     })
   } catch { toast.error(t('error.server_error')) }
   finally { creatingNew.value = false }
@@ -317,6 +350,8 @@ async function saveDraft(draftId: string): Promise<void> {
         nameVi: draft.nameVi.trim(), nameEn: draft.nameEn.trim(),
         descriptionVi: draft.descriptionVi.trim() || undefined,
         descriptionEn: draft.descriptionEn.trim() || undefined,
+        latitude: draft.latitude ?? undefined,
+        longitude: draft.longitude ?? undefined,
       },
     })
     const idx = draftSpots.value.findIndex(d => d.id === draftId)
@@ -364,6 +399,8 @@ function toggleExpand(spotId: string): void {
         nameVi: spot.nameVi, nameEn: spot.nameEn,
         descriptionVi: spot.descriptionVi ?? '',
         descriptionEn: spot.descriptionEn ?? '',
+        latitude: spot.latitude ?? null,
+        longitude: spot.longitude ?? null,
       }
     }
   }
@@ -375,7 +412,13 @@ async function handleSaveSpot(spotId: string): Promise<void> {
   savingSpotId.value = spotId
   try {
     await $fetch(apiUrl(`/admin/locations/${props.locationId}/spots/${spotId}`), {
-      method: 'PUT', headers: authHeaders(), body: form
+      method: 'PUT', headers: authHeaders(), body: {
+        nameVi: form.nameVi, nameEn: form.nameEn,
+        descriptionVi: form.descriptionVi || undefined,
+        descriptionEn: form.descriptionEn || undefined,
+        latitude: form.latitude ?? undefined,
+        longitude: form.longitude ?? undefined,
+      }
     })
     toast.success(t('admin.update_success'))
     emit('updated')

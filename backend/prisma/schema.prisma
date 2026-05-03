@@ -48,29 +48,33 @@ enum PackageType {
 }
 
 model Location {
-  id              String   @id @default(cuid())
-  slug            String   @unique
-  nameVi          String
-  nameEn          String
-  descriptionVi   String?  @db.Text
-  descriptionEn   String?  @db.Text
-  overviewVi      String?  @db.Text
-  overviewEn      String?  @db.Text
-  historyVi       String?  @db.Text
-  historyEn       String?  @db.Text
-  highlightsVi    String?  @db.Text
-  highlightsEn    String?  @db.Text
-  visitingGuideVi String?  @db.Text
-  visitingGuideEn String?  @db.Text
-  audioViUrl      String?
-  audioEnUrl      String?
-  imageUrl        String?
-  latitude        Float
-  longitude       Float
-  displayOrder    Int      @default(0)
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  nameVi            String
+  nameEn            String
+  descriptionVi     String?  @db.Text
+  descriptionEn     String?  @db.Text
+  overviewVi        String?  @db.Text
+  overviewEn        String?  @db.Text
+  historyVi         String?  @db.Text
+  historyEn         String?  @db.Text
+  highlightsVi      String?  @db.Text
+  highlightsEn      String?  @db.Text
+  openTime          String?
+  closeTime         String?
+  admissionFee      Int?
+  estimatedDuration Int?
+  address           String?
+  bestTime          String?
+  audioViUrl        String?
+  audioEnUrl        String?
+  imageUrl          String?
+  latitude          Float
+  longitude         Float
+  displayOrder      Int      @default(0)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   packages        PackageLocation[]
   locationImages  LocationImage[]
@@ -99,6 +103,7 @@ model Package {
 model PackageLocation {
   packageId  String
   locationId String
+  order      Int    @default(0)
 
   package  Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
   location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
@@ -129,6 +134,8 @@ model LocationSpot {
   descriptionEn String?  @db.Text
   audioViUrl    String?
   audioEnUrl    String?
+  latitude      Float?
+  longitude     Float?
   order         Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -152,15 +159,19 @@ model LocationSpotImage {
 }
 
 model Ticket {
-  id          String     @id @default(cuid())
-  code        String     @unique // NBG-XXXXXX
-  packageId   String
-  guestName   String
-  guestPhone  String?
-  note        String?
-  expiresAt   DateTime
-  createdById String // staff userId
-  createdAt   DateTime   @default(now())
+  id               String    @id @default(cuid())
+  code             String    @unique // NBG-XXXXXX
+  packageId        String
+  guestName        String
+  guestPhone       String?
+  note             String?
+  expiresAt        DateTime
+  isPaid           Boolean   @default(false)
+  amountCollected  Int       @default(0)
+  isCancelled      Boolean   @default(false)
+  cancelledAt      DateTime?
+  createdById      String // staff userId
+  createdAt        DateTime  @default(now())
 
   package     Package      @relation(fields: [packageId], references: [id])
   createdBy   User         @relation("StaffTickets", fields: [createdById], references: [id])
@@ -170,10 +181,11 @@ model Ticket {
 }
 
 model TicketUser {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   ticketId    String
   userId      String
-  activatedAt DateTime @default(now())
+  activatedAt DateTime  @default(now())
+  expiresAt   DateTime?
 
   ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

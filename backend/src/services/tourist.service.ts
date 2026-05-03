@@ -51,7 +51,6 @@ export class TouristService {
     if (!ticketUser) throw new ForbiddenError('Bạn chưa kích hoạt vé tham quan')
 
     const { ticket } = ticketUser
-    if (ticket.expiresAt < new Date()) throw new ForbiddenError('Vé đã hết hạn')
 
     let locations: Awaited<ReturnType<LocationRepo['findByIds']>>
 
@@ -80,7 +79,6 @@ export class TouristService {
     if (!ticketUser) throw new ForbiddenError('Bạn chưa kích hoạt vé tham quan')
 
     const { ticket } = ticketUser
-    if (ticket.expiresAt < new Date()) throw new ForbiddenError('Vé đã hết hạn')
 
     if (ticket.package.type === 'custom') {
       const allowedIds = ticket.package.locations.map((pl) => pl.locationId)
@@ -97,7 +95,12 @@ export class TouristService {
       overview: lang === 'vi' ? (location.overviewVi ?? null) : (location.overviewEn ?? null),
       history: lang === 'vi' ? (location.historyVi ?? null) : (location.historyEn ?? null),
       highlights: lang === 'vi' ? (location.highlightsVi ?? null) : (location.highlightsEn ?? null),
-      visitingGuide: lang === 'vi' ? (location.visitingGuideVi ?? null) : (location.visitingGuideEn ?? null),
+      openTime: location.openTime ?? null,
+      closeTime: location.closeTime ?? null,
+      admissionFee: location.admissionFee ?? null,
+      estimatedDuration: location.estimatedDuration ?? null,
+      address: location.address ?? null,
+      bestTime: location.bestTime ?? null,
       imageUrl: location.imageUrl ?? null,
       audioUrl: lang === 'vi' ? (location.audioViUrl ?? null) : (location.audioEnUrl ?? null),
       images: (location.locationImages ?? []).map((img: { id: string; url: string; caption: string | null }) => ({

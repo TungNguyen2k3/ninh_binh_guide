@@ -37,8 +37,12 @@ export interface Location {
   historyEn: string | null
   highlightsVi: string | null
   highlightsEn: string | null
-  visitingGuideVi: string | null
-  visitingGuideEn: string | null
+  openTime: string | null
+  closeTime: string | null
+  admissionFee: number | null
+  estimatedDuration: number | null
+  address: string | null
+  bestTime: string | null
   audioViUrl: string | null
   audioEnUrl: string | null
   imageUrl: string | null
@@ -63,8 +67,12 @@ export interface LocationFormData {
   historyEn: string
   highlightsVi: string
   highlightsEn: string
-  visitingGuideVi: string
-  visitingGuideEn: string
+  openTime: string
+  closeTime: string
+  admissionFee: number | null
+  estimatedDuration: number | null
+  address: string
+  bestTime: string
   latitude: number | null
   longitude: number | null
   displayOrder: number

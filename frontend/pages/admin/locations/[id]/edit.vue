@@ -91,7 +91,7 @@
           </div>
         </div>
 
-        <!-- 4 content sections -->
+        <!-- 3 bilingual content sections (overview, history, highlights) -->
         <div v-for="section in contentSections" :key="section.keyBase" class="flex flex-col gap-1">
           <label class="text-sm font-medium text-gray-700">
             {{ section.icon }} {{ section.label }}
@@ -103,6 +103,60 @@
             :placeholder="section.placeholder"
             class="mt-1 block w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none transition-colors"
           />
+        </div>
+
+        <!-- Visiting info: structured factual fields (not bilingual) -->
+        <div class="pt-2">
+          <div class="border-t border-gray-100 mb-4" />
+          <h3 class="text-sm font-semibold text-gray-700 mb-4">🗺️ {{ $t('admin.visiting_info') }}</h3>
+          <div class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <AppInput
+                v-model="formData.openTime"
+                :label="$t('location.open_time')"
+                :placeholder="$t('admin.open_time_placeholder')"
+              />
+              <AppInput
+                v-model="formData.closeTime"
+                :label="$t('location.open_time') + ' (close)'"
+                :placeholder="$t('admin.open_time_placeholder')"
+              />
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="flex flex-col gap-1">
+                <label class="text-sm font-medium text-gray-700">{{ $t('location.admission_fee') }}</label>
+                <input
+                  v-model.number="formData.admissionFee"
+                  type="number"
+                  min="0"
+                  step="1000"
+                  :placeholder="$t('admin.admission_fee_placeholder')"
+                  class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-colors"
+                />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-sm font-medium text-gray-700">{{ $t('location.estimated_duration') }}</label>
+                <input
+                  v-model.number="formData.estimatedDuration"
+                  type="number"
+                  min="0"
+                  step="15"
+                  :placeholder="$t('admin.duration_placeholder')"
+                  class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-colors"
+                />
+              </div>
+            </div>
+            <AppInput
+              v-model="formData.address"
+              :label="$t('location.address')"
+              :placeholder="$t('admin.address_placeholder')"
+            />
+            <AppInput
+              v-model="formData.bestTime"
+              :label="$t('location.best_time')"
+              :placeholder="$t('admin.best_time_placeholder')"
+            />
+          </div>
         </div>
 
         <div class="flex justify-end pt-1">
@@ -168,11 +222,6 @@ const contentSections = computed(() => [
     label: t('admin.highlights'), hint: t('admin.highlights_hint'),
     placeholder: t('admin.highlights_placeholder'), rows: 4,
   },
-  {
-    keyBase: 'visitingGuide', icon: '🗺️',
-    label: t('admin.visiting_guide'), hint: t('admin.visiting_guide_hint'),
-    placeholder: t('admin.visiting_guide_placeholder'), rows: 4,
-  },
 ])
 
 const formData = ref<LocationFormData>({
@@ -181,7 +230,9 @@ const formData = ref<LocationFormData>({
   overviewVi: '', overviewEn: '',
   historyVi: '', historyEn: '',
   highlightsVi: '', highlightsEn: '',
-  visitingGuideVi: '', visitingGuideEn: '',
+  openTime: '', closeTime: '',
+  admissionFee: null, estimatedDuration: null,
+  address: '', bestTime: '',
   latitude: null, longitude: null,
   displayOrder: 0, isActive: true,
 })
@@ -196,7 +247,9 @@ async function loadLocation(): Promise<void> {
       overviewVi: loc.overviewVi ?? '', overviewEn: loc.overviewEn ?? '',
       historyVi: loc.historyVi ?? '', historyEn: loc.historyEn ?? '',
       highlightsVi: loc.highlightsVi ?? '', highlightsEn: loc.highlightsEn ?? '',
-      visitingGuideVi: loc.visitingGuideVi ?? '', visitingGuideEn: loc.visitingGuideEn ?? '',
+      openTime: loc.openTime ?? '', closeTime: loc.closeTime ?? '',
+      admissionFee: loc.admissionFee ?? null, estimatedDuration: loc.estimatedDuration ?? null,
+      address: loc.address ?? '', bestTime: loc.bestTime ?? '',
       latitude: loc.latitude, longitude: loc.longitude,
       displayOrder: loc.displayOrder, isActive: loc.isActive,
     }

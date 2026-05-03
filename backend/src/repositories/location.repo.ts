@@ -65,6 +65,18 @@ export class LocationRepo {
       nameEn: string
       descriptionVi: string
       descriptionEn: string
+      overviewVi: string
+      overviewEn: string
+      historyVi: string
+      historyEn: string
+      highlightsVi: string
+      highlightsEn: string
+      openTime: string
+      closeTime: string
+      admissionFee: number
+      estimatedDuration: number
+      address: string
+      bestTime: string
       latitude: number
       longitude: number
       displayOrder: number
@@ -130,6 +142,8 @@ export class LocationRepo {
       nameEn: string
       descriptionVi?: string
       descriptionEn?: string
+      latitude?: number
+      longitude?: number
       order?: number
     }
   ) {
@@ -145,6 +159,8 @@ export class LocationRepo {
       descriptionEn: string
       audioViUrl: string
       audioEnUrl: string
+      latitude: number
+      longitude: number
       order: number
     }>
   ) {
