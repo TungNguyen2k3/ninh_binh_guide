@@ -40,13 +40,143 @@
         />
       </div>
 
-      <!-- Image upload -->
+      <!-- Image upload (single cover) -->
       <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
         <h2 class="text-base font-semibold text-gray-900">{{ $t('admin.upload_image') }}</h2>
         <AdminImageUpload
           :location-id="locationStore.current.id"
           :image-url="locationStore.current.imageUrl"
           @uploaded="reloadCurrent"
+        />
+      </div>
+
+      <!-- Detailed content sections -->
+      <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-5">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-semibold text-gray-900">{{ $t('admin.content_sections') }}</h2>
+          <!-- Language tabs -->
+          <div class="flex gap-2">
+            <button
+              v-for="lang in (['vi', 'en'] as const)"
+              :key="lang"
+              type="button"
+              class="px-3 py-1 text-sm rounded-lg transition-colors"
+              :class="contentLang === lang
+                ? 'bg-brand-600 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+              @click="contentLang = lang"
+            >
+              {{ lang === 'vi' ? 'Tiếng Việt' : 'English' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Vietnamese content fields -->
+        <template v-if="contentLang === 'vi'">
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">{{ $t('admin.overview') }} (VI)</label>
+            <textarea
+              v-model="formData.overviewVi"
+              rows="4"
+              :placeholder="$t('admin.overview')"
+              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
+            />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">{{ $t('admin.history') }} (VI)</label>
+            <textarea
+              v-model="formData.historyVi"
+              rows="4"
+              :placeholder="$t('admin.history')"
+              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
+            />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">{{ $t('admin.highlights') }} (VI)</label>
+            <textarea
+              v-model="formData.highlightsVi"
+              rows="4"
+              :placeholder="$t('admin.highlights')"
+              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
+            />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">{{ $t('admin.visiting_guide') }} (VI)</label>
+            <textarea
+              v-model="formData.visitingGuideVi"
+              rows="4"
+              :placeholder="$t('admin.visiting_guide')"
+              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
+            />
+          </div>
+        </template>
+
+        <!-- English content fields -->
+        <template v-if="contentLang === 'en'">
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">{{ $t('admin.overview') }} (EN)</label>
+            <textarea
+              v-model="formData.overviewEn"
+              rows="4"
+              :placeholder="$t('admin.overview')"
+              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
+            />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">{{ $t('admin.history') }} (EN)</label>
+            <textarea
+              v-model="formData.historyEn"
+              rows="4"
+              :placeholder="$t('admin.history')"
+              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
+            />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">{{ $t('admin.highlights') }} (EN)</label>
+            <textarea
+              v-model="formData.highlightsEn"
+              rows="4"
+              :placeholder="$t('admin.highlights')"
+              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
+            />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-sm font-medium text-gray-700">{{ $t('admin.visiting_guide') }} (EN)</label>
+            <textarea
+              v-model="formData.visitingGuideEn"
+              rows="4"
+              :placeholder="$t('admin.visiting_guide')"
+              class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors duration-150 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 resize-none"
+            />
+          </div>
+        </template>
+
+        <!-- Save content button -->
+        <div class="flex justify-end pt-2">
+          <AppButton type="button" :loading="isSubmitting" class="min-w-32" @click="handleSubmit">
+            {{ isSubmitting ? $t('common.saving') : $t('admin.save_changes') }}
+          </AppButton>
+        </div>
+      </div>
+
+      <!-- Multi-image upload -->
+      <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+        <h2 class="text-base font-semibold text-gray-900">{{ $t('admin.images_section') }}</h2>
+        <AdminMultiImageUpload
+          :location-id="locationStore.current.id"
+          :images="locationStore.current.images ?? []"
+          @uploaded="reloadCurrent"
+          @deleted="reloadCurrent"
+        />
+      </div>
+
+      <!-- Spot manager -->
+      <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+        <h2 class="text-base font-semibold text-gray-900">{{ $t('admin.spots_section') }}</h2>
+        <AdminSpotManager
+          :location-id="locationStore.current.id"
+          :spots="locationStore.current.spots ?? []"
+          @updated="reloadCurrent"
         />
       </div>
     </template>
@@ -69,6 +199,7 @@ const route = useRoute()
 const locationStore = useLocationStore()
 const { toast } = useToast()
 const isSubmitting = ref(false)
+const contentLang = ref<'vi' | 'en'>('vi')
 
 const formData = ref<LocationFormData>({
   nameVi: '',
@@ -76,6 +207,14 @@ const formData = ref<LocationFormData>({
   slug: '',
   descriptionVi: '',
   descriptionEn: '',
+  overviewVi: '',
+  overviewEn: '',
+  historyVi: '',
+  historyEn: '',
+  highlightsVi: '',
+  highlightsEn: '',
+  visitingGuideVi: '',
+  visitingGuideEn: '',
   latitude: null,
   longitude: null,
   displayOrder: 0,
@@ -93,6 +232,14 @@ async function loadLocation(): Promise<void> {
       slug: loc.slug,
       descriptionVi: loc.descriptionVi ?? '',
       descriptionEn: loc.descriptionEn ?? '',
+      overviewVi: loc.overviewVi ?? '',
+      overviewEn: loc.overviewEn ?? '',
+      historyVi: loc.historyVi ?? '',
+      historyEn: loc.historyEn ?? '',
+      highlightsVi: loc.highlightsVi ?? '',
+      highlightsEn: loc.highlightsEn ?? '',
+      visitingGuideVi: loc.visitingGuideVi ?? '',
+      visitingGuideEn: loc.visitingGuideEn ?? '',
       latitude: loc.latitude,
       longitude: loc.longitude,
       displayOrder: loc.displayOrder,
@@ -126,5 +273,5 @@ async function handleSubmit(): Promise<void> {
   }
 }
 
-await loadLocation()
+onMounted(loadLocation)
 </script>

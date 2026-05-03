@@ -79,7 +79,11 @@
     "not_found": "Location not found",
     "view_detail": "View details",
     "play": "Play",
-    "pause": "Pause"
+    "pause": "Pause",
+    "history": "History",
+    "highlights": "Highlights",
+    "visiting_guide": "Visiting Guide",
+    "spots": "Areas & Spots"
   },
   "admin": {
     "coming_soon": "Feature under development",
@@ -107,7 +111,20 @@
     "save_changes": "Save changes",
     "create_success": "Created successfully",
     "update_success": "Updated successfully",
-    "delete_success": "Deleted successfully"
+    "delete_success": "Deleted successfully",
+    "add_photo": "Add photo",
+    "max_photos_reached": "Maximum 5 photos reached",
+    "add_spot": "Add area",
+    "spot_name_vi": "Area name (Vietnamese)",
+    "spot_name_en": "Area name (English)",
+    "spot_description": "Area description",
+    "content_sections": "Detailed content",
+    "images_section": "Images",
+    "spots_section": "Areas & Spots",
+    "overview": "Overview",
+    "history": "History",
+    "highlights": "Highlights",
+    "visiting_guide": "Visiting guide"
   },
   "ticket": {
     "activate_title": "Activate your ticket",

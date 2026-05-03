@@ -79,7 +79,11 @@
     "not_found": "Không tìm thấy địa điểm",
     "view_detail": "Xem chi tiết",
     "play": "Phát",
-    "pause": "Dừng"
+    "pause": "Dừng",
+    "history": "Lịch sử hình thành",
+    "highlights": "Điểm nổi bật",
+    "visiting_guide": "Hướng dẫn tham quan",
+    "spots": "Các khu vực"
   },
   "admin": {
     "coming_soon": "Tính năng đang phát triển",
@@ -107,7 +111,20 @@
     "save_changes": "Lưu thay đổi",
     "create_success": "Tạo thành công",
     "update_success": "Cập nhật thành công",
-    "delete_success": "Đã xóa thành công"
+    "delete_success": "Đã xóa thành công",
+    "add_photo": "Thêm ảnh",
+    "max_photos_reached": "Đã đạt giới hạn 5 ảnh",
+    "add_spot": "Thêm khu vực",
+    "spot_name_vi": "Tên khu vực (Việt)",
+    "spot_name_en": "Tên khu vực (English)",
+    "spot_description": "Mô tả khu vực",
+    "content_sections": "Nội dung chi tiết",
+    "images_section": "Hình ảnh",
+    "spots_section": "Khu vực & Điểm tham quan",
+    "overview": "Mô tả tổng quan",
+    "history": "Lịch sử hình thành",
+    "highlights": "Điểm nổi bật",
+    "visiting_guide": "Hướng dẫn tham quan"
   },
   "ticket": {
     "activate_title": "Kích hoạt vé tham quan",

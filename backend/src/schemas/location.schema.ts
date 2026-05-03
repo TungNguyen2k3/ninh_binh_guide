@@ -16,7 +16,25 @@ export const CreateLocationSchema = z.object({
 
 export const UpdateLocationSchema = CreateLocationSchema.partial().extend({
   isActive: z.boolean().optional(),
+  overviewVi: z.string().optional(),
+  overviewEn: z.string().optional(),
+  historyVi: z.string().optional(),
+  historyEn: z.string().optional(),
+  highlightsVi: z.string().optional(),
+  highlightsEn: z.string().optional(),
+  visitingGuideVi: z.string().optional(),
+  visitingGuideEn: z.string().optional(),
 })
+
+export const CreateSpotSchema = z.object({
+  nameVi: z.string().min(1),
+  nameEn: z.string().min(1),
+  descriptionVi: z.string().optional(),
+  descriptionEn: z.string().optional(),
+  order: z.number().int().min(0).optional(),
+})
+
+export const UpdateSpotSchema = CreateSpotSchema.partial()
 
 export const LocationQuerySchema = z.object({
   search: z.string().optional(),
@@ -31,3 +49,5 @@ export const LocationQuerySchema = z.object({
 export type CreateLocationDto = z.infer<typeof CreateLocationSchema>
 export type UpdateLocationDto = z.infer<typeof UpdateLocationSchema>
 export type LocationQuery = z.infer<typeof LocationQuerySchema>
+export type CreateSpotDto = z.infer<typeof CreateSpotSchema>
+export type UpdateSpotDto = z.infer<typeof UpdateSpotSchema>

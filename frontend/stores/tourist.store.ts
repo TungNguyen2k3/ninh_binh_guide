@@ -13,8 +13,33 @@ export interface TouristLocation {
   displayOrder: number
 }
 
+export interface TouristSpotImage {
+  id: string
+  url: string
+}
+
+export interface TouristSpot {
+  id: string
+  name: string
+  description: string | null
+  audioUrl: string | null
+  images: TouristSpotImage[]
+}
+
+export interface TouristLocationImage {
+  id: string
+  url: string
+  caption: string | null
+}
+
 export interface TouristLocationDetail extends TouristLocation {
   audioUrl: string | null
+  overview: string | null
+  history: string | null
+  highlights: string | null
+  visitingGuide: string | null
+  images: TouristLocationImage[]
+  spots: TouristSpot[]
 }
 
 interface TouristState {

@@ -8,6 +8,8 @@ import {
   CreateLocationSchema,
   UpdateLocationSchema,
   LocationQuerySchema,
+  CreateSpotSchema,
+  UpdateSpotSchema,
 } from '../schemas/location.schema.js'
 import {
   CreatePackageSchema,
@@ -52,10 +54,10 @@ export async function adminRoutes(
     return reply.status(201).send(ok(location))
   })
 
-  // GET /locations/:id
+  // GET /locations/:id — includes locationImages and spots.images
   fastify.get('/locations/:id', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
     const { id } = req.params as { id: string }
-    const location = await locationService.getById(id)
+    const location = await locationService.getByIdFull(id)
     return reply.send(ok(location))
   })
 
@@ -100,6 +102,85 @@ export async function adminRoutes(
     const buffer = await data.toBuffer()
     const updated = await locationService.uploadImageFile(id, buffer, data.filename)
     return reply.send(ok(updated))
+  })
+
+  // POST /locations/:id/images — upload gallery image
+  fastify.post('/locations/:id/images', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as { id: string }
+
+    const data = await req.file()
+    if (!data) throw new ValidationError('File is required')
+
+    const buffer = await data.toBuffer()
+    const image = await locationService.uploadLocationImage(id, buffer, data.filename)
+    return reply.status(201).send(ok(image))
+  })
+
+  // DELETE /locations/:id/images/:imageId
+  fastify.delete('/locations/:id/images/:imageId', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id, imageId } = req.params as { id: string; imageId: string }
+    await locationService.deleteLocationImage(id, imageId)
+    return reply.status(204).send()
+  })
+
+  // POST /locations/:id/spots — create a spot
+  fastify.post('/locations/:id/spots', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as { id: string }
+    const parsed = CreateSpotSchema.safeParse(req.body)
+    if (!parsed.success) throw new ValidationError('Validation failed', parsed.error.flatten())
+
+    const spot = await locationService.createSpot(id, parsed.data)
+    return reply.status(201).send(ok(spot))
+  })
+
+  // PUT /locations/:id/spots/:spotId — update a spot
+  fastify.put('/locations/:id/spots/:spotId', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id, spotId } = req.params as { id: string; spotId: string }
+    const parsed = UpdateSpotSchema.safeParse(req.body)
+    if (!parsed.success) throw new ValidationError('Validation failed', parsed.error.flatten())
+
+    const spot = await locationService.updateSpot(id, spotId, parsed.data)
+    return reply.send(ok(spot))
+  })
+
+  // DELETE /locations/:id/spots/:spotId
+  fastify.delete('/locations/:id/spots/:spotId', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id, spotId } = req.params as { id: string; spotId: string }
+    await locationService.deleteSpot(id, spotId)
+    return reply.status(204).send()
+  })
+
+  // POST /locations/:id/spots/:spotId/audio — upload spot audio
+  fastify.post('/locations/:id/spots/:spotId/audio', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id, spotId } = req.params as { id: string; spotId: string }
+    const { lang } = req.query as { lang?: string }
+
+    const data = await req.file()
+    if (!data) throw new ValidationError('File is required')
+
+    const audioLang: 'vi' | 'en' = lang === 'en' ? 'en' : 'vi'
+    const buffer = await data.toBuffer()
+    const spot = await locationService.uploadSpotAudio(id, spotId, audioLang, buffer, data.filename)
+    return reply.send(ok(spot))
+  })
+
+  // POST /locations/:id/spots/:spotId/images — upload spot image
+  fastify.post('/locations/:id/spots/:spotId/images', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id, spotId } = req.params as { id: string; spotId: string }
+
+    const data = await req.file()
+    if (!data) throw new ValidationError('File is required')
+
+    const buffer = await data.toBuffer()
+    const image = await locationService.uploadSpotImage(id, spotId, buffer, data.filename)
+    return reply.status(201).send(ok(image))
+  })
+
+  // DELETE /locations/:id/spots/:spotId/images/:imageId
+  fastify.delete('/locations/:id/spots/:spotId/images/:imageId', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id, spotId, imageId } = req.params as { id: string; spotId: string; imageId: string }
+    await locationService.deleteSpotImage(id, spotId, imageId)
+    return reply.status(204).send()
   })
 
   // ─── Package Routes ───────────────────────────────────────────────────────────

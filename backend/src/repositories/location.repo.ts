@@ -89,4 +89,65 @@ export class LocationRepo {
       orderBy: { displayOrder: 'asc' },
     })
   }
+
+  findBySlugFull(slug: string) {
+    return this.prisma.location.findUnique({
+      where: { slug },
+      include: {
+        locationImages: { orderBy: { order: 'asc' } },
+        spots: {
+          orderBy: { order: 'asc' },
+          include: { images: { orderBy: { order: 'asc' } } },
+        },
+      },
+    })
+  }
+
+  addImage(locationId: string, data: { url: string; caption?: string; order?: number }) {
+    return this.prisma.locationImage.create({ data: { locationId, ...data } })
+  }
+
+  deleteImage(imageId: string) {
+    return this.prisma.locationImage.delete({ where: { id: imageId } })
+  }
+
+  createSpot(
+    locationId: string,
+    data: {
+      nameVi: string
+      nameEn: string
+      descriptionVi?: string
+      descriptionEn?: string
+      order?: number
+    }
+  ) {
+    return this.prisma.locationSpot.create({ data: { locationId, ...data } })
+  }
+
+  updateSpot(
+    spotId: string,
+    data: Partial<{
+      nameVi: string
+      nameEn: string
+      descriptionVi: string
+      descriptionEn: string
+      audioViUrl: string
+      audioEnUrl: string
+      order: number
+    }>
+  ) {
+    return this.prisma.locationSpot.update({ where: { id: spotId }, data })
+  }
+
+  deleteSpot(spotId: string) {
+    return this.prisma.locationSpot.delete({ where: { id: spotId } })
+  }
+
+  addSpotImage(spotId: string, data: { url: string; order?: number }) {
+    return this.prisma.locationSpotImage.create({ data: { spotId, ...data } })
+  }
+
+  deleteSpotImage(imageId: string) {
+    return this.prisma.locationSpotImage.delete({ where: { id: imageId } })
+  }
 }

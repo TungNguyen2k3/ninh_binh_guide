@@ -10,10 +10,18 @@ const mockLocationRepo = {
   findAll: vi.fn(),
   findById: vi.fn(),
   findBySlug: vi.fn(),
+  findBySlugFull: vi.fn(),
   create: vi.fn(),
   update: vi.fn(),
   delete: vi.fn(),
   findByPackageId: vi.fn(),
+  addImage: vi.fn(),
+  deleteImage: vi.fn(),
+  createSpot: vi.fn(),
+  updateSpot: vi.fn(),
+  deleteSpot: vi.fn(),
+  addSpotImage: vi.fn(),
+  deleteSpotImage: vi.fn(),
 } as unknown as LocationRepo
 
 // Mock cloudinary and cache so no real credentials are needed
@@ -36,6 +44,14 @@ const mockLocation = {
   nameEn: 'Trang An',
   descriptionVi: 'Mô tả tràng an',
   descriptionEn: 'Trang An description',
+  overviewVi: null,
+  overviewEn: null,
+  historyVi: null,
+  historyEn: null,
+  highlightsVi: null,
+  highlightsEn: null,
+  visitingGuideVi: null,
+  visitingGuideEn: null,
   latitude: 20.2539,
   longitude: 105.9054,
   displayOrder: 1,
@@ -232,5 +248,171 @@ describe('LocationService.uploadAudioFile', () => {
       expect.objectContaining({ audioEnUrl: 'https://cloudinary.com/audio.mp3' })
     )
     expect(result.audioEnUrl).toBe('https://cloudinary.com/audio.mp3')
+  })
+})
+
+// ===========================================================================
+// LocationService.uploadLocationImage
+// ===========================================================================
+describe('LocationService.uploadLocationImage', () => {
+  it('uploads gallery image and returns the created record', async () => {
+    const mockImage = { id: 'img-1', locationId: 'loc-1', url: 'https://cloudinary.com/image.jpg', caption: null, order: 0, createdAt: new Date() }
+    vi.mocked(mockLocationRepo.findById).mockResolvedValue(mockLocation)
+    vi.mocked(mockLocationRepo.addImage).mockResolvedValue(mockImage)
+
+    const { cache } = await import('../lib/cache.js')
+
+    const result = await locationService.uploadLocationImage('loc-1', Buffer.from('img'), 'photo.jpg')
+
+    expect(mockLocationRepo.addImage).toHaveBeenCalledWith('loc-1', expect.objectContaining({ url: 'https://cloudinary.com/image.jpg' }))
+    expect(cache.del).toHaveBeenCalledWith('locations:all')
+    expect(result).toEqual(mockImage)
+  })
+
+  it('throws NotFoundError when location does not exist', async () => {
+    vi.mocked(mockLocationRepo.findById).mockResolvedValue(null)
+
+    await expect(
+      locationService.uploadLocationImage('nonexistent', Buffer.from('img'), 'photo.jpg')
+    ).rejects.toThrow(NotFoundError)
+
+    expect(mockLocationRepo.addImage).not.toHaveBeenCalled()
+  })
+})
+
+// ===========================================================================
+// LocationService.deleteLocationImage
+// ===========================================================================
+describe('LocationService.deleteLocationImage', () => {
+  it('deletes image after verifying location exists', async () => {
+    vi.mocked(mockLocationRepo.findById).mockResolvedValue(mockLocation)
+    vi.mocked(mockLocationRepo.deleteImage).mockResolvedValue({ id: 'img-1' } as any)
+
+    await locationService.deleteLocationImage('loc-1', 'img-1')
+
+    expect(mockLocationRepo.deleteImage).toHaveBeenCalledWith('img-1')
+  })
+
+  it('throws NotFoundError when location not found', async () => {
+    vi.mocked(mockLocationRepo.findById).mockResolvedValue(null)
+
+    await expect(locationService.deleteLocationImage('bad-id', 'img-1')).rejects.toThrow(NotFoundError)
+    expect(mockLocationRepo.deleteImage).not.toHaveBeenCalled()
+  })
+})
+
+// ===========================================================================
+// LocationService.createSpot
+// ===========================================================================
+describe('LocationService.createSpot', () => {
+  it('creates a spot for existing location', async () => {
+    const mockSpot = { id: 'spot-1', locationId: 'loc-1', nameVi: 'Bến thuyền', nameEn: 'Boat dock', descriptionVi: null, descriptionEn: null, audioViUrl: null, audioEnUrl: null, order: 0, createdAt: new Date(), updatedAt: new Date() }
+    vi.mocked(mockLocationRepo.findById).mockResolvedValue(mockLocation)
+    vi.mocked(mockLocationRepo.createSpot).mockResolvedValue(mockSpot)
+
+    const result = await locationService.createSpot('loc-1', { nameVi: 'Bến thuyền', nameEn: 'Boat dock' })
+
+    expect(mockLocationRepo.createSpot).toHaveBeenCalledWith('loc-1', { nameVi: 'Bến thuyền', nameEn: 'Boat dock' })
+    expect(result.id).toBe('spot-1')
+  })
+
+  it('throws NotFoundError when location does not exist', async () => {
+    vi.mocked(mockLocationRepo.findById).mockResolvedValue(null)
+
+    await expect(
+      locationService.createSpot('bad-id', { nameVi: 'X', nameEn: 'X' })
+    ).rejects.toThrow(NotFoundError)
+
+    expect(mockLocationRepo.createSpot).not.toHaveBeenCalled()
+  })
+})
+
+// ===========================================================================
+// LocationService.updateSpot
+// ===========================================================================
+describe('LocationService.updateSpot', () => {
+  it('updates spot and invalidates detail cache', async () => {
+    const mockSpot = { id: 'spot-1', locationId: 'loc-1', nameVi: 'Cập nhật', nameEn: 'Updated', descriptionVi: null, descriptionEn: null, audioViUrl: null, audioEnUrl: null, order: 0, createdAt: new Date(), updatedAt: new Date() }
+    vi.mocked(mockLocationRepo.findById).mockResolvedValue(mockLocation)
+    vi.mocked(mockLocationRepo.updateSpot).mockResolvedValue(mockSpot)
+
+    const { cache } = await import('../lib/cache.js')
+
+    await locationService.updateSpot('loc-1', 'spot-1', { nameVi: 'Cập nhật' })
+
+    expect(mockLocationRepo.updateSpot).toHaveBeenCalledWith('spot-1', { nameVi: 'Cập nhật' })
+    expect(cache.del).toHaveBeenCalledWith('location:detail:trang-an:vi')
+    expect(cache.del).toHaveBeenCalledWith('location:detail:trang-an:en')
+  })
+})
+
+// ===========================================================================
+// LocationService.deleteSpot
+// ===========================================================================
+describe('LocationService.deleteSpot', () => {
+  it('deletes spot and invalidates detail cache', async () => {
+    vi.mocked(mockLocationRepo.findById).mockResolvedValue(mockLocation)
+    vi.mocked(mockLocationRepo.deleteSpot).mockResolvedValue({ id: 'spot-1' } as any)
+
+    const { cache } = await import('../lib/cache.js')
+
+    await locationService.deleteSpot('loc-1', 'spot-1')
+
+    expect(mockLocationRepo.deleteSpot).toHaveBeenCalledWith('spot-1')
+    expect(cache.del).toHaveBeenCalledWith('location:detail:trang-an:vi')
+  })
+})
+
+// ===========================================================================
+// LocationService.uploadSpotAudio
+// ===========================================================================
+describe('LocationService.uploadSpotAudio', () => {
+  it('uploads vi audio for spot and sets audioViUrl', async () => {
+    const mockSpot = { id: 'spot-1', locationId: 'loc-1', nameVi: 'X', nameEn: 'X', descriptionVi: null, descriptionEn: null, audioViUrl: 'https://cloudinary.com/audio.mp3', audioEnUrl: null, order: 0, createdAt: new Date(), updatedAt: new Date() }
+    vi.mocked(mockLocationRepo.findById).mockResolvedValue(mockLocation)
+    vi.mocked(mockLocationRepo.updateSpot).mockResolvedValue(mockSpot)
+
+    const result = await locationService.uploadSpotAudio('loc-1', 'spot-1', 'vi', Buffer.from('audio'), 'a.mp3')
+
+    expect(mockLocationRepo.updateSpot).toHaveBeenCalledWith('spot-1', expect.objectContaining({ audioViUrl: 'https://cloudinary.com/audio.mp3' }))
+    expect(result.audioViUrl).toBe('https://cloudinary.com/audio.mp3')
+  })
+
+  it('uploads en audio for spot and sets audioEnUrl', async () => {
+    const mockSpot = { id: 'spot-1', locationId: 'loc-1', nameVi: 'X', nameEn: 'X', descriptionVi: null, descriptionEn: null, audioViUrl: null, audioEnUrl: 'https://cloudinary.com/audio.mp3', order: 0, createdAt: new Date(), updatedAt: new Date() }
+    vi.mocked(mockLocationRepo.findById).mockResolvedValue(mockLocation)
+    vi.mocked(mockLocationRepo.updateSpot).mockResolvedValue(mockSpot)
+
+    const result = await locationService.uploadSpotAudio('loc-1', 'spot-1', 'en', Buffer.from('audio'), 'a.mp3')
+
+    expect(mockLocationRepo.updateSpot).toHaveBeenCalledWith('spot-1', expect.objectContaining({ audioEnUrl: 'https://cloudinary.com/audio.mp3' }))
+    expect(result.audioEnUrl).toBe('https://cloudinary.com/audio.mp3')
+  })
+})
+
+// ===========================================================================
+// LocationService.uploadSpotImage / deleteSpotImage
+// ===========================================================================
+describe('LocationService.uploadSpotImage', () => {
+  it('uploads image for spot and returns the record', async () => {
+    const mockSpotImg = { id: 'simg-1', spotId: 'spot-1', url: 'https://cloudinary.com/image.jpg', order: 0, createdAt: new Date() }
+    vi.mocked(mockLocationRepo.findById).mockResolvedValue(mockLocation)
+    vi.mocked(mockLocationRepo.addSpotImage).mockResolvedValue(mockSpotImg)
+
+    const result = await locationService.uploadSpotImage('loc-1', 'spot-1', Buffer.from('img'), 'p.jpg')
+
+    expect(mockLocationRepo.addSpotImage).toHaveBeenCalledWith('spot-1', expect.objectContaining({ url: 'https://cloudinary.com/image.jpg' }))
+    expect(result).toEqual(mockSpotImg)
+  })
+})
+
+describe('LocationService.deleteSpotImage', () => {
+  it('deletes spot image after verifying location', async () => {
+    vi.mocked(mockLocationRepo.findById).mockResolvedValue(mockLocation)
+    vi.mocked(mockLocationRepo.deleteSpotImage).mockResolvedValue({ id: 'simg-1' } as any)
+
+    await locationService.deleteSpotImage('loc-1', 'spot-1', 'simg-1')
+
+    expect(mockLocationRepo.deleteSpotImage).toHaveBeenCalledWith('simg-1')
   })
 })

@@ -48,23 +48,33 @@ enum PackageType {
 }
 
 model Location {
-  id            String   @id @default(cuid())
-  slug          String   @unique
-  nameVi        String
-  nameEn        String
-  descriptionVi String?  @db.Text
-  descriptionEn String?  @db.Text
-  audioViUrl    String?
-  audioEnUrl    String?
-  imageUrl      String?
-  latitude      Float
-  longitude     Float
-  displayOrder  Int      @default(0)
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  nameVi          String
+  nameEn          String
+  descriptionVi   String?  @db.Text
+  descriptionEn   String?  @db.Text
+  overviewVi      String?  @db.Text
+  overviewEn      String?  @db.Text
+  historyVi       String?  @db.Text
+  historyEn       String?  @db.Text
+  highlightsVi    String?  @db.Text
+  highlightsEn    String?  @db.Text
+  visitingGuideVi String?  @db.Text
+  visitingGuideEn String?  @db.Text
+  audioViUrl      String?
+  audioEnUrl      String?
+  imageUrl        String?
+  latitude        Float
+  longitude       Float
+  displayOrder    Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  packages PackageLocation[]
+  packages        PackageLocation[]
+  locationImages  LocationImage[]
+  spots           LocationSpot[]
 
   @@map("locations")
 }
@@ -95,6 +105,50 @@ model PackageLocation {
 
   @@id([packageId, locationId])
   @@map("package_locations")
+}
+
+model LocationImage {
+  id         String   @id @default(cuid())
+  locationId String
+  url        String
+  caption    String?
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("location_images")
+}
+
+model LocationSpot {
+  id            String   @id @default(cuid())
+  locationId    String
+  nameVi        String
+  nameEn        String
+  descriptionVi String?  @db.Text
+  descriptionEn String?  @db.Text
+  audioViUrl    String?
+  audioEnUrl    String?
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  location Location           @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  images   LocationSpotImage[]
+
+  @@map("location_spots")
+}
+
+model LocationSpotImage {
+  id        String   @id @default(cuid())
+  spotId    String
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  spot LocationSpot @relation(fields: [spotId], references: [id], onDelete: Cascade)
+
+  @@map("location_spot_images")
 }
 
 model Ticket {

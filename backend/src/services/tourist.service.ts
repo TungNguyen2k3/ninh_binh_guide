@@ -73,7 +73,7 @@ export class TouristService {
     const cached = cache.get<object>(cacheKey)
     if (cached) return cached
 
-    const location = await this.locationRepo.findBySlug(slug)
+    const location = await this.locationRepo.findBySlugFull(slug)
     if (!location || !location.isActive) throw new NotFoundError('Location')
 
     const ticketUser = await this.ticketRepo.findActiveByUser(userId)
@@ -94,8 +94,33 @@ export class TouristService {
       slug: location.slug,
       name: lang === 'vi' ? location.nameVi : location.nameEn,
       description: lang === 'vi' ? (location.descriptionVi ?? '') : (location.descriptionEn ?? ''),
+      overview: lang === 'vi' ? (location.overviewVi ?? null) : (location.overviewEn ?? null),
+      history: lang === 'vi' ? (location.historyVi ?? null) : (location.historyEn ?? null),
+      highlights: lang === 'vi' ? (location.highlightsVi ?? null) : (location.highlightsEn ?? null),
+      visitingGuide: lang === 'vi' ? (location.visitingGuideVi ?? null) : (location.visitingGuideEn ?? null),
       imageUrl: location.imageUrl ?? null,
       audioUrl: lang === 'vi' ? (location.audioViUrl ?? null) : (location.audioEnUrl ?? null),
+      images: (location.locationImages ?? []).map((img: { id: string; url: string; caption: string | null }) => ({
+        id: img.id,
+        url: img.url,
+        caption: img.caption,
+      })),
+      spots: (location.spots ?? []).map((spot: {
+        id: string
+        nameVi: string
+        nameEn: string
+        descriptionVi: string | null
+        descriptionEn: string | null
+        audioViUrl: string | null
+        audioEnUrl: string | null
+        images: Array<{ id: string; url: string }>
+      }) => ({
+        id: spot.id,
+        name: lang === 'vi' ? spot.nameVi : spot.nameEn,
+        description: lang === 'vi' ? (spot.descriptionVi ?? null) : (spot.descriptionEn ?? null),
+        audioUrl: lang === 'vi' ? (spot.audioViUrl ?? null) : (spot.audioEnUrl ?? null),
+        images: spot.images.map((img: { id: string; url: string }) => ({ id: img.id, url: img.url })),
+      })),
       latitude: location.latitude,
       longitude: location.longitude,
     }

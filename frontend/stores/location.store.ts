@@ -1,5 +1,29 @@
 import { defineStore } from 'pinia'
 
+export interface LocationImage {
+  id: string
+  url: string
+  caption: string | null
+  displayOrder: number
+}
+
+export interface SpotImage {
+  id: string
+  url: string
+}
+
+export interface Spot {
+  id: string
+  nameVi: string
+  nameEn: string
+  descriptionVi: string | null
+  descriptionEn: string | null
+  audioViUrl: string | null
+  audioEnUrl: string | null
+  images: SpotImage[]
+  order: number
+}
+
 export interface Location {
   id: string
   slug: string
@@ -7,9 +31,19 @@ export interface Location {
   nameEn: string
   descriptionVi: string | null
   descriptionEn: string | null
+  overviewVi: string | null
+  overviewEn: string | null
+  historyVi: string | null
+  historyEn: string | null
+  highlightsVi: string | null
+  highlightsEn: string | null
+  visitingGuideVi: string | null
+  visitingGuideEn: string | null
   audioViUrl: string | null
   audioEnUrl: string | null
   imageUrl: string | null
+  images: LocationImage[]
+  spots: Spot[]
   latitude: number
   longitude: number
   displayOrder: number
@@ -23,6 +57,14 @@ export interface LocationFormData {
   slug: string
   descriptionVi: string
   descriptionEn: string
+  overviewVi: string
+  overviewEn: string
+  historyVi: string
+  historyEn: string
+  highlightsVi: string
+  highlightsEn: string
+  visitingGuideVi: string
+  visitingGuideEn: string
   latitude: number | null
   longitude: number | null
   displayOrder: number
