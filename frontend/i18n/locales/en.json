@@ -121,6 +121,7 @@
     "content_hint": "Content displayed on the tourist detail page",
     "new_spot": "New spot",
     "create_spot": "Create spot",
+    "save_spot": "Save area",
     "spots_count": "spots",
     "spots_hint": "Add sub-areas within this location, each with their own photos and audio",
     "overview_hint": "Shown at the top of the detail page",

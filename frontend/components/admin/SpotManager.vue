@@ -2,15 +2,100 @@
   <div class="space-y-3">
     <!-- Header -->
     <div class="flex items-center justify-between">
-      <p class="text-xs text-gray-500">{{ spots.length }} {{ $t('admin.spots_count') }}</p>
+      <p class="text-xs text-gray-500">{{ spots.length + draftSpots.length }} {{ $t('admin.spots_count') }}</p>
       <button type="button"
-        class="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors"
-        @click="addPendingSpot">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        class="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors disabled:opacity-50"
+        :disabled="creatingNew"
+        @click="addDraftSpot">
+        <svg v-if="creatingNew" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+        <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
         {{ $t('admin.add_spot') }}
       </button>
+    </div>
+
+    <!-- Draft spots — newly created, full form visible immediately -->
+    <div v-for="draft in draftSpots" :key="draft.id"
+      class="border-2 border-brand-300 rounded-2xl overflow-hidden bg-white">
+
+      <!-- Draft header -->
+      <div class="flex items-center justify-between px-4 py-3 bg-brand-50 border-b border-brand-100">
+        <span class="text-sm font-semibold text-brand-700 flex items-center gap-1.5">
+          ✏️ {{ $t('admin.new_spot') }}
+        </span>
+        <button type="button"
+          class="text-xs text-red-400 hover:text-red-600 transition-colors"
+          @click="deleteDraft(draft.id)">
+          {{ $t('common.cancel') }} & Xóa
+        </button>
+      </div>
+
+      <div class="p-4 space-y-4">
+        <!-- Name fields (side by side) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('admin.spot_name_vi') }} *</label>
+            <input v-model="draft.nameVi" type="text" :placeholder="$t('admin.spot_name_vi')"
+              class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('admin.spot_name_en') }} *</label>
+            <input v-model="draft.nameEn" type="text" :placeholder="$t('admin.spot_name_en')"
+              class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
+          </div>
+        </div>
+
+        <!-- Description (VI/EN tabs) -->
+        <div>
+          <div class="flex gap-1 bg-gray-100 rounded-lg p-0.5 w-fit mb-2">
+            <button v-for="lang in (['vi', 'en'] as const)" :key="lang" type="button"
+              class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
+              :class="draft.descLang === lang ? 'bg-white text-brand-700 shadow-sm' : 'text-gray-500'"
+              @click="draft.descLang = lang">
+              {{ lang === 'vi' ? 'Tiếng Việt' : 'English' }}
+            </button>
+          </div>
+          <textarea v-if="draft.descLang === 'vi'" v-model="draft.descriptionVi" rows="3"
+            :placeholder="$t('admin.spot_description') + ' (VI)...'"
+            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" />
+          <textarea v-else v-model="draft.descriptionEn" rows="3"
+            :placeholder="$t('admin.spot_description') + ' (EN)...'"
+            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" />
+        </div>
+
+        <!-- Images -->
+        <div>
+          <h5 class="text-xs font-semibold text-gray-600 mb-2">🖼 {{ $t('admin.images_section') }}</h5>
+          <AdminSpotImageUpload
+            :location-id="locationId"
+            :spot-id="draft.id"
+            :images="draft.images"
+            @uploaded="refreshDraft(draft.id)"
+            @deleted="refreshDraft(draft.id)"
+          />
+        </div>
+
+        <!-- Audio -->
+        <div>
+          <h5 class="text-xs font-semibold text-gray-600 mb-2">🎧 {{ $t('admin.audio_vi') }} / {{ $t('admin.audio_en') }}</h5>
+          <AdminSpotAudioUpload
+            :location-id="locationId"
+            :spot-id="draft.id"
+            :audio-vi-url="draft.audioViUrl"
+            :audio-en-url="draft.audioEnUrl"
+            @uploaded="refreshDraft(draft.id)"
+          />
+        </div>
+
+        <!-- Single save button at bottom -->
+        <AppButton :loading="draft.saving" class="w-full" @click="saveDraft(draft.id)">
+          {{ draft.saving ? $t('common.saving') : $t('admin.save_spot') }}
+        </AppButton>
+      </div>
     </div>
 
     <!-- Saved spots -->
@@ -36,9 +121,7 @@
             <span v-if="spot.audioViUrl" class="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded-full">🎧 VI</span>
             <span v-if="spot.audioEnUrl" class="text-[10px] bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded-full">🎧 EN</span>
             <span v-if="!spot.images?.length && !spot.audioViUrl && !spot.audioEnUrl"
-              class="text-[10px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-full">
-              ⚠ Chưa có ảnh/audio
-            </span>
+              class="text-[10px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-full">⚠ Chưa có ảnh/audio</span>
           </div>
         </div>
         <div class="flex items-center gap-2 flex-shrink-0">
@@ -56,11 +139,25 @@
         </div>
       </button>
 
-      <!-- Expanded edit + upload -->
-      <div v-if="expanded[spot.id]" class="border-t border-gray-100 bg-gray-50/50">
-        <!-- Lang tabs -->
-        <div class="flex gap-1 p-4 pb-0">
-          <div class="flex gap-1 bg-white rounded-lg border border-gray-200 p-0.5">
+      <!-- Expanded edit -->
+      <div v-if="expanded[spot.id]" class="border-t border-gray-100 p-4 space-y-4 bg-gray-50/30">
+        <!-- Name fields -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('admin.spot_name_vi') }} *</label>
+            <input v-model="editForms[spot.id].nameVi" type="text"
+              class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('admin.spot_name_en') }} *</label>
+            <input v-model="editForms[spot.id].nameEn" type="text"
+              class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
+          </div>
+        </div>
+
+        <!-- Description tabs -->
+        <div>
+          <div class="flex gap-1 bg-white rounded-lg border border-gray-200 p-0.5 w-fit mb-2">
             <button v-for="lang in (['vi', 'en'] as const)" :key="lang" type="button"
               class="px-3 py-1 text-xs font-medium rounded-md transition-colors"
               :class="spotLang[spot.id] === lang ? 'bg-brand-600 text-white' : 'text-gray-500'"
@@ -68,47 +165,15 @@
               {{ lang === 'vi' ? 'Tiếng Việt' : 'English' }}
             </button>
           </div>
+          <textarea v-if="spotLang[spot.id] === 'vi'" v-model="editForms[spot.id].descriptionVi" rows="3"
+            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" />
+          <textarea v-else v-model="editForms[spot.id].descriptionEn" rows="3"
+            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" />
         </div>
 
-        <!-- Text fields -->
-        <div class="p-4 space-y-3">
-          <template v-if="spotLang[spot.id] === 'vi'">
-            <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('admin.spot_name_vi') }} *</label>
-              <input v-model="editForms[spot.id].nameVi" type="text"
-                class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('admin.spot_description') }} (VI)</label>
-              <textarea v-model="editForms[spot.id].descriptionVi" rows="3"
-                class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" />
-            </div>
-          </template>
-          <template v-else>
-            <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('admin.spot_name_en') }} *</label>
-              <input v-model="editForms[spot.id].nameEn" type="text"
-                class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('admin.spot_description') }} (EN)</label>
-              <textarea v-model="editForms[spot.id].descriptionEn" rows="3"
-                class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" />
-            </div>
-          </template>
-
-          <!-- Save text fields -->
-          <div class="flex justify-end">
-            <AppButton size="sm" variant="secondary" :loading="savingSpotId === spot.id"
-              @click="handleSaveSpot(spot.id)">
-              {{ $t('common.save') }}
-            </AppButton>
-          </div>
-        </div>
-
-        <!-- Images section -->
-        <div class="border-t border-gray-100 p-4">
-          <h5 class="text-xs font-semibold text-gray-700 mb-3">🖼 Hình ảnh khu vực</h5>
+        <!-- Images -->
+        <div>
+          <h5 class="text-xs font-semibold text-gray-600 mb-2">🖼 Hình ảnh khu vực</h5>
           <AdminSpotImageUpload
             :location-id="locationId"
             :spot-id="spot.id"
@@ -118,9 +183,9 @@
           />
         </div>
 
-        <!-- Audio section -->
-        <div class="border-t border-gray-100 p-4">
-          <h5 class="text-xs font-semibold text-gray-700 mb-3">🎧 Audio thuyết minh</h5>
+        <!-- Audio -->
+        <div>
+          <h5 class="text-xs font-semibold text-gray-600 mb-2">🎧 Audio thuyết minh</h5>
           <AdminSpotAudioUpload
             :location-id="locationId"
             :spot-id="spot.id"
@@ -129,97 +194,21 @@
             @uploaded="emit('updated')"
           />
         </div>
+
+        <!-- Save text fields -->
+        <div class="flex justify-end pt-1">
+          <AppButton size="sm" :loading="savingSpotId === spot.id" @click="handleSaveSpot(spot.id)">
+            {{ $t('admin.save_changes') }}
+          </AppButton>
+        </div>
       </div>
     </div>
 
-    <!-- Just-created spots (have spotId, waiting for parent reload) -->
-    <!-- Shows upload sections immediately after creation -->
-    <div v-for="jc in justCreatedSpots" :key="jc.id"
-      class="border-2 border-green-300 rounded-2xl overflow-hidden bg-green-50/30">
-      <div class="flex items-center gap-2 p-4 border-b border-green-100">
-        <span class="text-green-600 text-lg">✅</span>
-        <div class="flex-1">
-          <p class="text-sm font-semibold text-gray-900">{{ jc.nameVi }}</p>
-          <p class="text-xs text-green-600">Khu vực đã tạo — thêm ảnh và audio bên dưới</p>
-        </div>
-        <button type="button" class="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 border border-gray-200 rounded-lg bg-white"
-          @click="doneJustCreated(jc.id)">
-          Xong
-        </button>
-      </div>
-
-      <!-- Images -->
-      <div class="p-4">
-        <h5 class="text-xs font-semibold text-gray-700 mb-3">🖼 Hình ảnh khu vực</h5>
-        <AdminSpotImageUpload
-          :location-id="locationId"
-          :spot-id="jc.id"
-          :images="jc.images"
-          @uploaded="refreshJustCreated(jc.id)"
-          @deleted="refreshJustCreated(jc.id)"
-        />
-      </div>
-
-      <!-- Audio -->
-      <div class="border-t border-green-100 p-4">
-        <h5 class="text-xs font-semibold text-gray-700 mb-3">🎧 Audio thuyết minh</h5>
-        <AdminSpotAudioUpload
-          :location-id="locationId"
-          :spot-id="jc.id"
-          :audio-vi-url="jc.audioViUrl"
-          :audio-en-url="jc.audioEnUrl"
-          @uploaded="refreshJustCreated(jc.id)"
-        />
-      </div>
-    </div>
-
-    <!-- Pending (unsaved) spots -->
-    <div v-for="(pending, idx) in pendingSpots" :key="pending._key"
-      class="border-2 border-brand-300 rounded-2xl p-4 space-y-3 bg-brand-50/40">
-      <div class="flex items-center justify-between">
-        <span class="text-sm font-semibold text-brand-700">
-          ✨ {{ $t('admin.new_spot') }}
-          <span v-if="pendingSpots.length > 1" class="text-brand-400 font-normal">#{{ idx + 1 }}</span>
-        </span>
-        <button type="button" class="text-xs text-gray-400 hover:text-gray-600" @click="removePendingSpot(idx)">
-          {{ $t('common.cancel') }}
-        </button>
-      </div>
-
-      <!-- Both VI and EN always visible -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('admin.spot_name_vi') }} *</label>
-          <input v-model="pending.nameVi" type="text" :placeholder="$t('admin.spot_name_vi')"
-            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('admin.spot_name_en') }} *</label>
-          <input v-model="pending.nameEn" type="text" :placeholder="$t('admin.spot_name_en')"
-            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" />
-        </div>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('admin.spot_description') }} (VI)</label>
-        <textarea v-model="pending.descriptionVi" rows="2" :placeholder="$t('admin.spot_description') + '...'"
-          class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" />
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-600 mb-1">{{ $t('admin.spot_description') }} (EN)</label>
-        <textarea v-model="pending.descriptionEn" rows="2" :placeholder="$t('admin.spot_description') + '...'"
-          class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" />
-      </div>
-
-      <!-- Save pending — bottom of card -->
-      <AppButton :loading="pending.saving" class="w-full" @click="handleCreateSpot(idx)">
-        {{ pending.saving ? $t('common.saving') : $t('admin.create_spot') }}
-      </AppButton>
-    </div>
-
-    <!-- Add button — always at bottom -->
+    <!-- Add button at bottom -->
     <button type="button"
       class="w-full py-3 border-2 border-dashed border-gray-200 rounded-2xl text-sm text-gray-400 hover:border-brand-400 hover:text-brand-600 transition-colors flex items-center justify-center gap-2"
-      @click="addPendingSpot">
+      :disabled="creatingNew"
+      @click="addDraftSpot">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
@@ -237,16 +226,13 @@ export interface Spot {
   images: SpotImage[]; order: number
 }
 
-interface JustCreatedSpot {
-  id: string; nameVi: string; nameEn: string
-  audioViUrl: string | null; audioEnUrl: string | null
-  images: SpotImage[]
-}
-
-interface PendingSpot {
-  _key: number
+interface DraftSpot {
+  id: string
   nameVi: string; nameEn: string
   descriptionVi: string; descriptionEn: string
+  descLang: 'vi' | 'en'
+  audioViUrl: string | null; audioEnUrl: string | null
+  images: SpotImage[]
   saving: boolean
 }
 
@@ -262,14 +248,15 @@ const authStore = useAuthStore()
 function authHeaders(): Record<string, string> {
   return authStore.accessToken ? { Authorization: `Bearer ${authStore.accessToken}` } : {}
 }
-
 function apiUrl(path: string): string {
   return `${config.public.apiUrl}${path}`
 }
 
-let pendingKey = 0
-const pendingSpots = ref<PendingSpot[]>([])
-const justCreatedSpots = ref<JustCreatedSpot[]>([])
+// Draft spots: created in DB, waiting for user to fill name + save
+const draftSpots = ref<DraftSpot[]>([])
+const creatingNew = ref(false)
+
+// Saved spots edit state
 const expanded = ref<Record<string, boolean>>({})
 const spotLang = ref<Record<string, 'vi' | 'en'>>({})
 const editForms = ref<Record<string, { nameVi: string; nameEn: string; descriptionVi: string; descriptionEn: string }>>({})
@@ -286,23 +273,86 @@ watch(() => props.spots, (newSpots) => {
       }
     }
     if (!(spot.id in spotLang.value)) spotLang.value[spot.id] = 'vi'
-    // Remove from justCreated once it appears in saved spots
-    const jcIdx = justCreatedSpots.value.findIndex(jc => jc.id === spot.id)
-    if (jcIdx !== -1) justCreatedSpots.value.splice(jcIdx, 1)
   }
 }, { immediate: true })
 
-function addPendingSpot(): void {
-  pendingSpots.value.push({
-    _key: ++pendingKey,
-    nameVi: '', nameEn: '',
-    descriptionVi: '', descriptionEn: '',
-    saving: false,
-  })
+// Click "+ Add area" → create spot in DB immediately → show full form
+async function addDraftSpot(): Promise<void> {
+  creatingNew.value = true
+  try {
+    const res = await $fetch<{ success: true; data: Spot }>(
+      apiUrl(`/admin/locations/${props.locationId}/spots`),
+      {
+        method: 'POST',
+        headers: authHeaders(),
+        body: { nameVi: 'Khu vực mới', nameEn: 'New area' },
+      }
+    )
+    draftSpots.value.push({
+      id: res.data.id,
+      nameVi: '', nameEn: '',
+      descriptionVi: '', descriptionEn: '',
+      descLang: 'vi',
+      audioViUrl: null, audioEnUrl: null,
+      images: [],
+      saving: false,
+    })
+  } catch { toast.error(t('error.server_error')) }
+  finally { creatingNew.value = false }
 }
 
-function removePendingSpot(idx: number): void {
-  pendingSpots.value.splice(idx, 1)
+// Save draft text fields (name/description)
+async function saveDraft(draftId: string): Promise<void> {
+  const draft = draftSpots.value.find(d => d.id === draftId)
+  if (!draft) return
+  if (!draft.nameVi.trim() || !draft.nameEn.trim()) {
+    toast.error(t('error.required')); return
+  }
+  draft.saving = true
+  try {
+    await $fetch(apiUrl(`/admin/locations/${props.locationId}/spots/${draftId}`), {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: {
+        nameVi: draft.nameVi.trim(), nameEn: draft.nameEn.trim(),
+        descriptionVi: draft.descriptionVi.trim() || undefined,
+        descriptionEn: draft.descriptionEn.trim() || undefined,
+      },
+    })
+    const idx = draftSpots.value.findIndex(d => d.id === draftId)
+    if (idx !== -1) draftSpots.value.splice(idx, 1)
+    toast.success(t('admin.create_success'))
+    emit('updated')
+  } catch { toast.error(t('error.server_error')) }
+  finally { if (draft) draft.saving = false }
+}
+
+// Delete draft (cancel)
+async function deleteDraft(draftId: string): Promise<void> {
+  try {
+    await $fetch(apiUrl(`/admin/locations/${props.locationId}/spots/${draftId}`), {
+      method: 'DELETE', headers: authHeaders()
+    })
+    const idx = draftSpots.value.findIndex(d => d.id === draftId)
+    if (idx !== -1) draftSpots.value.splice(idx, 1)
+    emit('updated')
+  } catch { toast.error(t('error.server_error')) }
+}
+
+// Refresh draft data after image/audio upload
+async function refreshDraft(draftId: string): Promise<void> {
+  try {
+    const res = await $fetch<{ success: true; data: Spot }>(
+      apiUrl(`/admin/locations/${props.locationId}/spots/${draftId}`),
+      { headers: authHeaders() }
+    )
+    const draft = draftSpots.value.find(d => d.id === draftId)
+    if (draft) {
+      draft.audioViUrl = res.data.audioViUrl
+      draft.audioEnUrl = res.data.audioEnUrl
+      draft.images = res.data.images ?? []
+    }
+  } catch { /* ignore */ }
 }
 
 function toggleExpand(spotId: string): void {
@@ -342,60 +392,5 @@ async function handleDeleteSpot(spotId: string): Promise<void> {
     emit('updated')
   } catch { toast.error(t('error.server_error')) }
   finally { deletingSpotId.value = null }
-}
-
-async function handleCreateSpot(idx: number): Promise<void> {
-  const pending = pendingSpots.value[idx]
-  if (!pending.nameVi.trim() || !pending.nameEn.trim()) {
-    toast.error(t('error.required')); return
-  }
-  pending.saving = true
-  try {
-    const res = await $fetch<{ success: true; data: Spot }>(
-      apiUrl(`/admin/locations/${props.locationId}/spots`),
-      {
-        method: 'POST',
-        headers: authHeaders(),
-        body: {
-          nameVi: pending.nameVi.trim(), nameEn: pending.nameEn.trim(),
-          descriptionVi: pending.descriptionVi.trim() || undefined,
-          descriptionEn: pending.descriptionEn.trim() || undefined,
-        },
-      }
-    )
-    // Show just-created card immediately so user can upload audio/images without waiting for reload
-    justCreatedSpots.value.push({
-      id: res.data.id,
-      nameVi: res.data.nameVi, nameEn: res.data.nameEn,
-      audioViUrl: null, audioEnUrl: null, images: [],
-    })
-    pendingSpots.value.splice(idx, 1)
-    emit('updated')
-    toast.success(t('admin.create_success'))
-  } catch { toast.error(t('error.server_error')) }
-  finally { if (pendingSpots.value[idx]) pendingSpots.value[idx].saving = false }
-}
-
-async function refreshJustCreated(spotId: string): Promise<void> {
-  try {
-    const res = await $fetch<{ success: true; data: Spot }>(
-      apiUrl(`/admin/locations/${props.locationId}/spots/${spotId}`),
-      { headers: authHeaders() }
-    )
-    const idx = justCreatedSpots.value.findIndex(jc => jc.id === spotId)
-    if (idx !== -1) {
-      justCreatedSpots.value[idx] = {
-        id: res.data.id, nameVi: res.data.nameVi, nameEn: res.data.nameEn,
-        audioViUrl: res.data.audioViUrl, audioEnUrl: res.data.audioEnUrl,
-        images: res.data.images ?? [],
-      }
-    }
-  } catch { /* ignore, badges will update on parent reload */ }
-}
-
-function doneJustCreated(spotId: string): void {
-  const idx = justCreatedSpots.value.findIndex(jc => jc.id === spotId)
-  if (idx !== -1) justCreatedSpots.value.splice(idx, 1)
-  emit('updated') // trigger final reload
 }
 </script>
