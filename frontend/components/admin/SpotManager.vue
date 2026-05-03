@@ -113,7 +113,7 @@
     </div>
 
     <!-- Saved spots -->
-    <div v-for="spot in spots" :key="spot.id"
+    <div v-for="spot in sortedSpots" :key="spot.id"
       class="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-sm transition-shadow">
 
       <!-- Collapsed header -->
@@ -138,13 +138,37 @@
               class="text-[10px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-full">⚠ Chưa có ảnh/audio</span>
           </div>
         </div>
-        <div class="flex items-center gap-2 flex-shrink-0">
+        <div class="flex items-center gap-1.5 flex-shrink-0">
+          <!-- Order badge -->
+          <span class="w-5 h-5 rounded-full bg-gray-200 text-gray-600 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+            {{ sortedSpots.indexOf(spot) + 1 }}
+          </span>
+          <!-- Move up -->
+          <button type="button"
+            class="w-6 h-6 flex items-center justify-center rounded text-gray-300 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-30"
+            :disabled="sortedSpots.indexOf(spot) === 0 || reorderingId === spot.id"
+            @click.stop="reorderSpot(spot.id, 'up')">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+          <!-- Move down -->
+          <button type="button"
+            class="w-6 h-6 flex items-center justify-center rounded text-gray-300 hover:text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-30"
+            :disabled="sortedSpots.indexOf(spot) === sortedSpots.length - 1 || reorderingId === spot.id"
+            @click.stop="reorderSpot(spot.id, 'down')">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <!-- Delete -->
           <button type="button"
             class="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
             :disabled="deletingSpotId === spot.id"
             @click.stop="handleDeleteSpot(spot.id)">
             {{ deletingSpotId === spot.id ? '...' : $t('common.delete') }}
           </button>
+          <!-- Expand chevron -->
           <svg class="w-4 h-4 text-gray-400 transition-transform"
             :class="expanded[spot.id] ? 'rotate-180' : ''"
             fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -292,6 +316,9 @@ const spotLang = ref<Record<string, 'vi' | 'en'>>({})
 const editForms = ref<Record<string, { nameVi: string; nameEn: string; descriptionVi: string; descriptionEn: string; latitude: number | null; longitude: number | null }>>({})
 const savingSpotId = ref<string | null>(null)
 const deletingSpotId = ref<string | null>(null)
+const reorderingId = ref<string | null>(null)
+
+const sortedSpots = computed(() => [...props.spots].sort((a, b) => a.order - b.order))
 
 watch(() => props.spots, (newSpots) => {
   for (const spot of newSpots) {
@@ -317,7 +344,7 @@ async function addDraftSpot(): Promise<void> {
       {
         method: 'POST',
         headers: authHeaders(),
-        body: { nameVi: 'Khu vực mới', nameEn: 'New area' },
+        body: { nameVi: 'Khu vực mới', nameEn: 'New area', order: props.spots.length + draftSpots.value.length },
       }
     )
     draftSpots.value.push({
@@ -424,6 +451,29 @@ async function handleSaveSpot(spotId: string): Promise<void> {
     emit('updated')
   } catch { toast.error(t('error.server_error')) }
   finally { savingSpotId.value = null }
+}
+
+async function reorderSpot(spotId: string, dir: 'up' | 'down'): Promise<void> {
+  const list = sortedSpots.value
+  const idx = list.findIndex(s => s.id === spotId)
+  if (idx === -1) return
+  const swapIdx = dir === 'up' ? idx - 1 : idx + 1
+  if (swapIdx < 0 || swapIdx >= list.length) return
+  const a = list[idx]
+  const b = list[swapIdx]
+  reorderingId.value = spotId
+  try {
+    await Promise.all([
+      $fetch(apiUrl(`/admin/locations/${props.locationId}/spots/${a.id}`), {
+        method: 'PUT', headers: authHeaders(), body: { order: b.order === a.order ? (dir === 'up' ? a.order - 1 : a.order + 1) : b.order }
+      }),
+      $fetch(apiUrl(`/admin/locations/${props.locationId}/spots/${b.id}`), {
+        method: 'PUT', headers: authHeaders(), body: { order: a.order === b.order ? (dir === 'up' ? b.order + 1 : b.order - 1) : a.order }
+      }),
+    ])
+    emit('updated')
+  } catch { toast.error(t('error.server_error')) }
+  finally { reorderingId.value = null }
 }
 
 async function handleDeleteSpot(spotId: string): Promise<void> {
