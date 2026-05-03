@@ -24,8 +24,8 @@ export const UpdateLocationSchema = CreateLocationSchema.partial().extend({
   highlightsEn: z.string().optional(),
   openTime: z.string().optional(),
   closeTime: z.string().optional(),
-  admissionFee: z.number().int().min(0).optional(),
-  estimatedDuration: z.number().int().min(0).optional(),
+  admissionFee: z.number().int().min(0).nullish(),
+  estimatedDuration: z.number().int().min(0).nullish(),
   address: z.string().optional(),
   bestTime: z.string().optional(),
 })
@@ -35,8 +35,8 @@ export const CreateSpotSchema = z.object({
   nameEn: z.string().min(1),
   descriptionVi: z.string().optional(),
   descriptionEn: z.string().optional(),
-  latitude: z.number().min(-90).max(90).optional(),
-  longitude: z.number().min(-180).max(180).optional(),
+  latitude: z.number().min(-90).max(90).nullish(),
+  longitude: z.number().min(-180).max(180).nullish(),
   order: z.number().int().min(0).optional(),
 })
 

@@ -75,8 +75,15 @@ async function handleSubmit(): Promise<void> {
     await locationStore.create(formData.value)
     toast.success(t('admin.create_success'))
     await navigateTo('/admin/locations')
-  } catch {
-    toast.error(t('error.server_error'))
+  } catch (err: unknown) {
+    const apiErr = err as { data?: { error?: { message?: string; details?: { fieldErrors?: Record<string, string[]> } } } }
+    const fieldErrors = apiErr?.data?.error?.details?.fieldErrors
+    if (fieldErrors) {
+      const msgs = Object.entries(fieldErrors).map(([f, errs]) => `${f}: ${errs[0]}`).join(', ')
+      toast.error(msgs)
+    } else {
+      toast.error(apiErr?.data?.error?.message ?? t('error.server_error'))
+    }
   } finally {
     isSubmitting.value = false
   }

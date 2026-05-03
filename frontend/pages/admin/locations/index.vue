@@ -256,6 +256,6 @@ async function handleToggleActive(loc: Location): Promise<void> {
   }
 }
 
-// Initial load
-await loadLocations()
+// Client-side only — SSR has no auth token
+onMounted(loadLocations)
 </script>
