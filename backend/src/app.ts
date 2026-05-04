@@ -39,12 +39,15 @@ export function buildApp() {
 
   fastify.register(fastifyCors, {
     origin: (origin, cb) => {
-      // Allow requests with no origin (e.g. mobile apps, curl)
       if (!origin) return cb(null, true)
-      // Allow all configured origins (comma-separated, strip trailing slash)
-      const allowed = env.CORS_ORIGIN.split(',').map(o => o.trim().replace(/\/$/, ''))
       const clean = origin.replace(/\/$/, '')
+      // Allow all Vercel preview + production deployments
+      if (clean.endsWith('.vercel.app')) return cb(null, true)
+      // Allow explicitly configured origins (comma-separated)
+      const allowed = env.CORS_ORIGIN.split(',').map(o => o.trim().replace(/\/$/, ''))
       if (allowed.includes(clean)) return cb(null, true)
+      // Allow localhost for development
+      if (clean.startsWith('http://localhost')) return cb(null, true)
       cb(new Error('Not allowed by CORS'), false)
     },
     credentials: true,
