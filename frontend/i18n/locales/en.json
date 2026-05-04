@@ -84,7 +84,10 @@
     "highlights": "Highlights",
     "visiting_guide": "Visiting Guide",
     "spots": "Areas & Spots",
-    "overview_audio": "Overview"
+    "overview_audio": "Overview",
+    "tours": "Tours",
+    "tours_title": "Tour Itineraries",
+    "tours_subtitle": "Suggested itineraries for your Ninh Binh journey"
   },
   "admin": {
     "coming_soon": "Feature under development",
