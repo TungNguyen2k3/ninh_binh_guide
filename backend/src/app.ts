@@ -38,7 +38,15 @@ export function buildApp() {
   })
 
   fastify.register(fastifyCors, {
-    origin: env.CORS_ORIGIN,
+    origin: (origin, cb) => {
+      // Allow requests with no origin (e.g. mobile apps, curl)
+      if (!origin) return cb(null, true)
+      // Allow all configured origins (comma-separated, strip trailing slash)
+      const allowed = env.CORS_ORIGIN.split(',').map(o => o.trim().replace(/\/$/, ''))
+      const clean = origin.replace(/\/$/, '')
+      if (allowed.includes(clean)) return cb(null, true)
+      cb(new Error('Not allowed by CORS'), false)
+    },
     credentials: true,
   })
 
