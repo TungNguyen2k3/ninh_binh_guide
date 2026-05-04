@@ -7,7 +7,10 @@ const envSchema = z.object({
   JWT_ACCESS_TTL: z.string().default('1h'),
   JWT_REFRESH_TTL: z.string().default('7d'),
   PORT: z.coerce.number().default(4000),
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z.preprocess(
+    (val) => (val === '' || val === undefined ? 'production' : val),
+    z.enum(['development', 'production', 'test'])
+  ),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
