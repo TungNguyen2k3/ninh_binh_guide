@@ -104,6 +104,7 @@ Nhấn tab **"Danh sách"** ở thanh điều hướng phía dưới để xem t
 
 - Mỗi thẻ hiển thị: ảnh bìa, tên, mô tả ngắn, badge Audio và số điểm con
 - Nhấn vào thẻ để vào trang chi tiết địa điểm
+- Khi đã bật GPS (xem 2.4), danh sách **tự động sắp xếp theo khoảng cách gần nhất** và hiển thị khoảng cách trên mỗi thẻ
 
 ---
 
@@ -120,6 +121,7 @@ Các chip thông tin hiển thị nhanh:
 | ⏱ | Thời gian tham quan ước tính |
 | 🌤 | Thời điểm lý tưởng trong năm |
 | 📍 | Địa chỉ |
+| 🧭 | **Chỉ đường** — nhấn để mở Google Maps với tuyến đường đến địa điểm |
 
 ### Nội dung thuyết minh
 
@@ -147,11 +149,26 @@ Thanh audio xuất hiện ở phía dưới và **tiếp tục phát khi bạn c
 
 ---
 
-## 2.7. Lịch trình gợi ý
+## 2.7. Định vị GPS & Khoảng cách
+
+Nhấn nút **📍** ở góc trên phải bản đồ để bật định vị:
+
+1. Trình duyệt xin phép truy cập vị trí → nhấn **Cho phép**
+2. Chấm xanh xuất hiện trên bản đồ tại vị trí hiện tại của bạn
+3. Toast thông báo hiện: *"📍 Địa điểm gần nhất: Tràng An (1.2km)"*
+4. Tất cả thẻ địa điểm trong **Danh sách** hiển thị khoảng cách và sắp theo gần nhất
+
+> 💡 **Lưu ý**: Bản đồ **không tự động nhảy** về vị trí của bạn — vẫn giữ nguyên vùng Ninh Bình để dễ xem các địa điểm tham quan.
+
+**Chỉ đường tới địa điểm**: Nhấn vào marker trên bản đồ → nhấn nút **"Chỉ đường"** trong thông tin hiện ra → mở Google Maps với tuyến đường từ vị trí hiện tại đến địa điểm đó.
+
+---
+
+## 2.8. Lịch trình gợi ý
 
 Nhấn tab **"Lịch trình"** (biểu tượng bản đồ) ở thanh điều hướng phía dưới.
 
-Ứng dụng cung cấp 4 lịch trình mẫu:
+Ứng dụng cung cấp các lịch trình do ban quản lý đề xuất:
 
 | Lịch trình | Thời gian | Phù hợp với |
 |-----------|-----------|-------------|
@@ -166,15 +183,20 @@ Mỗi lịch trình hiển thị:
 - Ghi chú thực tế (ăn gì, mặc gì, lưu ý gì)
 - Badge 🎧 nếu điểm có audio thuyết minh
 
+**Khi nhấn vào một lịch trình:**
+- Xem chi tiết đầy đủ với mini-map hiển thị tuyến đường trên bản đồ (số thứ tự ① ② ③)
+- Nhấn **"Mở bản đồ đầy đủ"** để xem lịch trình trên bản đồ toàn màn hình
+- Nhấn **"Xem chi tiết →"** trên từng điểm để vào trang địa điểm và nghe audio
+
 ---
 
-## 2.8. Chuyển ngôn ngữ
+## 2.9. Chuyển ngôn ngữ
 
 Nhấn **EN** hoặc **VI** ở góc trên phải để chuyển ngôn ngữ giao diện và nội dung thuyết minh.
 
 ---
 
-## 2.9. Đăng xuất
+## 2.10. Đăng xuất
 
 Nhấn biểu tượng **→ (mũi tên ra)** ở góc trên phải → đăng xuất khỏi tài khoản.
 
@@ -233,6 +255,9 @@ Trang chính hiển thị danh sách tất cả vé bạn đã tạo, sắp xế
 ## 4.1. Đăng nhập
 
 Dùng tài khoản Admin. Sau khi đăng nhập, giao diện chuyển sang **Dashboard quản trị**.
+
+admin@ninhbinh.vn
+Admin@123456
 
 ---
 
@@ -324,7 +349,38 @@ Menu → **Gói tham quan**
 
 ---
 
-## 4.5. Quản lý vé
+## 4.5. Quản lý lịch trình tour
+
+Menu → **Lịch trình**
+
+Admin tạo và quản lý các lịch trình tour gợi ý hiển thị cho du khách.
+
+### Tạo tour mới
+1. Nhấn **"Thêm tour"**
+2. Điền thông tin:
+   - **Tên tour VI/EN** *(bắt buộc)*
+   - **Thời gian**: ví dụ "1 ngày", "2 ngày 1 đêm"
+   - **Badge VI/EN**: nhãn ngắn hiển thị trên thẻ (ví dụ "Phổ biến", "Tâm linh")
+   - **Ghi chú VI/EN**: lời khuyên chung cho du khách
+   - **Thứ tự hiển thị**: số nhỏ hiện trước
+3. Nhấn Save → chuyển sang trang chỉnh sửa
+
+### Thêm điểm dừng
+1. Trong trang edit tour → nhấn **"Thêm điểm dừng"**
+2. Chọn địa điểm từ dropdown, điền:
+   - **Giờ gợi ý**: ví dụ "7:30"
+   - **Thời gian tham quan**: ví dụ "2h"
+   - **Ghi chú VI/EN**: hướng dẫn cho điểm đó
+3. Nhấn **"Thêm điểm dừng"**
+4. **Sắp xếp thứ tự**: gõ số thứ tự vào ô bên trái mỗi điểm → Enter để áp dụng
+
+### Bật/tắt tour
+- Nhấn badge **Hoạt động / Tạm dừng** trong danh sách để toggle
+- Tour inactive sẽ **không hiển thị** cho du khách
+
+---
+
+## 4.6. Quản lý vé
 
 Menu → **Vé**
 
