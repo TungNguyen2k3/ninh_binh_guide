@@ -56,72 +56,67 @@
       <p class="text-sm text-gray-500">{{ $t('user.no_users') }}</p>
     </div>
 
-    <!-- Users table -->
-    <div v-else class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                {{ $t('user.name') }}
-              </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                {{ $t('auth.email_or_phone') }}
-              </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                {{ $t('user.role') }}
-              </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                {{ $t('user.created_at') }}
-              </th>
-              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                {{ $t('common.actions') }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            <tr v-for="u in users" :key="u.id" class="hover:bg-gray-50 transition-colors">
-              <td class="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
-                {{ u.name }}
-              </td>
-              <td class="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
-                {{ u.email ?? u.phone ?? '—' }}
-              </td>
-              <td class="px-4 py-3 whitespace-nowrap">
-                <span :class="roleBadgeClass(u.role)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-                  {{ roleLabel(u.role) }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-                {{ formatDate(u.createdAt) }}
-              </td>
-              <td class="px-4 py-3 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-2">
-                  <!-- Role change dropdown (hide for own account) -->
-                  <select
-                    v-if="u.id !== authStore.user?.id"
-                    :value="u.role"
-                    class="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-200 transition-colors"
-                    @change="onRoleChange(u, ($event.target as HTMLSelectElement).value as UserRole)"
-                  >
-                    <option value="admin">{{ $t('user.role_admin') }}</option>
-                    <option value="staff">{{ $t('user.role_staff') }}</option>
-                    <option value="tourist">{{ $t('user.role_tourist') }}</option>
-                  </select>
-                  <!-- Delete button (hide for own account) -->
-                  <AppButton
-                    v-if="u.id !== authStore.user?.id"
-                    variant="danger"
-                    size="sm"
-                    @click="confirmDelete(u)"
-                  >
-                    {{ $t('common.delete') }}
-                  </AppButton>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Users cards -->
+    <div v-else class="space-y-2">
+      <div
+        v-for="u in users"
+        :key="u.id"
+        class="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-sm transition-shadow"
+      >
+        <!-- Main info -->
+        <div class="flex items-center gap-3 px-4 py-3">
+          <!-- Avatar initials -->
+          <div
+            class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+            :class="roleBadgeClass(u.role)"
+          >
+            {{ u.name.charAt(0).toUpperCase() }}
+          </div>
+
+          <!-- Name + contact -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <p class="font-semibold text-gray-900 text-sm leading-tight">{{ u.name }}</p>
+              <span :class="roleBadgeClass(u.role)" class="text-[10px] font-medium px-2 py-0.5 rounded-full">
+                {{ roleLabel(u.role) }}
+              </span>
+              <!-- Self badge -->
+              <span v-if="u.id === authStore.user?.id"
+                class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-brand-100 text-brand-700">
+                Bạn
+              </span>
+            </div>
+            <p class="text-xs text-gray-400 mt-0.5 truncate">{{ u.email ?? u.phone ?? '—' }}</p>
+            <p class="text-[10px] text-gray-300 mt-0.5">{{ formatDate(u.createdAt) }}</p>
+          </div>
+
+          <!-- Role change (not self) -->
+          <select
+            v-if="u.id !== authStore.user?.id"
+            :value="u.role"
+            class="flex-shrink-0 rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-200 transition-colors"
+            @change="onRoleChange(u, ($event.target as HTMLSelectElement).value as UserRole)"
+          >
+            <option value="admin">{{ $t('user.role_admin') }}</option>
+            <option value="staff">{{ $t('user.role_staff') }}</option>
+            <option value="tourist">{{ $t('user.role_tourist') }}</option>
+          </select>
+        </div>
+
+        <!-- Action bar (not self) -->
+        <div v-if="u.id !== authStore.user?.id" class="border-t border-gray-100">
+          <button
+            type="button"
+            class="w-full py-2 text-xs font-medium text-red-500 hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5"
+            @click="confirmDelete(u)"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            {{ $t('common.delete') }}
+          </button>
+        </div>
       </div>
     </div>
 
