@@ -86,7 +86,7 @@
         </span>
         <a
           v-if="loc"
-          :href="`https://maps.google.com/?dq=${loc.latitude},${loc.longitude}`"
+          :href="`https://www.google.com/maps/dir/?api=1&destination=${loc.latitude},${loc.longitude}`"
           target="_blank"
           rel="noopener"
           class="flex-shrink-0 flex items-center gap-1 text-xs bg-blue-50 text-blue-700 font-medium rounded-full px-2.5 py-1"

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="h-[calc(100vh-8rem)] flex flex-col">
     <!-- Loading skeleton -->
     <div v-if="touristStore.isLoading" class="flex-1 bg-gray-200 animate-pulse" />
@@ -27,7 +27,7 @@
               <button
                 class="absolute top-2 right-2 w-7 h-7 bg-black/30 backdrop-blur rounded-full flex items-center justify-center text-white text-sm"
                 @click="selectedLocation = null"
-              >✕</button>
+              >âœ•</button>
             </div>
 
             <div class="p-4">
@@ -41,7 +41,7 @@
                   v-if="!selectedLocation.imageUrl"
                   class="text-gray-400 p-1 flex-shrink-0"
                   @click="selectedLocation = null"
-                >✕</button>
+                >âœ•</button>
               </div>
 
               <!-- Badges -->
@@ -49,14 +49,14 @@
                 <span
                   v-if="selectedLocation.hasAudioVi || selectedLocation.hasAudioEn"
                   class="text-[11px] font-medium text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full"
-                >🎧 Audio</span>
+                >ðŸŽ§ Audio</span>
                 <span
                   v-if="(selectedLocation.spotsCount ?? 0) > 0"
                   class="text-[11px] font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full"
-                >📍 {{ selectedLocation.spotsCount }} điểm</span>
+                >ðŸ“ {{ selectedLocation.spotsCount }} Ä‘iá»ƒm</span>
                 <span v-if="userPos && selectedLocation && distanceTo(selectedLocation.latitude, selectedLocation.longitude) !== null"
                   class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                  📍 {{ formatDistance(distanceTo(selectedLocation.latitude, selectedLocation.longitude)!) }}
+                  ðŸ“ {{ formatDistance(distanceTo(selectedLocation.latitude, selectedLocation.longitude)!) }}
                 </span>
               </div>
 
@@ -66,11 +66,11 @@
                 class="w-full mt-3"
                 @click="navigateTo(`/explore/${selectedLocation.slug}`)"
               >
-                {{ $t('explore.view_detail') }} →
+                {{ $t('explore.view_detail') }} â†’
               </AppButton>
               <a
                 v-if="selectedLocation"
-                :href="`https://maps.google.com/?dq=${selectedLocation.latitude},${selectedLocation.longitude}`"
+                :href="`https://www.google.com/maps/dir/?api=1&destination=${selectedLocation.latitude},${selectedLocation.longitude}`"
                 target="_blank"
                 rel="noopener"
                 class="mt-2 w-full py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
@@ -80,7 +80,7 @@
                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
-                Chỉ đường
+                Chá»‰ Ä‘Æ°á»ng
               </a>
             </div>
           </div>
@@ -97,34 +97,34 @@
                 {{ (tourStops?.indexOf(selectedTourStop) ?? 0) + 1 }}
               </div>
               <button class="absolute top-2 right-2 w-7 h-7 bg-black/30 backdrop-blur rounded-full flex items-center justify-center text-white text-sm"
-                @click="selectedTourStop = null">✕</button>
+                @click="selectedTourStop = null">âœ•</button>
             </div>
             <div class="p-4">
               <div class="flex items-start justify-between gap-2 mb-2">
                 <div>
                   <p class="text-xs text-brand-600 font-semibold mb-0.5">
-                    Điểm số {{ (tourStops?.indexOf(selectedTourStop) ?? 0) + 1 }} trong lịch trình
+                    Äiá»ƒm sá»‘ {{ (tourStops?.indexOf(selectedTourStop) ?? 0) + 1 }} trong lá»‹ch trÃ¬nh
                   </p>
                   <h3 class="font-bold text-gray-900">{{ selectedTourStop.location.nameVi }}</h3>
                 </div>
                 <button v-if="!selectedTourStop.location.imageUrl"
-                  class="text-gray-400" @click="selectedTourStop = null">✕</button>
+                  class="text-gray-400" @click="selectedTourStop = null">âœ•</button>
               </div>
               <div class="flex gap-2 mb-3">
                 <span v-if="selectedTourStop.suggestedTime" class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                  🕐 {{ selectedTourStop.suggestedTime }}
+                  ðŸ• {{ selectedTourStop.suggestedTime }}
                 </span>
                 <span v-if="selectedTourStop.suggestedDuration" class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                  ⏱ {{ selectedTourStop.suggestedDuration }}
+                  â± {{ selectedTourStop.suggestedDuration }}
                 </span>
               </div>
               <AppButton variant="primary" size="sm" class="w-full"
                 @click="navigateTo(`/explore/${selectedTourStop.location.slug}`)">
-                Xem chi tiết địa điểm →
+                Xem chi tiáº¿t Ä‘á»‹a Ä‘iá»ƒm â†’
               </AppButton>
               <a
                 v-if="selectedTourStop"
-                :href="`https://maps.google.com/?dq=${selectedTourStop.location.latitude},${selectedTourStop.location.longitude}`"
+                :href="`https://www.google.com/maps/dir/?api=1&destination=${selectedTourStop.location.latitude},${selectedTourStop.location.longitude}`"
                 target="_blank"
                 rel="noopener"
                 class="mt-2 w-full py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
@@ -134,7 +134,7 @@
                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
-                Chỉ đường
+                Chá»‰ Ä‘Æ°á»ng
               </a>
             </div>
           </div>
@@ -212,3 +212,4 @@ onMounted(() => touristStore.fetchLocations(locale.value))
   transform: translateY(100%);
 }
 </style>
+
