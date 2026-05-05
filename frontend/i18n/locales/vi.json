@@ -67,6 +67,7 @@
     "list": "Danh sách",
     "dashboard": "Tổng quan",
     "locations": "Địa điểm",
+    "tours": "Lịch trình",
     "packages": "Gói tham quan",
     "tickets": "Vé",
     "users": "Người dùng"
@@ -154,7 +155,14 @@
     "admission_fee_placeholder": "250000",
     "duration_placeholder": "120",
     "address_placeholder": "Tràng An, Trường Yên, Hoa Lư, Ninh Bình",
-    "best_time_placeholder": "Sáng sớm, tháng 3-4"
+    "best_time_placeholder": "Sáng sớm, tháng 3-4",
+    "add_tour": "Thêm tour",
+    "edit_tour": "Sửa tour",
+    "delete_tour_title": "Xóa tour?",
+    "no_tours": "Chưa có tour nào",
+    "add_stop": "Thêm điểm dừng",
+    "suggested_time": "Giờ gợi ý",
+    "suggested_duration": "Thời gian"
   },
   "ticket": {
     "activate_title": "Kích hoạt vé tham quan",

@@ -119,6 +119,7 @@ const route = useRoute()
 const navItems = [
   { to: '/admin', icon: '📊', labelKey: 'nav.dashboard' },
   { to: '/admin/locations', icon: '📍', labelKey: 'nav.locations' },
+  { to: '/admin/tours', icon: '🗺️', labelKey: 'nav.tours' },
   { to: '/admin/packages', icon: '🎫', labelKey: 'nav.packages' },
   { to: '/admin/tickets', icon: '🎟', labelKey: 'nav.tickets' },
   { to: '/admin/users', icon: '👥', labelKey: 'nav.users' }

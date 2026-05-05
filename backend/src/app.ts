@@ -15,12 +15,14 @@ import { RefreshTokenRepo } from './repositories/refresh-token.repo.js'
 import { LocationRepo } from './repositories/location.repo.js'
 import { PackageRepo } from './repositories/package.repo.js'
 import { TicketRepo } from './repositories/ticket.repo.js'
+import { TourRepo } from './repositories/tour.repo.js'
 import { AuthService } from './services/auth.service.js'
 import { LocationService } from './services/location.service.js'
 import { PackageService } from './services/package.service.js'
 import { TicketService } from './services/ticket.service.js'
 import { TouristService } from './services/tourist.service.js'
 import { UserService } from './services/user.service.js'
+import { TourService } from './services/tour.service.js'
 import { authRoutes } from './routes/auth.route.js'
 import { adminRoutes } from './routes/admin.route.js'
 import { staffRoutes } from './routes/staff.route.js'
@@ -73,6 +75,7 @@ export function buildApp() {
   const locationRepo = new LocationRepo(prisma)
   const packageRepo = new PackageRepo(prisma)
   const ticketRepo = new TicketRepo(prisma)
+  const tourRepo = new TourRepo(prisma)
 
   // Services
   const authService = new AuthService(userRepo, refreshTokenRepo)
@@ -81,6 +84,7 @@ export function buildApp() {
   const ticketService = new TicketService(ticketRepo, packageRepo)
   const touristService = new TouristService(locationRepo, ticketRepo)
   const userService = new UserService(userRepo)
+  const tourService = new TourService(tourRepo)
 
   // ─── Routes ──────────────────────────────────────────────────────────────────
 
@@ -91,9 +95,9 @@ export function buildApp() {
 
   // API routes
   fastify.register(authRoutes, { prefix: '/api/v1/auth', authService, ticketService })
-  fastify.register(adminRoutes, { prefix: '/api/v1/admin', locationService, packageService, ticketService, userService })
+  fastify.register(adminRoutes, { prefix: '/api/v1/admin', locationService, packageService, ticketService, userService, tourService })
   fastify.register(staffRoutes, { prefix: '/api/v1/staff', ticketService, packageRepo })
-  fastify.register(touristRoutes, { prefix: '/api/v1', touristService })
+  fastify.register(touristRoutes, { prefix: '/api/v1', touristService, tourService })
 
   // ─── Global Error Handler ─────────────────────────────────────────────────────
 

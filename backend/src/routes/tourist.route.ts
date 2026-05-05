@@ -1,10 +1,12 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { authenticate } from '../middlewares/authenticate.js'
 import { TouristService } from '../services/tourist.service.js'
+import { TourService } from '../services/tour.service.js'
 import { ok } from '../lib/response.js'
 
 interface TouristRouteOptions {
   touristService: TouristService
+  tourService: TourService
 }
 
 function getLang(request: FastifyRequest): 'vi' | 'en' {
@@ -16,7 +18,7 @@ export async function touristRoutes(
   fastify: FastifyInstance,
   options: TouristRouteOptions
 ): Promise<void> {
-  const { touristService } = options
+  const { touristService, tourService } = options
   const preHandler = [authenticate]
 
   // GET /locations — list locations in tourist's package
@@ -41,4 +43,10 @@ export async function touristRoutes(
       return reply.send(ok(location))
     }
   )
+
+  // GET /tours — active tours for tourist
+  fastify.get('/tours', { preHandler }, async (_req: FastifyRequest, reply: FastifyReply) => {
+    const tours = await tourService.getActiveTours()
+    return reply.send(ok(tours))
+  })
 }

@@ -79,6 +79,7 @@ model Location {
   packages        PackageLocation[]
   locationImages  LocationImage[]
   spots           LocationSpot[]
+  tourStops       TourStop[]
 
   @@map("locations")
 }
@@ -192,4 +193,39 @@ model TicketUser {
 
   @@unique([ticketId, userId])
   @@map("ticket_users")
+}
+
+model Tour {
+  id           String     @id @default(cuid())
+  nameVi       String
+  nameEn       String
+  duration     String
+  badgeVi      String?
+  badgeEn      String?
+  noteVi       String?    @db.Text
+  noteEn       String?    @db.Text
+  isActive     Boolean    @default(true)
+  displayOrder Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  stops TourStop[]
+
+  @@map("tours")
+}
+
+model TourStop {
+  id                String   @id @default(cuid())
+  tourId            String
+  locationId        String
+  order             Int      @default(0)
+  suggestedTime     String?
+  suggestedDuration String?
+  noteVi            String?  @db.Text
+  noteEn            String?  @db.Text
+
+  tour     Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id])
+
+  @@map("tour_stops")
 }

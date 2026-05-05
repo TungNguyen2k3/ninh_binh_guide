@@ -67,6 +67,7 @@
     "list": "List",
     "dashboard": "Dashboard",
     "locations": "Locations",
+    "tours": "Tours",
     "packages": "Packages",
     "tickets": "Tickets",
     "users": "Users"
@@ -154,7 +155,14 @@
     "admission_fee_placeholder": "250000",
     "duration_placeholder": "120",
     "address_placeholder": "Tràng An, Trường Yên, Hoa Lư, Ninh Bình",
-    "best_time_placeholder": "Early morning, March-April"
+    "best_time_placeholder": "Early morning, March-April",
+    "add_tour": "Add tour",
+    "edit_tour": "Edit tour",
+    "delete_tour_title": "Delete tour?",
+    "no_tours": "No tours yet",
+    "add_stop": "Add stop",
+    "suggested_time": "Suggested time",
+    "suggested_duration": "Duration"
   },
   "ticket": {
     "activate_title": "Activate your ticket",

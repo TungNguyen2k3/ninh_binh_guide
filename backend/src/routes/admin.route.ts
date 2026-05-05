@@ -5,6 +5,7 @@ import { LocationService } from '../services/location.service.js'
 import { PackageService } from '../services/package.service.js'
 import { TicketService } from '../services/ticket.service.js'
 import { UserService } from '../services/user.service.js'
+import { TourService } from '../services/tour.service.js'
 import {
   CreateLocationSchema,
   UpdateLocationSchema,
@@ -19,6 +20,13 @@ import {
 } from '../schemas/package.schema.js'
 import { TicketQuerySchema } from '../schemas/ticket.schema.js'
 import { CreateUserSchema, UpdateRoleSchema, UserQuerySchema } from '../schemas/user.schema.js'
+import {
+  CreateTourSchema,
+  UpdateTourSchema,
+  CreateTourStopSchema,
+  UpdateTourStopSchema,
+  ReorderTourStopsSchema,
+} from '../schemas/tour.schema.js'
 import { ValidationError } from '../lib/errors.js'
 import { ok, paginated } from '../lib/response.js'
 
@@ -27,13 +35,14 @@ interface AdminRouteOptions {
   packageService: PackageService
   ticketService: TicketService
   userService: UserService
+  tourService: TourService
 }
 
 export async function adminRoutes(
   fastify: FastifyInstance,
   options: AdminRouteOptions
 ): Promise<void> {
-  const { locationService, packageService, ticketService, userService } = options
+  const { locationService, packageService, ticketService, userService, tourService } = options
   const preHandler = [authenticate, requireRole('admin')]
 
   // ─── Location Routes ─────────────────────────────────────────────────────────
@@ -318,5 +327,69 @@ export async function adminRoutes(
     const { id } = req.params as { id: string }
     await userService.deleteUser(id, req.user.userId)
     return reply.status(204).send()
+  })
+
+  // ─── Tour Routes ──────────────────────────────────────────────────────────────
+
+  fastify.get('/tours', { preHandler }, async (_req: FastifyRequest, reply: FastifyReply) => {
+    const tours = await tourService.list()
+    return reply.send(ok(tours))
+  })
+
+  fastify.post('/tours', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = CreateTourSchema.safeParse(req.body)
+    if (!parsed.success) throw new ValidationError('Validation failed', parsed.error.flatten())
+    const tour = await tourService.create(parsed.data)
+    return reply.status(201).send(ok(tour))
+  })
+
+  fastify.get('/tours/:id', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as { id: string }
+    const tour = await tourService.getById(id)
+    return reply.send(ok(tour))
+  })
+
+  fastify.put('/tours/:id', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as { id: string }
+    const parsed = UpdateTourSchema.safeParse(req.body)
+    if (!parsed.success) throw new ValidationError('Validation failed', parsed.error.flatten())
+    const tour = await tourService.update(id, parsed.data)
+    return reply.send(ok(tour))
+  })
+
+  fastify.delete('/tours/:id', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as { id: string }
+    await tourService.delete(id)
+    return reply.status(204).send()
+  })
+
+  fastify.post('/tours/:id/stops', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as { id: string }
+    const parsed = CreateTourStopSchema.safeParse(req.body)
+    if (!parsed.success) throw new ValidationError('Validation failed', parsed.error.flatten())
+    const stop = await tourService.addStop(id, parsed.data)
+    return reply.status(201).send(ok(stop))
+  })
+
+  fastify.put('/tours/:id/stops/:stopId', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id, stopId } = req.params as { id: string; stopId: string }
+    const parsed = UpdateTourStopSchema.safeParse(req.body)
+    if (!parsed.success) throw new ValidationError('Validation failed', parsed.error.flatten())
+    const stop = await tourService.updateStop(id, stopId, parsed.data)
+    return reply.send(ok(stop))
+  })
+
+  fastify.delete('/tours/:id/stops/:stopId', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id, stopId } = req.params as { id: string; stopId: string }
+    await tourService.deleteStop(id, stopId)
+    return reply.status(204).send()
+  })
+
+  fastify.put('/tours/:id/stops/reorder', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as { id: string }
+    const parsed = ReorderTourStopsSchema.safeParse(req.body)
+    if (!parsed.success) throw new ValidationError('Validation failed', parsed.error.flatten())
+    await tourService.reorderStops(id, parsed.data.stops)
+    return reply.send(ok({ success: true }))
   })
 }
