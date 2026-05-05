@@ -18,40 +18,71 @@
 
     <div v-else class="space-y-3">
       <div v-for="tour in tourStore.tours" :key="tour.id"
-        class="bg-white rounded-2xl border border-gray-200 p-4 flex items-center gap-4">
-        <!-- Order + active -->
-        <div class="flex-shrink-0 text-center">
-          <span class="text-xs text-gray-400 block">{{ $t('location.display_order') }}</span>
-          <span class="text-lg font-bold text-gray-700">{{ tour.displayOrder }}</span>
-        </div>
+        class="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-sm transition-shadow">
 
-        <!-- Info -->
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 flex-wrap">
-            <p class="font-semibold text-gray-900 text-sm">{{ tour.nameVi }}</p>
-            <span v-if="tour.badgeVi"
-              class="text-[10px] font-medium bg-brand-100 text-brand-700 px-2 py-0.5 rounded-full">
-              {{ tour.badgeVi }}
-            </span>
+        <!-- Main row -->
+        <div class="flex items-start gap-3 px-4 pt-4 pb-3">
+          <!-- Order badge -->
+          <span class="mt-0.5 w-7 h-7 rounded-full bg-gray-100 text-gray-600 text-xs font-bold flex items-center justify-center flex-shrink-0">
+            {{ tour.displayOrder }}
+          </span>
+
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <p class="font-bold text-gray-900 leading-tight">{{ tour.nameVi }}</p>
+                <p class="text-xs text-gray-400 mt-0.5 truncate">{{ tour.nameEn }}</p>
+              </div>
+              <!-- Active toggle — top right -->
+              <button type="button"
+                class="flex-shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors mt-0.5"
+                :class="tour.isActive
+                  ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
+                @click="toggleActive(tour)">
+                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  :class="tour.isActive ? 'bg-green-500' : 'bg-gray-400'" />
+                {{ tour.isActive ? $t('common.active') : $t('common.inactive') }}
+              </button>
+            </div>
+
+            <!-- Meta chips -->
+            <div class="flex items-center gap-2 mt-2 flex-wrap">
+              <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-full">
+                🕐 {{ tour.duration }}
+              </span>
+              <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-full">
+                📍 {{ tour.stops.length }} điểm dừng
+              </span>
+              <span v-if="tour.badgeVi"
+                class="inline-flex items-center text-xs font-medium bg-brand-50 text-brand-700 border border-brand-200 px-2 py-0.5 rounded-full">
+                {{ tour.badgeVi }}
+              </span>
+            </div>
           </div>
-          <p class="text-xs text-gray-400 mt-0.5">{{ tour.nameEn }} · {{ tour.duration }} · {{ tour.stops.length }} điểm dừng</p>
         </div>
 
-        <!-- Actions -->
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <!-- Toggle active -->
+        <!-- Action bar -->
+        <div class="flex border-t border-gray-100 divide-x divide-gray-100">
           <button type="button"
-            class="px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
-            :class="tour.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'"
-            @click="toggleActive(tour)">
-            {{ tour.isActive ? $t('common.active') : $t('common.inactive') }}
-          </button>
-          <AppButton variant="secondary" size="sm" @click="navigateTo(`/admin/tours/${tour.id}/edit`)">
+            class="flex-1 py-2.5 text-xs font-medium text-brand-600 hover:bg-brand-50 transition-colors flex items-center justify-center gap-1.5"
+            @click="navigateTo(`/admin/tours/${tour.id}/edit`)">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
             {{ $t('common.edit') }}
-          </AppButton>
-          <AppButton variant="danger" size="sm" @click="confirmDelete(tour)">
+          </button>
+          <button type="button"
+            class="flex-1 py-2.5 text-xs font-medium text-red-500 hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5"
+            @click="confirmDelete(tour)">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
             {{ $t('common.delete') }}
-          </AppButton>
+          </button>
         </div>
       </div>
     </div>
