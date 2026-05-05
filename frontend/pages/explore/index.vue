@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="h-[calc(100vh-8rem)] flex flex-col">
     <!-- Loading skeleton -->
     <div v-if="touristStore.isLoading" class="flex-1 bg-gray-200 animate-pulse" />
@@ -27,7 +27,7 @@
               <button
                 class="absolute top-2 right-2 w-7 h-7 bg-black/30 backdrop-blur rounded-full flex items-center justify-center text-white text-sm"
                 @click="selectedLocation = null"
-              >âœ•</button>
+              >✕</button>
             </div>
 
             <div class="p-4">
@@ -41,7 +41,7 @@
                   v-if="!selectedLocation.imageUrl"
                   class="text-gray-400 p-1 flex-shrink-0"
                   @click="selectedLocation = null"
-                >âœ•</button>
+                >✕</button>
               </div>
 
               <!-- Badges -->
@@ -49,14 +49,14 @@
                 <span
                   v-if="selectedLocation.hasAudioVi || selectedLocation.hasAudioEn"
                   class="text-[11px] font-medium text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full"
-                >ðŸŽ§ Audio</span>
+                >🎧 Audio</span>
                 <span
                   v-if="(selectedLocation.spotsCount ?? 0) > 0"
                   class="text-[11px] font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full"
-                >ðŸ“ {{ selectedLocation.spotsCount }} Ä‘iá»ƒm</span>
+                >📍 {{ selectedLocation.spotsCount }} điểm</span>
                 <span v-if="userPos && selectedLocation && distanceTo(selectedLocation.latitude, selectedLocation.longitude) !== null"
                   class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                  ðŸ“ {{ formatDistance(distanceTo(selectedLocation.latitude, selectedLocation.longitude)!) }}
+                  📍 {{ formatDistance(distanceTo(selectedLocation.latitude, selectedLocation.longitude)!) }}
                 </span>
               </div>
 
@@ -66,7 +66,7 @@
                 class="w-full mt-3"
                 @click="navigateTo(`/explore/${selectedLocation.slug}`)"
               >
-                {{ $t('explore.view_detail') }} â†’
+                {{ $t('explore.view_detail') }} →
               </AppButton>
               <a
                 v-if="selectedLocation"
@@ -97,30 +97,30 @@
                 {{ (tourStops?.indexOf(selectedTourStop) ?? 0) + 1 }}
               </div>
               <button class="absolute top-2 right-2 w-7 h-7 bg-black/30 backdrop-blur rounded-full flex items-center justify-center text-white text-sm"
-                @click="selectedTourStop = null">âœ•</button>
+                @click="selectedTourStop = null">✕</button>
             </div>
             <div class="p-4">
               <div class="flex items-start justify-between gap-2 mb-2">
                 <div>
                   <p class="text-xs text-brand-600 font-semibold mb-0.5">
-                    Äiá»ƒm sá»‘ {{ (tourStops?.indexOf(selectedTourStop) ?? 0) + 1 }} trong lá»‹ch trÃ¬nh
+                    Điểm số {{ (tourStops?.indexOf(selectedTourStop) ?? 0) + 1 }} trong lịch trình
                   </p>
                   <h3 class="font-bold text-gray-900">{{ selectedTourStop.location.nameVi }}</h3>
                 </div>
                 <button v-if="!selectedTourStop.location.imageUrl"
-                  class="text-gray-400" @click="selectedTourStop = null">âœ•</button>
+                  class="text-gray-400" @click="selectedTourStop = null">✕</button>
               </div>
               <div class="flex gap-2 mb-3">
                 <span v-if="selectedTourStop.suggestedTime" class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                  ðŸ• {{ selectedTourStop.suggestedTime }}
+                  🕐 {{ selectedTourStop.suggestedTime }}
                 </span>
                 <span v-if="selectedTourStop.suggestedDuration" class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                  â± {{ selectedTourStop.suggestedDuration }}
+                  ⏱ {{ selectedTourStop.suggestedDuration }}
                 </span>
               </div>
               <AppButton variant="primary" size="sm" class="w-full"
                 @click="navigateTo(`/explore/${selectedTourStop.location.slug}`)">
-                Xem chi tiáº¿t Ä‘á»‹a Ä‘iá»ƒm â†’
+                Xem chi tiết địa điểm →
               </AppButton>
               <a
                 v-if="selectedTourStop"
@@ -212,4 +212,3 @@ onMounted(() => touristStore.fetchLocations(locale.value))
   transform: translateY(100%);
 }
 </style>
-
