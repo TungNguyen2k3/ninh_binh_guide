@@ -10,8 +10,9 @@
         title="Vị trí của tôi"
         @click="locateUser"
       >📍</button>
-      <!-- Route toggle -->
+      <!-- Route toggle — only shown in normal mode -->
       <button
+        v-if="!props.tourStops || props.tourStops.length === 0"
         type="button"
         class="w-10 h-10 rounded-xl shadow-lg flex items-center justify-center text-lg transition-colors border"
         :class="showRoute ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-200 hover:bg-green-50'"
@@ -26,9 +27,29 @@
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { TouristLocation } from '~/stores/tourist.store'
+import type { TourStop } from '~/stores/tour.store'
 
-const props = defineProps<{ locations: TouristLocation[] }>()
-const emit = defineEmits<{ select: [location: TouristLocation] }>()
+const props = defineProps<{
+  locations: TouristLocation[]
+  tourStops?: Array<{
+    order: number
+    suggestedTime?: string | null
+    suggestedDuration?: string | null
+    location: {
+      nameVi: string
+      nameEn: string
+      slug: string
+      latitude: number
+      longitude: number
+      imageUrl?: string | null
+    }
+  }>
+}>()
+
+const emit = defineEmits<{
+  select: [location: TouristLocation]
+  selectTourStop: [stop: TourStop]
+}>()
 
 const mapEl = ref<HTMLElement | null>(null)
 let map: L.Map | null = null
@@ -48,6 +69,15 @@ function createIcon() {
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
     shadowSize: [41, 41],
+  })
+}
+
+function createNumberedIcon(n: number) {
+  return L.divIcon({
+    html: `<div style="width:28px;height:28px;border-radius:50%;background:#16a34a;color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.25)">${n}</div>`,
+    className: '',
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
   })
 }
 
@@ -75,15 +105,34 @@ function addMarkers() {
   markers.forEach(m => m.remove())
   markers = []
 
-  props.locations.forEach((loc: TouristLocation) => {
-    const marker = L.marker([loc.latitude, loc.longitude], { icon: createIcon() })
-      .addTo(map!)
-      .bindTooltip(loc.name, { permanent: false, direction: 'top' })
-      .on('click', () => emit('select', loc))
-    markers.push(marker)
-  })
+  if (props.tourStops && props.tourStops.length > 0) {
+    // TOUR MODE: numbered markers
+    props.tourStops.forEach((stop, idx) => {
+      const { latitude, longitude } = stop.location
+      const icon = createNumberedIcon(idx + 1)
+      const marker = L.marker([latitude, longitude], { icon })
+        .addTo(map!)
+        .on('click', () => emit('selectTourStop', stop as unknown as TourStop))
+      markers.push(marker)
+    })
 
-  // Fit map to markers if any
+    // Tour polyline
+    if (routeLine) { routeLine.remove(); routeLine = null }
+    const latlngs = props.tourStops.map(s => [s.location.latitude, s.location.longitude] as [number, number])
+    routeLine = L.polyline(latlngs, { color: '#16a34a', weight: 3, opacity: 0.8, dashArray: '8, 6' }).addTo(map!)
+    showRoute.value = true
+  } else {
+    // NORMAL MODE: standard markers
+    props.locations.forEach((loc: TouristLocation) => {
+      const marker = L.marker([loc.latitude, loc.longitude], { icon: createIcon() })
+        .addTo(map!)
+        .bindTooltip(loc.name, { permanent: false, direction: 'top' })
+        .on('click', () => emit('select', loc))
+      markers.push(marker)
+    })
+    showRoute.value = false
+  }
+
   if (markers.length > 0) {
     const group = L.featureGroup(markers)
     map.fitBounds(group.getBounds().pad(0.1))
@@ -136,9 +185,9 @@ function drawRoute() {
   }).addTo(map!)
 }
 
-watch(() => props.locations, () => {
+watch([() => props.locations, () => props.tourStops], () => {
   addMarkers()
-  if (showRoute.value) {
+  if (showRoute.value && (!props.tourStops || props.tourStops.length === 0)) {
     drawRoute()
   }
 }, { deep: true })

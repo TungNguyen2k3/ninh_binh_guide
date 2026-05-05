@@ -53,6 +53,7 @@ export interface TourFormData {
 interface TourState {
   tours: Tour[]
   current: Tour | null
+  touristTour: Tour | null
   isLoading: boolean
 }
 
@@ -60,9 +61,20 @@ export const useTourStore = defineStore('tour', {
   state: (): TourState => ({
     tours: [],
     current: null,
+    touristTour: null,
     isLoading: false,
   }),
   actions: {
+    async fetchTouristTour(id: string): Promise<void> {
+      this.isLoading = true
+      try {
+        const { apiFetch } = useApiFetch()
+        const res = await apiFetch<{ success: true; data: Tour }>(`/tours/${id}`)
+        this.touristTour = res.data
+      } finally {
+        this.isLoading = false
+      }
+    },
     async fetchList(): Promise<void> {
       this.isLoading = true
       try {

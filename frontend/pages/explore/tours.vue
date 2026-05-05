@@ -22,7 +22,8 @@
       <div
         v-for="tour in tours"
         :key="tour.id"
-        class="bg-white rounded-2xl border border-gray-200 overflow-hidden"
+        class="bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
+        @click="navigateTo('/explore/tours/' + tour.id)"
       >
         <!-- Header -->
         <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">

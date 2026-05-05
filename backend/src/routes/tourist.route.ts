@@ -3,6 +3,7 @@ import { authenticate } from '../middlewares/authenticate.js'
 import { TouristService } from '../services/tourist.service.js'
 import { TourService } from '../services/tour.service.js'
 import { ok } from '../lib/response.js'
+import { NotFoundError } from '../lib/errors.js'
 
 interface TouristRouteOptions {
   touristService: TouristService
@@ -48,5 +49,13 @@ export async function touristRoutes(
   fastify.get('/tours', { preHandler }, async (_req: FastifyRequest, reply: FastifyReply) => {
     const tours = await tourService.getActiveTours()
     return reply.send(ok(tours))
+  })
+
+  // GET /tours/:id — single tour detail (stops + location data)
+  fastify.get('/tours/:id', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as { id: string }
+    const tour = await tourService.getById(id)
+    if (!tour.isActive) throw new NotFoundError('Tour')
+    return reply.send(ok(tour))
   })
 }
