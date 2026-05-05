@@ -104,7 +104,7 @@ onMounted(async () => {
   isLoading.value = true
   try {
     const { apiFetch } = useApiFetch()
-    const res = await apiFetch<{ success: true; data: Tour[] }>('/tourist/tours')
+    const res = await apiFetch<{ success: true; data: Tour[] }>('/tours')
     tours.value = res.data
   } catch {
     // If no tours yet or API error, show empty state
