@@ -141,7 +141,7 @@ function locateUser() {
       color: '#fff',
       weight: 3,
     }).addTo(map!).bindTooltip('Vị trí của bạn', { permanent: false, direction: 'top' })
-    map!.setView(e.latlng, 14)
+    // Do NOT pan/zoom — keep map on Ninh Binh locations
     emit('locate', e.latlng.lat, e.latlng.lng)
   })
   map.once('locationerror', () => {

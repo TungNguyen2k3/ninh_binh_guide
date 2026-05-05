@@ -161,10 +161,19 @@ const route = useRoute()
 const touristStore = useTouristStore()
 const tourStore = useTourStore()
 
+const { toast } = useToast()
 const { position: userPos, distanceTo, formatDistance, setPosition } = useGeolocation()
 
 function handleLocate(lat: number, lng: number) {
   setPosition(lat, lng)
+  // Show toast with nearest location distance
+  const nearest = touristStore.locations
+    .map(l => ({ name: l.name, dist: distanceTo(l.latitude, l.longitude) }))
+    .filter(l => l.dist !== null)
+    .sort((a, b) => (a.dist ?? Infinity) - (b.dist ?? Infinity))[0]
+  if (nearest?.dist !== null && nearest?.dist !== undefined) {
+    toast.info(`📍 Địa điểm gần nhất: ${nearest.name} (${formatDistance(nearest.dist)})`)
+  }
 }
 
 const selectedLocation = ref<TouristLocation | null>(null)
