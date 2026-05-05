@@ -84,6 +84,16 @@
         <span v-if="loc.address" class="flex-shrink-0 flex items-center gap-1 text-xs bg-gray-100 rounded-full px-2.5 py-1 text-gray-700">
           📍 {{ loc.address }}
         </span>
+        <a
+          v-if="loc"
+          :href="`https://maps.google.com/?dq=${loc.latitude},${loc.longitude}`"
+          target="_blank"
+          rel="noopener"
+          class="flex-shrink-0 flex items-center gap-1 text-xs bg-blue-50 text-blue-700 font-medium rounded-full px-2.5 py-1"
+          @click.stop
+        >
+          🧭 Chỉ đường
+        </a>
       </div>
 
       <div class="px-4 space-y-6 pt-2">

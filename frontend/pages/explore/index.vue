@@ -11,6 +11,7 @@
           :tour-stops="tourStops"
           @select="handleSelectLocation"
           @select-tour-stop="handleSelectTourStop"
+          @locate="handleLocate"
         />
 
         <!-- Normal location bottom sheet -->
@@ -53,6 +54,10 @@
                   v-if="(selectedLocation.spotsCount ?? 0) > 0"
                   class="text-[11px] font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full"
                 >📍 {{ selectedLocation.spotsCount }} điểm</span>
+                <span v-if="userPos && selectedLocation && distanceTo(selectedLocation.latitude, selectedLocation.longitude) !== null"
+                  class="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                  📍 {{ formatDistance(distanceTo(selectedLocation.latitude, selectedLocation.longitude)!) }}
+                </span>
               </div>
 
               <AppButton
@@ -63,6 +68,20 @@
               >
                 {{ $t('explore.view_detail') }} →
               </AppButton>
+              <a
+                v-if="selectedLocation"
+                :href="`https://maps.google.com/?dq=${selectedLocation.latitude},${selectedLocation.longitude}`"
+                target="_blank"
+                rel="noopener"
+                class="mt-2 w-full py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+              >
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Chỉ đường
+              </a>
             </div>
           </div>
         </Transition>
@@ -103,6 +122,20 @@
                 @click="navigateTo(`/explore/${selectedTourStop.location.slug}`)">
                 Xem chi tiết địa điểm →
               </AppButton>
+              <a
+                v-if="selectedTourStop"
+                :href="`https://maps.google.com/?dq=${selectedTourStop.location.latitude},${selectedTourStop.location.longitude}`"
+                target="_blank"
+                rel="noopener"
+                class="mt-2 w-full py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+              >
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Chỉ đường
+              </a>
             </div>
           </div>
         </Transition>
@@ -127,6 +160,12 @@ useHead({ title: () => t('explore.title') })
 const route = useRoute()
 const touristStore = useTouristStore()
 const tourStore = useTourStore()
+
+const { position: userPos, distanceTo, formatDistance, setPosition } = useGeolocation()
+
+function handleLocate(lat: number, lng: number) {
+  setPosition(lat, lng)
+}
 
 const selectedLocation = ref<TouristLocation | null>(null)
 const selectedTourStop = ref<any>(null)

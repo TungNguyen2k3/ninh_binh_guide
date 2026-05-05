@@ -17,9 +17,12 @@
     <!-- List -->
     <div v-else class="p-4 grid grid-cols-2 gap-3 pb-24">
       <ExploreLocationCard
-        v-for="loc in touristStore.locations"
+        v-for="loc in sortedLocations"
         :key="loc.id"
         :location="loc"
+        :distance="userPos && distanceTo(loc.latitude, loc.longitude) !== null
+          ? formatDistance(distanceTo(loc.latitude, loc.longitude)!)
+          : undefined"
         @click="navigateTo(`/explore/${loc.slug}`)"
       />
     </div>
@@ -33,6 +36,17 @@ useHead({ title: () => t('nav.list') })
 
 const touristStore = useTouristStore()
 const { locale } = useI18n()
+
+const { position: userPos, distanceTo, formatDistance } = useGeolocation()
+
+const sortedLocations = computed(() => {
+  if (!userPos.value) return touristStore.locations
+  return [...touristStore.locations].sort((a, b) => {
+    const da = distanceTo(a.latitude, a.longitude) ?? Infinity
+    const db = distanceTo(b.latitude, b.longitude) ?? Infinity
+    return da - db
+  })
+})
 
 watch(locale, (lang) => touristStore.fetchLocations(lang))
 onMounted(() => touristStore.fetchLocations(locale.value))

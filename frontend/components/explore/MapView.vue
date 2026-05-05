@@ -10,15 +10,6 @@
         title="Vị trí của tôi"
         @click="locateUser"
       >📍</button>
-      <!-- Route toggle — only shown in normal mode -->
-      <button
-        v-if="!props.tourStops || props.tourStops.length === 0"
-        type="button"
-        class="w-10 h-10 rounded-xl shadow-lg flex items-center justify-center text-lg transition-colors border"
-        :class="showRoute ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-200 hover:bg-green-50'"
-        title="Tuyến đường gợi ý"
-        @click="toggleRoute"
-      >🗺️</button>
     </div>
   </div>
 </template>
@@ -49,6 +40,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   select: [location: TouristLocation]
   selectTourStop: [stop: TourStop]
+  locate: [lat: number, lng: number]
 }>()
 
 const mapEl = ref<HTMLElement | null>(null)
@@ -56,8 +48,6 @@ let map: L.Map | null = null
 let markers: L.Marker[] = []
 let userMarker: L.CircleMarker | null = null
 let routeLine: L.Polyline | null = null
-
-const showRoute = ref(false)
 
 // Fix Leaflet default icon path issue with Vite
 function createIcon() {
@@ -120,7 +110,6 @@ function addMarkers() {
     if (routeLine) { routeLine.remove(); routeLine = null }
     const latlngs = props.tourStops.map(s => [s.location.latitude, s.location.longitude] as [number, number])
     routeLine = L.polyline(latlngs, { color: '#16a34a', weight: 3, opacity: 0.8, dashArray: '8, 6' }).addTo(map!)
-    showRoute.value = true
   } else {
     // NORMAL MODE: standard markers
     props.locations.forEach((loc: TouristLocation) => {
@@ -130,7 +119,6 @@ function addMarkers() {
         .on('click', () => emit('select', loc))
       markers.push(marker)
     })
-    showRoute.value = false
   }
 
   if (markers.length > 0) {
@@ -154,41 +142,14 @@ function locateUser() {
       weight: 3,
     }).addTo(map!).bindTooltip('Vị trí của bạn', { permanent: false, direction: 'top' })
     map!.setView(e.latlng, 14)
+    emit('locate', e.latlng.lat, e.latlng.lng)
   })
   map.once('locationerror', () => {
     // Silent fail — geolocation denied or unavailable
   })
 }
 
-function toggleRoute() {
-  if (!map) return
-  showRoute.value = !showRoute.value
-  if (!showRoute.value) {
-    routeLine?.remove()
-    routeLine = null
-    return
-  }
-  drawRoute()
-}
-
-function drawRoute() {
-  if (!map) return
-  routeLine?.remove()
-  routeLine = null
-  const sorted = [...props.locations].sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
-  const latlngs = sorted.map(l => [l.latitude, l.longitude] as [number, number])
-  routeLine = L.polyline(latlngs, {
-    color: '#16a34a',
-    weight: 3,
-    opacity: 0.7,
-    dashArray: '8, 6',
-  }).addTo(map!)
-}
-
 watch([() => props.locations, () => props.tourStops], () => {
   addMarkers()
-  if (showRoute.value && (!props.tourStops || props.tourStops.length === 0)) {
-    drawRoute()
-  }
 }, { deep: true })
 </script>

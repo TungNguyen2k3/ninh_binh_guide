@@ -34,6 +34,10 @@
         >
           📍 {{ location.spotsCount }} điểm
         </span>
+        <span v-if="distance"
+          class="inline-flex items-center gap-1 text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+          📍 {{ distance }}
+        </span>
       </div>
     </div>
   </div>
@@ -53,6 +57,7 @@ defineProps<{
     longitude: number
     spotsCount?: number
   }
+  distance?: string
 }>()
 
 defineEmits<{ click: [] }>()
