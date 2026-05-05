@@ -20,153 +20,119 @@
       />
     </div>
 
-    <!-- Table wrapper — horizontal scroll on mobile -->
-    <div class="bg-white rounded-2xl border border-gray-200">
-      <!-- Loading state -->
-      <div v-if="locationStore.isLoading" class="flex justify-center items-center py-16">
-        <svg class="animate-spin h-6 w-6 text-brand-600" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-      </div>
+    <!-- Loading state -->
+    <div v-if="locationStore.isLoading" class="flex justify-center items-center py-16">
+      <svg class="animate-spin h-6 w-6 text-brand-600" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+      </svg>
+    </div>
 
-      <!-- Empty state -->
-      <div v-else-if="locationStore.locations.length === 0" class="flex flex-col items-center justify-center py-16 text-center">
-        <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        <p class="text-sm text-gray-500">{{ $t('admin.no_locations') }}</p>
-      </div>
+    <!-- Empty state -->
+    <div v-else-if="locationStore.locations.length === 0" class="flex flex-col items-center justify-center py-16 text-center">
+      <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+      <p class="text-sm text-gray-500">{{ $t('admin.no_locations') }}</p>
+    </div>
 
-      <!-- Table -->
-      <div v-else class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 text-sm">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                {{ $t('location.name_vi') }}
-              </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap hidden md:table-cell">
-                {{ $t('location.slug') }}
-              </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">
-                {{ $t('location.coordinates') }}
-              </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                {{ $t('location.status') }}
-              </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
-                {{ $t('admin.audio_vi') }}
-              </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap hidden sm:table-cell">
-                {{ $t('admin.audio_en') }}
-              </th>
-              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                {{ $t('common.actions') }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 bg-white">
-            <tr v-for="loc in locationStore.locations" :key="loc.id" class="hover:bg-gray-50 transition-colors">
-              <!-- Name -->
-              <td class="px-4 py-3">
-                <p class="font-medium text-gray-900 whitespace-nowrap">{{ loc.nameVi }}</p>
-                <p class="text-xs text-gray-400 mt-0.5 whitespace-nowrap">{{ loc.nameEn }}</p>
-              </td>
-
-              <!-- Slug -->
-              <td class="px-4 py-3 text-gray-500 hidden md:table-cell">
-                <code class="text-xs bg-gray-100 rounded px-1.5 py-0.5">{{ loc.slug }}</code>
-              </td>
-
-              <!-- Coordinates -->
-              <td class="px-4 py-3 text-gray-500 hidden lg:table-cell whitespace-nowrap">
-                {{ loc.latitude.toFixed(4) }}, {{ loc.longitude.toFixed(4) }}
-              </td>
-
-              <!-- Status toggle -->
-              <td class="px-4 py-3">
-                <button
-                  type="button"
-                  :disabled="togglingId === loc.id"
-                  class="flex items-center gap-1.5"
-                  @click="handleToggleActive(loc)"
-                >
-                  <span
-                    class="px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap"
-                    :class="loc.isActive
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-500'"
-                  >
-                    {{ loc.isActive ? $t('common.active') : $t('common.inactive') }}
-                  </span>
-                </button>
-              </td>
-
-              <!-- Audio Vi -->
-              <td class="px-4 py-3 text-center hidden sm:table-cell">
-                <span v-if="loc.audioViUrl" class="text-green-500 font-bold">&#10003;</span>
-                <span v-else class="text-gray-300">&#8212;</span>
-              </td>
-
-              <!-- Audio En -->
-              <td class="px-4 py-3 text-center hidden sm:table-cell">
-                <span v-if="loc.audioEnUrl" class="text-green-500 font-bold">&#10003;</span>
-                <span v-else class="text-gray-300">&#8212;</span>
-              </td>
-
-              <!-- Actions -->
-              <td class="px-4 py-3">
-                <div class="flex items-center justify-end gap-2">
-                  <button
-                    type="button"
-                    class="text-brand-600 hover:text-brand-700 font-medium text-sm px-2 py-1 rounded-lg hover:bg-brand-50 transition-colors whitespace-nowrap"
-                    @click="navigateTo(`/admin/locations/${loc.id}/edit`)"
-                  >
-                    {{ $t('common.edit') }}
-                  </button>
-                  <button
-                    type="button"
-                    class="text-red-600 hover:text-red-700 font-medium text-sm px-2 py-1 rounded-lg hover:bg-red-50 transition-colors whitespace-nowrap"
-                    @click="confirmDelete(loc)"
-                  >
-                    {{ $t('common.delete') }}
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pagination -->
+    <!-- Card list -->
+    <div v-else class="space-y-2">
       <div
-        v-if="totalPages > 1"
-        class="flex items-center justify-between px-4 py-3 border-t border-gray-200"
+        v-for="loc in locationStore.locations"
+        :key="loc.id"
+        class="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-sm transition-shadow"
       >
-        <p class="text-sm text-gray-500">
-          Trang {{ currentPage }} / {{ totalPages }}
-        </p>
-        <div class="flex gap-2">
-          <AppButton
-            variant="secondary"
-            size="sm"
-            :disabled="currentPage <= 1"
-            @click="goToPage(currentPage - 1)"
-          >
-            {{ $t('common.prev') }}
-          </AppButton>
-          <AppButton
-            variant="secondary"
-            size="sm"
-            :disabled="currentPage >= totalPages"
-            @click="goToPage(currentPage + 1)"
-          >
-            {{ $t('common.next') }}
-          </AppButton>
+        <!-- Main info row -->
+        <div class="flex items-start gap-3 px-4 pt-3 pb-2">
+          <!-- Name -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <p class="font-semibold text-gray-900 leading-tight truncate">{{ loc.nameVi }}</p>
+                <p class="text-xs text-gray-400 mt-0.5 truncate">{{ loc.nameEn }}</p>
+              </div>
+              <!-- Status toggle -->
+              <button
+                type="button"
+                :disabled="togglingId === loc.id"
+                class="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors mt-0.5 disabled:opacity-50"
+                :class="loc.isActive ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
+                @click="handleToggleActive(loc)"
+              >
+                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="loc.isActive ? 'bg-green-500' : 'bg-gray-400'" />
+                {{ loc.isActive ? $t('common.active') : $t('common.inactive') }}
+              </button>
+            </div>
+
+            <!-- Meta row -->
+            <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+              <code class="text-[10px] bg-gray-100 text-gray-500 rounded px-1.5 py-0.5 truncate max-w-[120px]">{{ loc.slug }}</code>
+              <span class="text-[10px] flex items-center gap-1" :class="loc.audioViUrl ? 'text-green-600' : 'text-gray-300'">
+                🎧 VI {{ loc.audioViUrl ? '✓' : '—' }}
+              </span>
+              <span class="text-[10px] flex items-center gap-1" :class="loc.audioEnUrl ? 'text-green-600' : 'text-gray-300'">
+                🎧 EN {{ loc.audioEnUrl ? '✓' : '—' }}
+              </span>
+            </div>
+          </div>
         </div>
+
+        <!-- Action bar -->
+        <div class="flex border-t border-gray-100 divide-x divide-gray-100">
+          <button
+            type="button"
+            class="flex-1 py-2 text-xs font-medium text-brand-600 hover:bg-brand-50 transition-colors flex items-center justify-center gap-1.5"
+            @click="navigateTo(`/admin/locations/${loc.id}/edit`)"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            {{ $t('common.edit') }}
+          </button>
+          <button
+            type="button"
+            class="flex-1 py-2 text-xs font-medium text-red-500 hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5"
+            @click="confirmDelete(loc)"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            {{ $t('common.delete') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div
+      v-if="totalPages > 1"
+      class="flex items-center justify-between px-4 py-3 border-t border-gray-200"
+    >
+      <p class="text-sm text-gray-500">
+        Trang {{ currentPage }} / {{ totalPages }}
+      </p>
+      <div class="flex gap-2">
+        <AppButton
+          variant="secondary"
+          size="sm"
+          :disabled="currentPage <= 1"
+          @click="goToPage(currentPage - 1)"
+        >
+          {{ $t('common.prev') }}
+        </AppButton>
+        <AppButton
+          variant="secondary"
+          size="sm"
+          :disabled="currentPage >= totalPages"
+          @click="goToPage(currentPage + 1)"
+        >
+          {{ $t('common.next') }}
+        </AppButton>
       </div>
     </div>
 
