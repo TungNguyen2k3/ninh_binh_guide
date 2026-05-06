@@ -34,8 +34,8 @@ export default defineNuxtRouteMiddleware((to) => {
     return navigateTo('/')
   }
 
-  // Tourist without active ticket — redirect to activate before entering /explore
-  if (to.path.startsWith('/explore') && authStore.isTourist && !authStore.hasActiveTicket) {
-    return navigateTo('/auth/activate')
-  }
+  // Ticket activation temporarily disabled — tourists can explore without a ticket
+  // if (to.path.startsWith('/explore') && authStore.isTourist && !authStore.hasActiveTicket) {
+  //   return navigateTo('/auth/activate')
+  // }
 })

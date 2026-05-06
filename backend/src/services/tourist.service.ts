@@ -51,18 +51,22 @@ export class TouristService {
     if (cached) return cached
 
     const ticketUser = await this.ticketRepo.findActiveByUser(userId)
-    if (!ticketUser) throw new ForbiddenError('Bạn chưa kích hoạt vé tham quan')
-
-    const { ticket } = ticketUser
 
     let locations: Awaited<ReturnType<LocationRepo['findByIds']>>
 
-    if (ticket.package.type === 'all_locations') {
+    // Ticket check temporarily disabled — fall back to all active locations when no ticket
+    if (!ticketUser) {
       const [allLocations] = await this.locationRepo.findAll({ isActive: true, limit: 1000 })
       locations = allLocations
     } else {
-      const locationIds = ticket.package.locations.map((pl: any) => pl.locationId)
-      locations = await this.locationRepo.findByIds(locationIds)
+      const { ticket } = ticketUser
+      if (ticket.package.type === 'all_locations') {
+        const [allLocations] = await this.locationRepo.findAll({ isActive: true, limit: 1000 })
+        locations = allLocations
+      } else {
+        const locationIds = ticket.package.locations.map((pl: any) => pl.locationId)
+        locations = await this.locationRepo.findByIds(locationIds)
+      }
     }
 
     const result = locations.map((loc) => mapLocation(loc, lang))
@@ -80,14 +84,15 @@ export class TouristService {
     if (!location || !location.isActive) throw new NotFoundError('Location')
 
     const ticketUser = await this.ticketRepo.findActiveByUser(userId)
-    if (!ticketUser) throw new ForbiddenError('Bạn chưa kích hoạt vé tham quan')
 
-    const { ticket } = ticketUser
-
-    if (ticket.package.type === 'custom') {
-      const allowedIds = ticket.package.locations.map((pl: any) => pl.locationId)
-      if (!allowedIds.includes(location.id)) {
-        throw new ForbiddenError('Địa điểm này không có trong gói của bạn')
+    // Ticket check temporarily disabled — allow access to all active locations when no ticket
+    if (ticketUser) {
+      const { ticket } = ticketUser
+      if (ticket.package.type === 'custom') {
+        const allowedIds = ticket.package.locations.map((pl: any) => pl.locationId)
+        if (!allowedIds.includes(location.id)) {
+          throw new ForbiddenError('Địa điểm này không có trong gói của bạn')
+        }
       }
     }
 
