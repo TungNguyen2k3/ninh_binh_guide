@@ -3,6 +3,14 @@ import { TicketRepo } from '../repositories/ticket.repo.js'
 import { cache } from '../lib/cache.js'
 import { ForbiddenError, NotFoundError } from '../lib/errors.js'
 
+/** Format a TIME Date object to "HH:MM" string */
+function formatTime(d: Date | null | undefined): string | null {
+  if (!d) return null
+  const h = d.getUTCHours().toString().padStart(2, '0')
+  const m = d.getUTCMinutes().toString().padStart(2, '0')
+  return `${h}:${m}`
+}
+
 type MappedLocation = ReturnType<typeof mapLocation>
 
 function mapLocation(
@@ -75,73 +83,92 @@ export class TouristService {
   }
 
   async getLocationDetail(slug: string, userId: string, lang: 'vi' | 'en') {
-    const cacheKey = `location:detail:${slug}:${lang}`
-    const cached = cache.get<object>(cacheKey)
-    if (cached) return cached
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const location = await this.locationRepo.findBySlugFull(slug) as any
-    if (!location || !location.isActive) throw new NotFoundError('Location')
-
+    // Check ticket first — determines both cache key and audio access
     const ticketUser = await this.ticketRepo.findActiveByUser(userId)
+    const hasTicket = !!ticketUser
 
-    // Ticket check temporarily disabled — allow access to all active locations when no ticket
+    // Cache full location data (with audio) separately from restricted (no audio)
+    const cacheKey = `location:detail:${slug}:${lang}`
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let locationData = cache.get<any>(cacheKey)
+
+    if (!locationData) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const location = await this.locationRepo.findBySlugFull(slug) as any
+      if (!location || !location.isActive) throw new NotFoundError('Location')
+
+      locationData = {
+        id: location.id,
+        slug: location.slug,
+        name: lang === 'vi' ? location.nameVi : location.nameEn,
+        description: lang === 'vi' ? (location.descriptionVi ?? '') : (location.descriptionEn ?? ''),
+        overview: lang === 'vi' ? (location.overviewVi ?? null) : (location.overviewEn ?? null),
+        history: lang === 'vi' ? (location.historyVi ?? null) : (location.historyEn ?? null),
+        highlights: lang === 'vi' ? (location.highlightsVi ?? null) : (location.highlightsEn ?? null),
+        openTime: formatTime(location.openTime),
+        closeTime: formatTime(location.closeTime),
+        admissionFees: (location.admissionFees ?? []).map((f: { labelVi: string; labelEn: string; price: number }) => ({
+          labelVi: f.labelVi,
+          labelEn: f.labelEn,
+          price: f.price,
+        })),
+        estimatedDuration: location.estimatedDuration ?? null,
+        address: location.address ?? null,
+        bestTime: location.bestTime ?? null,
+        imageUrl: location.imageUrl ?? null,
+        _audioUrl: lang === 'vi'
+          ? (location.audioViUrl ?? location.audioEnUrl ?? null)
+          : (location.audioEnUrl ?? location.audioViUrl ?? null),
+        images: (location.locationImages ?? []).map((img: { id: string; url: string; caption: string | null }) => ({
+          id: img.id,
+          url: img.url,
+          caption: img.caption,
+        })),
+        spots: (location.spots ?? []).map((spot: {
+          id: string
+          nameVi: string
+          nameEn: string
+          descriptionVi: string | null
+          descriptionEn: string | null
+          audioViUrl: string | null
+          audioEnUrl: string | null
+          images: Array<{ id: string; url: string }>
+        }) => ({
+          id: spot.id,
+          name: lang === 'vi' ? spot.nameVi : spot.nameEn,
+          description: lang === 'vi' ? (spot.descriptionVi ?? null) : (spot.descriptionEn ?? null),
+          _audioUrl: lang === 'vi'
+            ? (spot.audioViUrl ?? spot.audioEnUrl ?? null)
+            : (spot.audioEnUrl ?? spot.audioViUrl ?? null),
+          images: spot.images.map((img: { id: string; url: string }) => ({ id: img.id, url: img.url })),
+        })),
+        latitude: location.latitude,
+        longitude: location.longitude,
+      }
+
+      cache.set(cacheKey, locationData, 300)
+    }
+
+    // Check custom package access
     if (ticketUser) {
       const { ticket } = ticketUser
       if (ticket.package.type === 'custom') {
         const allowedIds = ticket.package.locations.map((pl: any) => pl.locationId)
-        if (!allowedIds.includes(location.id)) {
+        if (!allowedIds.includes(locationData.id)) {
           throw new ForbiddenError('Địa điểm này không có trong gói của bạn')
         }
       }
     }
 
-    const result = {
-      id: location.id,
-      slug: location.slug,
-      name: lang === 'vi' ? location.nameVi : location.nameEn,
-      description: lang === 'vi' ? (location.descriptionVi ?? '') : (location.descriptionEn ?? ''),
-      overview: lang === 'vi' ? (location.overviewVi ?? null) : (location.overviewEn ?? null),
-      history: lang === 'vi' ? (location.historyVi ?? null) : (location.historyEn ?? null),
-      highlights: lang === 'vi' ? (location.highlightsVi ?? null) : (location.highlightsEn ?? null),
-      openTime: location.openTime ?? null,
-      closeTime: location.closeTime ?? null,
-      admissionFee: location.admissionFee ?? null,
-      estimatedDuration: location.estimatedDuration ?? null,
-      address: location.address ?? null,
-      bestTime: location.bestTime ?? null,
-      imageUrl: location.imageUrl ?? null,
-      audioUrl: lang === 'vi'
-        ? (location.audioViUrl ?? location.audioEnUrl ?? null)
-        : (location.audioEnUrl ?? location.audioViUrl ?? null),
-      images: (location.locationImages ?? []).map((img: { id: string; url: string; caption: string | null }) => ({
-        id: img.id,
-        url: img.url,
-        caption: img.caption,
+    // Gate audio: only expose URLs when user has an active ticket
+    return {
+      ...locationData,
+      audioGated: !hasTicket,
+      audioUrl: hasTicket ? locationData._audioUrl : null,
+      spots: locationData.spots.map((s: any) => ({
+        ...s,
+        audioUrl: hasTicket ? s._audioUrl : null,
       })),
-      spots: (location.spots ?? []).map((spot: {
-        id: string
-        nameVi: string
-        nameEn: string
-        descriptionVi: string | null
-        descriptionEn: string | null
-        audioViUrl: string | null
-        audioEnUrl: string | null
-        images: Array<{ id: string; url: string }>
-      }) => ({
-        id: spot.id,
-        name: lang === 'vi' ? spot.nameVi : spot.nameEn,
-        description: lang === 'vi' ? (spot.descriptionVi ?? null) : (spot.descriptionEn ?? null),
-        audioUrl: lang === 'vi'
-          ? (spot.audioViUrl ?? spot.audioEnUrl ?? null)
-          : (spot.audioEnUrl ?? spot.audioViUrl ?? null),
-        images: spot.images.map((img: { id: string; url: string }) => ({ id: img.id, url: img.url })),
-      })),
-      latitude: location.latitude,
-      longitude: location.longitude,
     }
-
-    cache.set(cacheKey, result, 300)
-    return result
   }
 }

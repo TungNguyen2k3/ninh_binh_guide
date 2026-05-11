@@ -111,29 +111,24 @@
           <h3 class="text-sm font-semibold text-gray-700 mb-4">🗺️ {{ $t('admin.visiting_info') }}</h3>
           <div class="space-y-3">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <AppInput
-                v-model="formData.openTime"
-                :label="$t('location.open_time')"
-                :placeholder="$t('admin.open_time_placeholder')"
-              />
-              <AppInput
-                v-model="formData.closeTime"
-                :label="$t('location.open_time') + ' (close)'"
-                :placeholder="$t('admin.open_time_placeholder')"
-              />
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div class="flex flex-col gap-1">
-                <label class="text-sm font-medium text-gray-700">{{ $t('location.admission_fee') }}</label>
+                <label class="text-sm font-medium text-gray-700">{{ $t('location.open_time') }}</label>
                 <input
-                  v-model.number="formData.admissionFee"
-                  type="number"
-                  min="0"
-                  step="1000"
-                  :placeholder="$t('admin.admission_fee_placeholder')"
-                  class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-colors"
+                  v-model="formData.openTime"
+                  type="time"
+                  class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-base text-gray-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-colors"
                 />
               </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-sm font-medium text-gray-700">{{ $t('location.close_time') }}</label>
+                <input
+                  v-model="formData.closeTime"
+                  type="time"
+                  class="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-base text-gray-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-colors"
+                />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div class="flex flex-col gap-1">
                 <label class="text-sm font-medium text-gray-700">{{ $t('location.estimated_duration') }}</label>
                 <input
@@ -156,6 +151,79 @@
               :label="$t('location.best_time')"
               :placeholder="$t('admin.best_time_placeholder')"
             />
+          </div>
+        </div>
+
+        <!-- Admission fees manager -->
+        <div class="pt-2">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-semibold text-gray-700">🎫 {{ $t('location.admission_fee') }}</h4>
+          </div>
+
+          <!-- Existing fees list -->
+          <div v-if="locationStore.current?.admissionFees?.length" class="space-y-2 mb-3">
+            <div
+              v-for="fee in locationStore.current.admissionFees"
+              :key="fee.id"
+              class="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2"
+            >
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">{{ fee.labelVi }}</p>
+                <p class="text-xs text-gray-500 truncate">{{ fee.labelEn }}</p>
+              </div>
+              <span class="text-sm font-semibold text-brand-600 whitespace-nowrap">
+                {{ fee.price === 0 ? 'Miễn phí' : new Intl.NumberFormat('vi-VN').format(fee.price) + '₫' }}
+              </span>
+              <button
+                type="button"
+                class="text-red-400 hover:text-red-600 transition-colors p-1 flex-shrink-0"
+                :disabled="isDeletingFee === fee.id"
+                @click="deleteFee(fee.id)"
+              >
+                <svg v-if="isDeletingFee !== fee.id" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span v-else class="text-xs">...</span>
+              </button>
+            </div>
+          </div>
+          <p v-else class="text-xs text-gray-400 mb-3">Chưa có loại vé nào</p>
+
+          <!-- Add new fee form -->
+          <div class="border border-dashed border-gray-300 rounded-xl p-3 space-y-2">
+            <p class="text-xs font-medium text-gray-500">Thêm loại vé</p>
+            <div class="grid grid-cols-2 gap-2">
+              <input
+                v-model="newFee.labelVi"
+                type="text"
+                placeholder="Tên VN (Người lớn)"
+                class="block w-full rounded-lg border border-gray-300 px-2.5 py-2 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-200"
+              />
+              <input
+                v-model="newFee.labelEn"
+                type="text"
+                placeholder="Tên EN (Adult)"
+                class="block w-full rounded-lg border border-gray-300 px-2.5 py-2 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-200"
+              />
+            </div>
+            <div class="flex gap-2">
+              <input
+                v-model.number="newFee.price"
+                type="number"
+                min="0"
+                step="1000"
+                placeholder="Giá (VND, 0 = miễn phí)"
+                class="flex-1 block w-full rounded-lg border border-gray-300 px-2.5 py-2 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-200"
+              />
+              <button
+                type="button"
+                class="flex-shrink-0 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                :disabled="!newFee.labelVi || !newFee.labelEn || isAddingFee"
+                @click="addFee"
+              >
+                {{ isAddingFee ? '...' : 'Thêm' }}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -197,6 +265,42 @@ const route = useRoute()
 const locationStore = useLocationStore()
 const { toast } = useToast()
 const isSubmitting = ref(false)
+
+// Admission fee management
+const newFee = ref({ labelVi: '', labelEn: '', price: 0 })
+const isAddingFee = ref(false)
+const isDeletingFee = ref<string | null>(null)
+
+async function addFee(): Promise<void> {
+  if (!newFee.value.labelVi || !newFee.value.labelEn) return
+  isAddingFee.value = true
+  try {
+    await locationStore.addAdmissionFee(route.params.id as string, {
+      labelVi: newFee.value.labelVi,
+      labelEn: newFee.value.labelEn,
+      price: newFee.value.price ?? 0,
+    })
+    newFee.value = { labelVi: '', labelEn: '', price: 0 }
+    toast.success('Đã thêm loại vé')
+  } catch {
+    toast.error('Không thể thêm loại vé')
+  } finally {
+    isAddingFee.value = false
+  }
+}
+
+async function deleteFee(feeId: string): Promise<void> {
+  isDeletingFee.value = feeId
+  try {
+    await locationStore.deleteAdmissionFee(route.params.id as string, feeId)
+    toast.success('Đã xóa loại vé')
+  } catch {
+    toast.error('Không thể xóa loại vé')
+  } finally {
+    isDeletingFee.value = null
+  }
+}
+
 const activeTab = ref<'basic' | 'content' | 'spots'>('basic')
 const contentLang = ref<'vi' | 'en'>('vi')
 
@@ -231,7 +335,7 @@ const formData = ref<LocationFormData>({
   historyVi: '', historyEn: '',
   highlightsVi: '', highlightsEn: '',
   openTime: '', closeTime: '',
-  admissionFee: null, estimatedDuration: null,
+  estimatedDuration: null,
   address: '', bestTime: '',
   latitude: null, longitude: null,
   displayOrder: 0, isActive: true,
@@ -248,7 +352,7 @@ async function loadLocation(): Promise<void> {
       historyVi: loc.historyVi ?? '', historyEn: loc.historyEn ?? '',
       highlightsVi: loc.highlightsVi ?? '', highlightsEn: loc.highlightsEn ?? '',
       openTime: loc.openTime ?? '', closeTime: loc.closeTime ?? '',
-      admissionFee: loc.admissionFee ?? null, estimatedDuration: loc.estimatedDuration ?? null,
+      estimatedDuration: loc.estimatedDuration ?? null,
       address: loc.address ?? '', bestTime: loc.bestTime ?? '',
       latitude: loc.latitude, longitude: loc.longitude,
       displayOrder: loc.displayOrder, isActive: loc.isActive,

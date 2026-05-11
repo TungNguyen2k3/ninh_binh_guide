@@ -2,7 +2,21 @@ import type { LocationRepo } from '../repositories/location.repo.js'
 import { uploadAudio, uploadImage } from '../lib/cloudinary.js'
 import { cache } from '../lib/cache.js'
 import { NotFoundError, ConflictError } from '../lib/errors.js'
-import type { CreateLocationDto, UpdateLocationDto, CreateSpotDto, UpdateSpotDto } from '../schemas/location.schema.js'
+import type { CreateLocationDto, UpdateLocationDto, CreateSpotDto, UpdateSpotDto, AdmissionFeeDto, UpdateAdmissionFeeDto } from '../schemas/location.schema.js'
+
+/** Format a TIME Date object (stored in DB as TIME(6)) to "HH:MM" string */
+function formatTime(d: Date | null | undefined): string | null {
+  if (!d) return null
+  const h = d.getUTCHours().toString().padStart(2, '0')
+  const m = d.getUTCMinutes().toString().padStart(2, '0')
+  return `${h}:${m}`
+}
+
+/** Convert "HH:MM" string to a Date on epoch day (1970-01-01) for Prisma TIME(6) */
+function parseTime(val: string | null | undefined): Date | null {
+  if (!val) return null
+  return new Date(`1970-01-01T${val}:00.000Z`)
+}
 
 export class LocationService {
   constructor(private readonly locationRepo: LocationRepo) {}
@@ -29,8 +43,20 @@ export class LocationService {
     if (!full) throw new NotFoundError('Location')
     // Rename locationImages → images so frontend interface matches
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { locationImages, ...rest } = full as any
-    return { ...rest, images: locationImages ?? [] }
+    const { locationImages, admissionFees, openTime, closeTime, ...rest } = full as any
+    return {
+      ...rest,
+      openTime: formatTime(openTime),
+      closeTime: formatTime(closeTime),
+      images: locationImages ?? [],
+      admissionFees: (admissionFees ?? []).map((f: { id: string; labelVi: string; labelEn: string; price: number; order: number }) => ({
+        id: f.id,
+        labelVi: f.labelVi,
+        labelEn: f.labelEn,
+        price: f.price,
+        order: f.order,
+      })),
+    }
   }
 
   async create(data: CreateLocationDto) {
@@ -47,7 +73,13 @@ export class LocationService {
       const existing = await this.locationRepo.findBySlug(data.slug)
       if (existing && existing.id !== id) throw new ConflictError(`Slug '${data.slug}' already exists`)
     }
-    const updated = await this.locationRepo.update(id, data as Parameters<typeof this.locationRepo.update>[1])
+    const { openTime, closeTime, ...rest } = data
+    const repoData: Parameters<typeof this.locationRepo.update>[1] = {
+      ...rest,
+      ...(openTime !== undefined && { openTime: parseTime(openTime ?? null) }),
+      ...(closeTime !== undefined && { closeTime: parseTime(closeTime ?? null) }),
+    }
+    const updated = await this.locationRepo.update(id, repoData)
     cache.del('locations:all')
     cache.del(`location:slug:${updated.slug}`)
     cache.del(`location:detail:${updated.slug}:vi`)
@@ -162,5 +194,38 @@ export class LocationService {
     await this.locationRepo.deleteSpotImage(imageId)
     cache.del(`location:detail:${location.slug}:vi`)
     cache.del(`location:detail:${location.slug}:en`)
+  }
+
+  async addAdmissionFee(locationId: string, data: AdmissionFeeDto) {
+    const location = await this.getById(locationId)
+    const fee = await this.locationRepo.addAdmissionFee(locationId, {
+      labelVi: data.labelVi,
+      labelEn: data.labelEn,
+      price: data.price,
+      order: data.order ?? 0,
+    })
+    cache.del(`location:detail:${location.slug}:vi`)
+    cache.del(`location:detail:${location.slug}:en`)
+    return fee
+  }
+
+  async updateAdmissionFee(feeId: string, data: UpdateAdmissionFeeDto) {
+    const fee = await this.locationRepo.updateAdmissionFee(feeId, data)
+    const location = await this.locationRepo.findById(fee.locationId)
+    if (location) {
+      cache.del(`location:detail:${location.slug}:vi`)
+      cache.del(`location:detail:${location.slug}:en`)
+    }
+    return fee
+  }
+
+  async deleteAdmissionFee(feeId: string) {
+    const fee = await this.locationRepo.deleteAdmissionFee(feeId)
+    const location = await this.locationRepo.findById(fee.locationId)
+    if (location) {
+      cache.del(`location:detail:${location.slug}:vi`)
+      cache.del(`location:detail:${location.slug}:en`)
+    }
+    return fee
   }
 }

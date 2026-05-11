@@ -88,7 +88,10 @@
     "overview_audio": "Tổng quan",
     "tours": "Lịch trình",
     "tours_title": "Gợi ý lịch trình",
-    "tours_subtitle": "Lịch trình gợi ý cho hành trình Ninh Bình của bạn"
+    "tours_subtitle": "Lịch trình gợi ý cho hành trình Ninh Bình của bạn",
+    "audio_locked": "Thuyết minh audio chưa được mở khóa",
+    "activate_to_listen": "Kích hoạt vé tham quan để nghe thuyết minh tại địa điểm này",
+    "activate_ticket": "Kích hoạt vé"
   },
   "admin": {
     "coming_soon": "Tính năng đang phát triển",

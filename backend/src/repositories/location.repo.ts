@@ -24,6 +24,7 @@ export class LocationRepo {
           // @ts-ignore -- Prisma client type lags schema
           _count: { select: { spots: true } },
           locationImages: { orderBy: { order: 'asc' as const }, take: 1 },
+          admissionFees: { orderBy: { order: 'asc' as const } },
         },
       }),
       this.prisma.location.count({ where }),
@@ -76,9 +77,8 @@ export class LocationRepo {
       historyEn: string
       highlightsVi: string
       highlightsEn: string
-      openTime: string
-      closeTime: string
-      admissionFee: number | null
+      openTime: Date | null
+      closeTime: Date | null
       estimatedDuration: number | null
       address: string
       bestTime: string
@@ -113,6 +113,7 @@ export class LocationRepo {
         // @ts-ignore -- Prisma client type lags schema
         _count: { select: { spots: true } },
         locationImages: { orderBy: { order: 'asc' as const }, take: 1 },
+        admissionFees: { orderBy: { order: 'asc' as const } },
       },
     })
   }
@@ -122,12 +123,31 @@ export class LocationRepo {
       where: { slug },
       include: {
         locationImages: { orderBy: { order: 'asc' } },
+        admissionFees: { orderBy: { order: 'asc' } },
         spots: {
           orderBy: { order: 'asc' },
           include: { images: { orderBy: { order: 'asc' } } },
         },
       },
     })
+  }
+
+  addAdmissionFee(
+    locationId: string,
+    data: { labelVi: string; labelEn: string; price: number; order: number }
+  ) {
+    return this.prisma.locationAdmissionFee.create({ data: { locationId, ...data } })
+  }
+
+  updateAdmissionFee(
+    feeId: string,
+    data: Partial<{ labelVi: string; labelEn: string; price: number; order: number }>
+  ) {
+    return this.prisma.locationAdmissionFee.update({ where: { id: feeId }, data })
+  }
+
+  deleteAdmissionFee(feeId: string) {
+    return this.prisma.locationAdmissionFee.delete({ where: { id: feeId } })
   }
 
   addImage(locationId: string, data: { url: string; caption?: string; order?: number }) {

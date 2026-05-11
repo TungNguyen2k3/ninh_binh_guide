@@ -24,6 +24,14 @@ export interface Spot {
   order: number
 }
 
+export interface AdmissionFee {
+  id: string
+  labelVi: string
+  labelEn: string
+  price: number
+  order: number
+}
+
 export interface Location {
   id: string
   slug: string
@@ -39,7 +47,7 @@ export interface Location {
   highlightsEn: string | null
   openTime: string | null
   closeTime: string | null
-  admissionFee: number | null
+  admissionFees: AdmissionFee[]
   estimatedDuration: number | null
   address: string | null
   bestTime: string | null
@@ -69,7 +77,6 @@ export interface LocationFormData {
   highlightsEn: string
   openTime: string
   closeTime: string
-  admissionFee: number | null
   estimatedDuration: number | null
   address: string
   bestTime: string
@@ -215,6 +222,27 @@ export const useLocationStore = defineStore('location', {
       if (this.current?.id === id) {
         await this.fetchOne(id)
       }
-    }
+    },
+
+    async addAdmissionFee(locationId: string, data: { labelVi: string; labelEn: string; price: number; order?: number }): Promise<void> {
+      const { useApiFetch } = await import('~/utils/api')
+      const { apiFetch } = useApiFetch()
+      await apiFetch(`/admin/locations/${locationId}/fees`, { method: 'POST', body: data })
+      await this.fetchOne(locationId)
+    },
+
+    async updateAdmissionFee(locationId: string, feeId: string, data: { labelVi?: string; labelEn?: string; price?: number; order?: number }): Promise<void> {
+      const { useApiFetch } = await import('~/utils/api')
+      const { apiFetch } = useApiFetch()
+      await apiFetch(`/admin/locations/${locationId}/fees/${feeId}`, { method: 'PUT', body: data })
+      await this.fetchOne(locationId)
+    },
+
+    async deleteAdmissionFee(locationId: string, feeId: string): Promise<void> {
+      const { useApiFetch } = await import('~/utils/api')
+      const { apiFetch } = useApiFetch()
+      await apiFetch(`/admin/locations/${locationId}/fees/${feeId}`, { method: 'DELETE' })
+      await this.fetchOne(locationId)
+    },
   }
 })

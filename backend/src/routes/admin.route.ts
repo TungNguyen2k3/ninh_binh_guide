@@ -12,6 +12,8 @@ import {
   LocationQuerySchema,
   CreateSpotSchema,
   UpdateSpotSchema,
+  AdmissionFeeSchema,
+  UpdateAdmissionFeeSchema,
 } from '../schemas/location.schema.js'
 import {
   CreatePackageSchema,
@@ -132,6 +134,31 @@ export async function adminRoutes(
   fastify.delete('/locations/:id/images/:imageId', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
     const { id, imageId } = req.params as { id: string; imageId: string }
     await locationService.deleteLocationImage(id, imageId)
+    return reply.status(204).send()
+  })
+
+  // POST /locations/:id/fees — add an admission fee entry
+  fastify.post('/locations/:id/fees', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as { id: string }
+    const parsed = AdmissionFeeSchema.safeParse(req.body)
+    if (!parsed.success) throw new ValidationError('Validation failed', parsed.error.flatten())
+    const fee = await locationService.addAdmissionFee(id, parsed.data)
+    return reply.status(201).send(ok(fee))
+  })
+
+  // PUT /locations/:id/fees/:feeId — update an admission fee entry
+  fastify.put('/locations/:id/fees/:feeId', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { feeId } = req.params as { id: string; feeId: string }
+    const parsed = UpdateAdmissionFeeSchema.safeParse(req.body)
+    if (!parsed.success) throw new ValidationError('Validation failed', parsed.error.flatten())
+    const fee = await locationService.updateAdmissionFee(feeId, parsed.data)
+    return reply.send(ok(fee))
+  })
+
+  // DELETE /locations/:id/fees/:feeId — delete an admission fee entry
+  fastify.delete('/locations/:id/fees/:feeId', { preHandler }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const { feeId } = req.params as { id: string; feeId: string }
+    await locationService.deleteAdmissionFee(feeId)
     return reply.status(204).send()
   })
 

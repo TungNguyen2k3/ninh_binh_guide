@@ -67,14 +67,17 @@
       <!-- Visiting info chips (compact row) -->
       <div v-if="hasVisitingInfo" class="px-4 py-2 flex items-center gap-2 overflow-x-auto" style="scrollbar-width: none;">
         <span v-if="loc.openTime" class="flex-shrink-0 flex items-center gap-1 text-xs bg-gray-100 rounded-full px-2.5 py-1 text-gray-700">
-          🕐 {{ loc.openTime }}
+          🕐 {{ loc.openTime }}{{ loc.closeTime ? ' – ' + loc.closeTime : '' }}
         </span>
-        <span
-          v-if="loc.admissionFee !== null && loc.admissionFee !== undefined"
-          class="flex-shrink-0 flex items-center gap-1 text-xs bg-gray-100 rounded-full px-2.5 py-1 text-gray-700"
-        >
-          🎫 {{ loc.admissionFee === 0 ? $t('location.free_entry') : formatVnd(loc.admissionFee) }}
-        </span>
+        <template v-if="loc.admissionFees?.length">
+          <span
+            v-for="fee in loc.admissionFees"
+            :key="fee.labelEn"
+            class="flex-shrink-0 flex items-center gap-1 text-xs bg-gray-100 rounded-full px-2.5 py-1 text-gray-700"
+          >
+            🎫 {{ locale === 'vi' ? fee.labelVi : fee.labelEn }}: {{ fee.price === 0 ? $t('location.free_entry') : formatVnd(fee.price) }}
+          </span>
+        </template>
         <span v-if="loc.estimatedDuration" class="flex-shrink-0 flex items-center gap-1 text-xs bg-gray-100 rounded-full px-2.5 py-1 text-gray-700">
           ⏱ {{ loc.estimatedDuration }}{{ $t('location.minutes') }}
         </span>
@@ -166,8 +169,30 @@
       <AppButton class="mt-4" @click="navigateTo('/explore/list')">{{ $t('common.back') }}</AppButton>
     </div>
 
-    <!-- Sticky audio bar (only when content is loaded) -->
-    <ExploreAudioBar v-if="loc && audioTracks.length" :tracks="audioTracks" />
+    <!-- Audio gate: no ticket → activation banner -->
+    <div
+      v-if="loc && loc.audioGated"
+      class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg px-4 py-3"
+    >
+      <div class="max-w-lg mx-auto flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center flex-shrink-0">
+          <span class="text-xl">🎧</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-gray-900">{{ $t('explore.audio_locked') }}</p>
+          <p class="text-xs text-gray-500 mt-0.5">{{ $t('explore.activate_to_listen') }}</p>
+        </div>
+        <button
+          class="flex-shrink-0 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
+          @click="navigateTo('/auth/activate')"
+        >
+          {{ $t('explore.activate_ticket') }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Sticky audio bar (only when content is loaded and ticket is active) -->
+    <ExploreAudioBar v-else-if="loc && hasAnyAudio" :tracks="audioTracks" />
   </div>
 </template>
 
@@ -185,8 +210,10 @@ useHead({ title: () => loc.value?.name ?? t('explore.title') })
 
 const hasVisitingInfo = computed(() => {
   const l = loc.value
-  return l && (l.openTime || l.admissionFee !== undefined || l.estimatedDuration || l.address || l.bestTime)
+  return l && (l.openTime || l.admissionFees?.length || l.estimatedDuration || l.address || l.bestTime)
 })
+
+const hasAnyAudio = computed(() => audioTracks.value.some(t => t.audioUrl !== null))
 
 // Build tracks: main audio first, then spots with audio
 const audioTracks = computed<AudioTrack[]>(() => {

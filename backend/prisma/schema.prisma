@@ -60,9 +60,8 @@ model Location {
   historyEn         String?  @db.Text
   highlightsVi      String?  @db.Text
   highlightsEn      String?  @db.Text
-  openTime          String?
-  closeTime         String?
-  admissionFee      Int?
+  openTime          DateTime? @db.Time(6)
+  closeTime         DateTime? @db.Time(6)
   estimatedDuration Int?
   address           String?
   bestTime          String?
@@ -80,8 +79,23 @@ model Location {
   locationImages  LocationImage[]
   spots           LocationSpot[]
   tourStops       TourStop[]
+  admissionFees   LocationAdmissionFee[]
 
   @@map("locations")
+}
+
+model LocationAdmissionFee {
+  id         String   @id @default(cuid())
+  locationId String
+  labelVi    String
+  labelEn    String
+  price      Int
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("location_admission_fees")
 }
 
 model Package {

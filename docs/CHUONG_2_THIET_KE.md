@@ -540,7 +540,7 @@ end
 
 == Trả về kết quả ==
 
-Service --> Route : LocationDetail {\n  id, slug, name, description, overview,\n  history, highlights, openTime, closeTime,\n  admissionFee, estimatedDuration, address,\n  bestTime, imageUrl, audioUrl,\n  images[], spots[], latitude, longitude\n}
+Service --> Route : LocationDetail {\n  id, slug, name, description, overview,\n  history, highlights, openTime, closeTime,\n  admissionFees[], estimatedDuration, address,\n  bestTime, imageUrl,\n  audioUrl (null nếu chưa kích hoạt vé),\n  audioGated: boolean,\n  images[], spots[], latitude, longitude\n}
 deactivate Service
 
 Route --> API : HTTP 200 OK\n{ "success": true, "data": LocationDetail }
@@ -615,9 +615,8 @@ entity locations {
   historyEn : TEXT
   highlightsVi : TEXT
   highlightsEn : TEXT
-  openTime : VARCHAR(50)
-  closeTime : VARCHAR(50)
-  admissionFee : INT
+  openTime : TIME
+  closeTime : TIME
   estimatedDuration : INT
   address : VARCHAR(500)
   bestTime : VARCHAR(255)
@@ -630,6 +629,17 @@ entity locations {
   isActive : BOOLEAN <<DEFAULT true>>
   createdAt : TIMESTAMP
   updatedAt : TIMESTAMP
+}
+
+entity location_admission_fees {
+  * id : VARCHAR(36) <<PK>>
+  --
+  locationId : VARCHAR(36) <<FK>>
+  labelVi : VARCHAR(255) <<NOT NULL>>
+  labelEn : VARCHAR(255) <<NOT NULL>>
+  price : INT <<NOT NULL>>
+  order : INT <<DEFAULT 0>>
+  createdAt : TIMESTAMP
 }
 
 entity location_images {
@@ -747,6 +757,7 @@ users ||--o{ refresh_tokens : "có"
 users ||--o{ tickets : "tạo (Staff)"
 users ||--o{ ticket_users : "kích hoạt"
 
+locations ||--o{ location_admission_fees : "có (1-N)"
 locations ||--o{ location_images : "có (1-N)"
 locations ||--o{ location_spots : "chứa (1-N)"
 locations ||--o{ package_locations : "thuộc (N-N)"
@@ -801,23 +812,38 @@ tours ||--o{ tour_stops : "gồm (1-N)"
 | 10 | `historyEn` | TEXT | NULL | Lịch sử hình thành tiếng Anh |
 | 11 | `highlightsVi` | TEXT | NULL | Điểm nổi bật tiếng Việt |
 | 12 | `highlightsEn` | TEXT | NULL | Điểm nổi bật tiếng Anh |
-| 13 | `openTime` | VARCHAR(50) | NULL | Giờ mở cửa |
-| 14 | `closeTime` | VARCHAR(50) | NULL | Giờ đóng cửa |
-| 15 | `admissionFee` | INT | NULL | Giá vé tham quan (VND) |
-| 16 | `estimatedDuration` | INT | NULL | Thời gian tham quan ước tính (phút) |
-| 17 | `address` | VARCHAR(500) | NULL | Địa chỉ đầy đủ |
-| 18 | `bestTime` | VARCHAR(255) | NULL | Thời điểm lý tưởng để tham quan |
-| 19 | `latitude` | FLOAT | NOT NULL | Vĩ độ GPS — khoảng [-90, 90] |
-| 20 | `longitude` | FLOAT | NOT NULL | Kinh độ GPS — khoảng [-180, 180] |
-| 21 | `imageUrl` | TEXT | NULL | URL ảnh bìa (Cloudinary) |
-| 22 | `audioViUrl` | TEXT | NULL | URL file audio thuyết minh tiếng Việt (MP3) |
-| 23 | `audioEnUrl` | TEXT | NULL | URL file audio thuyết minh tiếng Anh (MP3) |
-| 24 | `displayOrder` | INT | DEFAULT 0 | Thứ tự hiển thị trên bản đồ và danh sách |
-| 25 | `isActive` | BOOLEAN | DEFAULT true | Trạng thái kích hoạt |
-| 26 | `createdAt` | TIMESTAMP | DEFAULT NOW() | Thời điểm tạo |
-| 27 | `updatedAt` | TIMESTAMP | AUTO UPDATE | Thời điểm cập nhật |
+| 13 | `openTime` | TIME | NULL | Giờ mở cửa — định dạng HH:MM, lưu kiểu TIME trong PostgreSQL |
+| 14 | `closeTime` | TIME | NULL | Giờ đóng cửa — định dạng HH:MM |
+| 15 | `estimatedDuration` | INT | NULL | Thời gian tham quan ước tính (phút) |
+| 16 | `address` | VARCHAR(500) | NULL | Địa chỉ đầy đủ |
+| 17 | `bestTime` | VARCHAR(255) | NULL | Thời điểm lý tưởng để tham quan |
+| 18 | `latitude` | FLOAT | NOT NULL | Vĩ độ GPS — khoảng [-90, 90] |
+| 19 | `longitude` | FLOAT | NOT NULL | Kinh độ GPS — khoảng [-180, 180] |
+| 20 | `imageUrl` | TEXT | NULL | URL ảnh bìa (Cloudinary) |
+| 21 | `audioViUrl` | TEXT | NULL | URL file audio thuyết minh tiếng Việt (MP3) |
+| 22 | `audioEnUrl` | TEXT | NULL | URL file audio thuyết minh tiếng Anh (MP3) |
+| 23 | `displayOrder` | INT | DEFAULT 0 | Thứ tự hiển thị trên bản đồ và danh sách |
+| 24 | `isActive` | BOOLEAN | DEFAULT true | Trạng thái kích hoạt |
+| 25 | `createdAt` | TIMESTAMP | DEFAULT NOW() | Thời điểm tạo |
+| 26 | `updatedAt` | TIMESTAMP | AUTO UPDATE | Thời điểm cập nhật |
 
-> **Fallback audio**: Khi truy xuất theo ngôn ngữ, nếu audioViUrl là null thì dùng audioEnUrl (và ngược lại). Logic này áp dụng cho cả location lẫn location_spots.
+> **Fallback audio**: Khi truy xuất theo ngôn ngữ, nếu `audioViUrl` là null thì dùng `audioEnUrl` (và ngược lại). Logic này áp dụng cho cả location lẫn location_spots. Audio chỉ được trả về khi du khách có vé tham quan hợp lệ — nếu chưa kích hoạt vé, `audioUrl` trả về `null` và frontend hiển thị banner yêu cầu kích hoạt.
+
+---
+
+#### Bảng `location_admission_fees` — Loại vé tham quan
+
+| STT | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
+|-----|---------|-------------|-----------|-------|
+| 1 | `id` | VARCHAR(36) | PRIMARY KEY | Định danh duy nhất (cuid) |
+| 2 | `locationId` | VARCHAR(36) | FOREIGN KEY, NOT NULL | Địa điểm áp dụng loại vé này |
+| 3 | `labelVi` | VARCHAR(255) | NOT NULL | Tên loại vé tiếng Việt (VD: "Người lớn", "Trẻ em") |
+| 4 | `labelEn` | VARCHAR(255) | NOT NULL | Tên loại vé tiếng Anh (VD: "Adult", "Child") |
+| 5 | `price` | INT | NOT NULL | Giá vé (VND), giá trị 0 = miễn phí |
+| 6 | `order` | INT | DEFAULT 0 | Thứ tự hiển thị |
+| 7 | `createdAt` | TIMESTAMP | DEFAULT NOW() | Thời điểm tạo |
+
+> **Lý do thiết kế**: Thay vì lưu một mức giá duy nhất (`admissionFee INT`), hệ thống hỗ trợ nhiều loại vé cho một địa điểm (người lớn, trẻ em, người cao tuổi, đoàn...). Admin quản lý danh sách loại vé qua endpoint `POST/PUT/DELETE /admin/locations/:id/fees`. Quan hệ 1-N với `locations`, xóa cascade khi địa điểm bị xóa.
 
 ---
 
@@ -883,6 +909,7 @@ tours ||--o{ tour_stops : "gồm (1-N)"
 | users → refresh_tokens | 1-N | Một tài khoản có nhiều refresh token (xóa cascade khi xóa user) |
 | users → tickets | 1-N | Một nhân viên tạo nhiều vé cho các khách khác nhau |
 | users → ticket_users | 1-N | Một du khách có thể kích hoạt nhiều vé (nhưng mỗi thời điểm chỉ 1 vé hiệu lực) |
+| locations → location_admission_fees | 1-N | Một địa điểm có nhiều loại vé tham quan (người lớn, trẻ em...), xóa cascade |
 | locations → location_images | 1-N | Một địa điểm có nhiều ảnh trong thư viện (xóa cascade) |
 | locations → location_spots | 1-N | Một địa điểm có nhiều khu vực con, mỗi khu vực có audio và ảnh riêng |
 | locations → package_locations | N-N | Một địa điểm có thể thuộc nhiều gói tham quan (qua bảng trung gian) |
@@ -909,7 +936,7 @@ Bảng sau mô tả các ràng buộc Zod được áp dụng khi tạo mới đ
 | `latitude` | `z.number().min(-90).max(90)` | "Number must be greater than or equal to -90" / "less than or equal to 90" |
 | `longitude` | `z.number().min(-180).max(180)` | "Number must be greater than or equal to -180" / "less than or equal to 180" |
 
-`UpdateLocationSchema` là `CreateLocationSchema.partial()` được extend thêm `isActive: z.boolean().optional()` và các trường nội dung (overview, history, highlights, openTime, closeTime, admissionFee, estimatedDuration, address, bestTime).
+`UpdateLocationSchema` là `CreateLocationSchema.partial()` được extend thêm `isActive: z.boolean().optional()` và các trường nội dung (overview, history, highlights, openTime, closeTime, estimatedDuration, address, bestTime). Giá vé được quản lý riêng qua `AdmissionFeeSchema` với endpoint `/admin/locations/:id/fees`.
 
 ### 2.5.2. Luồng kích hoạt vé — `activateTicket()`
 

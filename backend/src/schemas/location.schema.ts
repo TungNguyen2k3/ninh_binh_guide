@@ -22,13 +22,21 @@ export const UpdateLocationSchema = CreateLocationSchema.partial().extend({
   historyEn: z.string().optional(),
   highlightsVi: z.string().optional(),
   highlightsEn: z.string().optional(),
-  openTime: z.string().optional(),
-  closeTime: z.string().optional(),
-  admissionFee: z.number().int().min(0).nullish(),
+  openTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Định dạng HH:MM').nullish(),
+  closeTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Định dạng HH:MM').nullish(),
   estimatedDuration: z.number().int().min(0).nullish(),
   address: z.string().optional(),
   bestTime: z.string().optional(),
 })
+
+export const AdmissionFeeSchema = z.object({
+  labelVi: z.string().min(1),
+  labelEn: z.string().min(1),
+  price: z.number().int().min(0),
+  order: z.number().int().min(0).optional().default(0),
+})
+
+export const UpdateAdmissionFeeSchema = AdmissionFeeSchema.partial()
 
 export const CreateSpotSchema = z.object({
   nameVi: z.string().min(1),
@@ -57,3 +65,5 @@ export type UpdateLocationDto = z.infer<typeof UpdateLocationSchema>
 export type LocationQuery = z.infer<typeof LocationQuerySchema>
 export type CreateSpotDto = z.infer<typeof CreateSpotSchema>
 export type UpdateSpotDto = z.infer<typeof UpdateSpotSchema>
+export type AdmissionFeeDto = z.infer<typeof AdmissionFeeSchema>
+export type UpdateAdmissionFeeDto = z.infer<typeof UpdateAdmissionFeeSchema>

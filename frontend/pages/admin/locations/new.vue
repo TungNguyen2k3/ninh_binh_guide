@@ -50,7 +50,6 @@ const formData = ref<LocationFormData>({
   highlightsEn: '',
   openTime: '',
   closeTime: '',
-  admissionFee: null,
   estimatedDuration: null,
   address: '',
   bestTime: '',

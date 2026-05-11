@@ -48,14 +48,14 @@
         </form>
       </div>
 
-      <!-- Logout link -->
+      <!-- Back link -->
       <p class="text-center text-sm text-gray-500 mt-4">
         <button
           type="button"
           class="text-brand-600 hover:underline font-medium"
-          @click="handleLogout"
+          @click="router.back()"
         >
-          {{ $t('auth.logout') }}
+          {{ $t('common.back') }}
         </button>
       </p>
     </div>
@@ -67,6 +67,7 @@ definePageMeta({ layout: false })
 const { t } = useI18n()
 useHead({ title: () => t('ticket.activate_title') })
 
+const router = useRouter()
 const ticketStore = useTicketStore()
 const authStore = useAuthStore()
 const { toast } = useToast()

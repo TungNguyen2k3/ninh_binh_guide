@@ -88,7 +88,10 @@
     "overview_audio": "Overview",
     "tours": "Tours",
     "tours_title": "Tour Itineraries",
-    "tours_subtitle": "Suggested itineraries for your Ninh Binh journey"
+    "tours_subtitle": "Suggested itineraries for your Ninh Binh journey",
+    "audio_locked": "Audio guide is locked",
+    "activate_to_listen": "Activate your ticket to listen to the audio guide at this location",
+    "activate_ticket": "Activate ticket"
   },
   "admin": {
     "coming_soon": "Feature under development",

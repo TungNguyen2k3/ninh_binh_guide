@@ -40,10 +40,11 @@ export interface TouristLocationDetail extends TouristLocation {
   highlights: string | null
   openTime: string | null
   closeTime: string | null
-  admissionFee: number | null
+  admissionFees: { labelVi: string; labelEn: string; price: number }[]
   estimatedDuration: number | null
   address: string | null
   bestTime: string | null
+  audioGated: boolean
   images: TouristLocationImage[]
   spots: TouristSpot[]
 }
