@@ -16,6 +16,8 @@ export default defineNuxtRouteMiddleware((to) => {
     if (to.path === '/auth/activate') return
     // Allow unauthenticated browsing of explore pages (audio gated by backend)
     if (to.path.startsWith('/explore')) return
+    // Root path → send guests to explore instead of login
+    if (to.path === '/') return navigateTo('/explore')
     return navigateTo('/auth/login')
   }
 

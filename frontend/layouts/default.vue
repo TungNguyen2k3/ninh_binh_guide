@@ -29,6 +29,15 @@
 
           <!-- Auth-dependent UI: client-only to avoid SSR hydration mismatch -->
           <ClientOnly>
+            <!-- Login button for unauthenticated guests -->
+            <NuxtLink
+              v-if="!authStore.isAuthenticated"
+              to="/auth/login"
+              class="text-sm font-semibold text-brand-600 hover:text-brand-700 px-3 py-1.5 rounded-lg hover:bg-brand-50 transition-colors"
+            >
+              {{ $t('auth.login') }}
+            </NuxtLink>
+
             <!-- Ticket expiry badge — tourist only -->
             <span
               v-if="authStore.isTourist && timeLeft"
