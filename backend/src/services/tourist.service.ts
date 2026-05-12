@@ -53,16 +53,16 @@ export class TouristService {
     private readonly ticketRepo: TicketRepo
   ) {}
 
-  async getLocationsForTourist(userId: string, lang: 'vi' | 'en'): Promise<MappedLocation[]> {
-    const cacheKey = `locations:tourist:${userId}:${lang}`
+  async getLocationsForTourist(userId: string | null, lang: 'vi' | 'en'): Promise<MappedLocation[]> {
+    const cacheKey = `locations:tourist:${userId ?? 'guest'}:${lang}`
     const cached = cache.get<MappedLocation[]>(cacheKey)
     if (cached) return cached
 
-    const ticketUser = await this.ticketRepo.findActiveByUser(userId)
+    const ticketUser = userId ? await this.ticketRepo.findActiveByUser(userId) : null
 
     let locations: Awaited<ReturnType<LocationRepo['findByIds']>>
 
-    // Ticket check temporarily disabled — fall back to all active locations when no ticket
+    // Guests and users without a ticket both see all active locations; audio remains gated
     if (!ticketUser) {
       const [allLocations] = await this.locationRepo.findAll({ isActive: true, limit: 1000 })
       locations = allLocations
@@ -82,9 +82,9 @@ export class TouristService {
     return result
   }
 
-  async getLocationDetail(slug: string, userId: string, lang: 'vi' | 'en') {
-    // Check ticket first — determines both cache key and audio access
-    const ticketUser = await this.ticketRepo.findActiveByUser(userId)
+  async getLocationDetail(slug: string, userId: string | null, lang: 'vi' | 'en') {
+    // Check ticket first — determines audio access (guests always get hasTicket=false)
+    const ticketUser = userId ? await this.ticketRepo.findActiveByUser(userId) : null
     const hasTicket = !!ticketUser
 
     // Cache full location data (with audio) separately from restricted (no audio)

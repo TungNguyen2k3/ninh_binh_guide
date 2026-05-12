@@ -91,7 +91,11 @@
     "tours_subtitle": "Lịch trình gợi ý cho hành trình Ninh Bình của bạn",
     "audio_locked": "Thuyết minh audio chưa được mở khóa",
     "activate_to_listen": "Kích hoạt vé tham quan để nghe thuyết minh tại địa điểm này",
-    "activate_ticket": "Kích hoạt vé"
+    "activate_ticket": "Kích hoạt vé",
+    "register_to_listen": "Đăng ký tài khoản và kích hoạt vé để nghe thuyết minh",
+    "register_now": "Đăng ký ngay",
+    "search_placeholder": "Tìm kiếm địa điểm...",
+    "no_search_results": "Không tìm thấy địa điểm phù hợp"
   },
   "admin": {
     "coming_soon": "Tính năng đang phát triển",

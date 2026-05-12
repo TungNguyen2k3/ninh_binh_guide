@@ -91,7 +91,11 @@
     "tours_subtitle": "Suggested itineraries for your Ninh Binh journey",
     "audio_locked": "Audio guide is locked",
     "activate_to_listen": "Activate your ticket to listen to the audio guide at this location",
-    "activate_ticket": "Activate ticket"
+    "activate_ticket": "Activate ticket",
+    "register_to_listen": "Register an account and activate your ticket to listen to the audio guide",
+    "register_now": "Register now",
+    "search_placeholder": "Search locations...",
+    "no_search_results": "No locations found"
   },
   "admin": {
     "coming_soon": "Feature under development",

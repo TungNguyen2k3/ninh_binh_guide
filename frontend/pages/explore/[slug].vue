@@ -180,13 +180,23 @@
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-sm font-semibold text-gray-900">{{ $t('explore.audio_locked') }}</p>
-          <p class="text-xs text-gray-500 mt-0.5">{{ $t('explore.activate_to_listen') }}</p>
+          <p class="text-xs text-gray-500 mt-0.5">
+            {{ authStore.isAuthenticated ? $t('explore.activate_to_listen') : $t('explore.register_to_listen') }}
+          </p>
         </div>
         <button
+          v-if="authStore.isAuthenticated"
           class="flex-shrink-0 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
           @click="navigateTo('/auth/activate')"
         >
           {{ $t('explore.activate_ticket') }}
+        </button>
+        <button
+          v-else
+          class="flex-shrink-0 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
+          @click="navigateTo('/auth/register')"
+        >
+          {{ $t('explore.register_now') }}
         </button>
       </div>
     </div>
@@ -203,6 +213,7 @@ definePageMeta({ layout: 'default' })
 const { t, locale } = useI18n()
 const route = useRoute()
 const touristStore = useTouristStore()
+const authStore = useAuthStore()
 
 const loc = computed(() => touristStore.currentLocation)
 

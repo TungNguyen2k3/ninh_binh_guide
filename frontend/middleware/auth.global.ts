@@ -14,6 +14,8 @@ export default defineNuxtRouteMiddleware((to) => {
   if (!authStore.isAuthenticated && !isPublicRoute) {
     // Allow tourists to reach the activate page without a ticket
     if (to.path === '/auth/activate') return
+    // Allow unauthenticated browsing of explore pages (audio gated by backend)
+    if (to.path.startsWith('/explore')) return
     return navigateTo('/auth/login')
   }
 
