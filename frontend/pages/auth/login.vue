@@ -71,6 +71,16 @@
         {{ $t('auth.register') }}
       </NuxtLink>
     </p>
+
+    <!-- Back to explore -->
+    <p class="mt-3 text-center">
+      <NuxtLink
+        to="/explore"
+        class="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        ← {{ $t('auth.continue_without_login') }}
+      </NuxtLink>
+    </p>
   </div>
 </template>
 
